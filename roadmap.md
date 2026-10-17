@@ -11,6 +11,8 @@
 - [x] Profile page /profile: banner artwork + shop info (no login yet — user's choice)
 - [x] Shop name set to "Yuric Topup" (user's answer)
 - [x] Game pictures: keep the badges/logos baked into the artwork (user's choice)
+- [x] Layout widened so content spans the screen; tiles fill their frames (no white edge showing)
+- [x] Banner made full width; hero text block (badge, GAME TOP UP 3D, blurb, ចាប់ផ្តើម) removed
 - [ ] User to confirm: real Telegram handle (now @yuric_topup), real prices, the "1–3 minutes" claim
 - [ ] More games ("game mode បន្ថែមទៀត") — needs artwork from the user
 - [ ] Avatar picture for the profile — user has none yet, "YT" placeholder in place

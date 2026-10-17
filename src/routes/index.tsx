@@ -27,29 +27,14 @@ const steps = [
 function Index() {
   return (
     <SiteChrome>
-      <section className="mx-auto grid w-full max-w-[1500px] items-center gap-8 px-4 py-10 sm:px-6 md:grid-cols-2">
-        <div>
-          <p className="mb-3 inline-block rounded-full border border-brand-400/40 bg-brand-400/10 px-3 py-1 text-xs text-brand-400">
-            ⚡ ចូលភ្លាមៗ ក្នុង 1-3 នាទី
-          </p>
-          <h1 className="font-display text-4xl font-black leading-tight md:text-6xl">
-            GAME <span className="text-brand-400 text-glow">TOP UP</span> <span className="text-on-dark text-glow">3D</span>
-          </h1>
-          <p className="mt-4 text-lg text-on-dark-muted">
-            ជ្រើសហ្គេមមួយ បញ្ចូល ID របស់អ្នក រួចបង់ប្រាក់តាម KHQR — ពេជ្រចូលភ្លាមៗ។
-          </p>
-          <Link to="/" hash="games" className="btn-3d glow-pulse mt-8 inline-block rounded-xl px-8 py-4 font-display font-bold">
-            ចាប់ផ្តើម
-          </Link>
-        </div>
-
-        <div className="tile-clean rounded-3xl">
+      <section className="w-full">
+        <Link to="/" hash="games" className="tile-clean block">
           <img src={banner.url} alt="រូបបដាហ្គេម ពេជ្រភ្លឺភ្លឹបភ្ល្លែត" width={1920} height={1080}
-            className="block aspect-video w-full object-cover" />
-        </div>
+            className="block h-[280px] w-full object-cover sm:h-[420px] lg:h-[520px]" />
+        </Link>
       </section>
 
-      <section id="games" className="mx-auto w-full max-w-[1500px] px-4 pb-6 sm:px-6">
+      <section id="games" className="mx-auto w-full max-w-[1500px] px-4 pt-6 pb-6 sm:px-6">
         <div className="card-3d rounded-3xl p-5 sm:p-7">
           <h2 className="font-display text-xl font-bold">ជ្រើសរើសហ្គេម</h2>
           <p className="mt-1 text-sm text-muted-foreground">ចុចហ្គេមមួយ ដើម្បីបញ្ចូល ID និងជ្រើសកញ្ចប់។</p>
