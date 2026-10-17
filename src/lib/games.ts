@@ -35,7 +35,7 @@ export const packages = [
 export const payments = ["ABA KHQR", "Wing", "ACLEDA", "Bakong"];
 
 export const store = {
-  name: "GemZone",
-  telegram: "@gemzone_support",
+  name: "Yuric Topup",
+  telegram: "@yuric_topup",
   hours: "24 ម៉ោង",
 };

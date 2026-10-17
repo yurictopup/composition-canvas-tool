@@ -7,9 +7,9 @@ import { SiteChrome } from "@/components/SiteChrome";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "GemZone — បញ្ចូលពេជ្រហ្គេម 3D" },
+      { title: "Yuric Topup — បញ្ចូលពេជ្រហ្គេម 3D" },
       { name: "description", content: "បញ្ចូលពេជ្រ Mobile Legends, Free Fire, Roblox, PUBG UC — លឿន សុវត្ថិភាព តាម ABA KHQR។" },
-      { property: "og:title", content: "GemZone — បញ្ចូលពេជ្រហ្គេម 3D" },
+      { property: "og:title", content: "Yuric Topup — បញ្ចូលពេជ្រហ្គេម 3D" },
       { property: "og:description", content: "ជ្រើសហ្គេម បញ្ចូល ID រួចបង់ប្រាក់តាម KHQR — ពេជ្រចូលក្នុង 1-3 នាទី។" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -6,10 +6,10 @@ import { SiteChrome } from "@/components/SiteChrome";
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "ប្រវត្តិ — GemZone" },
-      { name: "description", content: "ទំព័រប្រវត្តិរបស់ GemZone — ទំនាក់ទំនង វិធីបង់ប្រាក់ និងហ្គេមទាំងអស់។" },
-      { property: "og:title", content: "ប្រវត្តិ — GemZone" },
-      { property: "og:description", content: "ទំព័រប្រវត្តិរបស់ GemZone — ទំនាក់ទំនង និងហ្គេមទាំងអស់។" },
+      { title: "ប្រវត្តិ — Yuric Topup" },
+      { name: "description", content: "ទំព័រប្រវត្តិរបស់ Yuric Topup — ទំនាក់ទំនង វិធីបង់ប្រាក់ និងហ្គេមទាំងអស់។" },
+      { property: "og:title", content: "ប្រវត្តិ — Yuric Topup" },
+      { property: "og:description", content: "ទំព័រប្រវត្តិរបស់ Yuric Topup — ទំនាក់ទំនង និងហ្គេមទាំងអស់។" },
       { property: "og:type", content: "profile" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -29,7 +29,7 @@ function Profile() {
 
           <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end">
             <span className="-mt-14 grid h-24 w-24 shrink-0 place-items-center rounded-full border-4 border-card bg-secondary font-display text-3xl font-black text-secondary-foreground shadow-lg">
-              GZ
+              YT
             </span>
             <div className="min-w-0">
               <h1 className="font-display text-2xl font-black">{store.name}</h1>

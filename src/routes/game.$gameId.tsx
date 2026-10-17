@@ -10,9 +10,9 @@ export const Route = createFileRoute("/game/$gameId")({
     const unit = game?.unit ?? "ពេជ្រ";
     return {
       meta: [
-        { title: `${name} — GemZone` },
+        { title: `${name} — Yuric Topup` },
         { name: "description", content: `បញ្ចូល ${unit} ${name} លឿន សុវត្ថិភាព តាម ABA KHQR។` },
-        { property: "og:title", content: `${name} — GemZone` },
+        { property: "og:title", content: `${name} — Yuric Topup` },
         { property: "og:description", content: `បញ្ចូល ${name} ក្នុង 1-3 នាទី តាម KHQR។` },
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" },

@@ -8,7 +8,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-20 border-b border-brand-400/20 bg-brand-950/70 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link to="/" className="font-display text-xl font-black text-glow">
-            💎 GEM<span className="text-brand-400">ZONE</span>
+            💎 YURIC<span className="text-brand-400"> TOPUP</span>
           </Link>
           <nav className="flex items-center gap-5 text-sm text-on-dark-muted">
             <Link to="/" hash="games" className="transition-colors hover:text-on-dark">ហ្គេម</Link>
