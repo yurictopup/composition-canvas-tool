@@ -38,12 +38,11 @@ function Profile() {
             <p className="text-sm text-muted-foreground">
               ជំនួយ {store.hours} · Telegram: {store.telegram}
             </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              ⚠️ រូបតំណាង (YT) នៅសល់ជាកន្លែងទំនេរ — សូមផ្ញើរូបតំណាងពិត ដើម្បីដាក់ជារូបរបស់អ្នក។
+            </p>
           </div>
         </div>
-
-        <p className="mt-3 text-xs text-muted-foreground">
-          ⚠️ រូបតំណាង (YT) នៅសល់ជាកន្លែងទំនេរ — សូមផ្ញើរូបតំណាងពិត ដើម្បីដាក់ជារូបរបស់អ្នក។
-        </p>
 
         <section className="card-3d mt-5 rounded-3xl p-5 sm:p-7">
           <h2 className="font-display text-xl font-bold">ហ្គេមទាំងអស់</h2>
