@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import hero from "@/assets/hero-gems.jpg";
+import mlbb from "@/assets/mlbb.png.asset.json";
+import freefire from "@/assets/freefire.png.asset.json";
+import roblox from "@/assets/roblox.png.asset.json";
+import magicchess from "@/assets/magicchess.png.asset.json";
+import pubg from "@/assets/pubg.png.asset.json";
+import hok from "@/assets/hok.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,10 +22,12 @@ export const Route = createFileRoute("/")({
 });
 
 const games = [
-  { id: "mlbb", name: "Mobile Legends", emoji: "⚔️", unit: "Diamonds" },
-  { id: "ff", name: "Free Fire", emoji: "🔥", unit: "Diamonds" },
-  { id: "pubg", name: "PUBG Mobile", emoji: "🎯", unit: "UC" },
-  { id: "hok", name: "Honor of Kings", emoji: "👑", unit: "Tokens" },
+  { id: "mlbb", name: "Mobile Legends", icon: mlbb.url, unit: "Diamonds" },
+  { id: "ff", name: "Free Fire", icon: freefire.url, unit: "Diamonds" },
+  { id: "roblox", name: "Roblox", icon: roblox.url, unit: "Robux" },
+  { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess.url, unit: "Diamonds" },
+  { id: "pubg", name: "PUBG Mobile", icon: pubg.url, unit: "UC" },
+  { id: "hok", name: "Honor of Kings", icon: hok.url, unit: "Tokens" },
 ];
 
 const packages = [
@@ -70,18 +77,29 @@ function Index() {
           <p className="mt-4 text-lg text-on-dark-muted">បញ្ចូលពេជ្រហ្គេម លឿន ថោក សុវត្ថិភាព — បង់ប្រាក់តាម KHQR។</p>
           <a href="#topup" className="btn-3d mt-8 inline-block rounded-xl px-8 py-4 font-display font-bold">TOP UP NOW</a>
         </div>
-        <img src={hero} alt="Glowing 3D diamonds and gold coins" width={1280} height={896} className="animate-float rounded-3xl card-3d" />
+        <div className="animate-float card-3d rounded-3xl p-5">
+          <p className="mb-4 text-center font-display text-sm font-bold">រូបហ្គេមពិតៗ</p>
+          <div className="grid grid-cols-3 gap-4">
+            {games.map((g) => (
+              <figure key={g.id} className="text-center">
+                <img src={g.icon} alt={g.name} width={151} height={151}
+                  className="h-20 w-20 rounded-2xl border border-brand-100 object-cover shadow-lg sm:h-24 sm:w-24" />
+                <figcaption className="mt-2 text-[11px] font-semibold leading-tight">{g.name}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
       </section>
 
       <main id="topup" className="mx-auto grid max-w-6xl gap-6 px-4 pb-20 lg:grid-cols-[1fr_340px]">
         <div className="space-y-6">
           <section className="card-3d rounded-2xl p-5">
             <Step n={1} title="ជ្រើសរើសហ្គេម" />
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {games.map((g) => (
                 <button key={g.id} onClick={() => setGame(g)}
                   className={`card-3d rounded-xl p-4 text-center hover:-translate-y-1 ${game.id === g.id ? "card-3d-active" : ""}`}>
-                  <div className="text-4xl">{g.emoji}</div>
+                  <img src={g.icon} alt={g.name} width={151} height={151} className="mx-auto h-16 w-16 rounded-xl border border-brand-100 object-cover" />
                   <div className="mt-2 text-sm font-semibold">{g.name}</div>
                 </button>
               ))}
