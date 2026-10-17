@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import hero from "@/assets/hero-gems.jpg";
+import { useState, type CSSProperties } from "react";
+import mlbb from "@/assets/mlbb.png.asset.json";
+import freefire from "@/assets/freefire.png.asset.json";
+import roblox from "@/assets/roblox.png.asset.json";
+import magicchess from "@/assets/magicchess.png.asset.json";
+import pubg from "@/assets/pubg.png.asset.json";
+import hok from "@/assets/hok.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,10 +22,12 @@ export const Route = createFileRoute("/")({
 });
 
 const games = [
-  { id: "mlbb", name: "Mobile Legends", emoji: "⚔️", unit: "Diamonds" },
-  { id: "ff", name: "Free Fire", emoji: "🔥", unit: "Diamonds" },
-  { id: "pubg", name: "PUBG Mobile", emoji: "🎯", unit: "UC" },
-  { id: "hok", name: "Honor of Kings", emoji: "👑", unit: "Tokens" },
+  { id: "mlbb", name: "Mobile Legends", icon: mlbb.url, unit: "Diamonds" },
+  { id: "ff", name: "Free Fire", icon: freefire.url, unit: "Diamonds" },
+  { id: "roblox", name: "Roblox", icon: roblox.url, unit: "Robux" },
+  { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess.url, unit: "Diamonds" },
+  { id: "pubg", name: "PUBG Mobile", icon: pubg.url, unit: "UC" },
+  { id: "hok", name: "Honor of Kings", icon: hok.url, unit: "Tokens" },
 ];
 
 const packages = [
@@ -51,37 +58,81 @@ function Index() {
   const canBuy = uid.trim() && selected;
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
+    <div className="page-gradient min-h-screen">
+      <header className="sticky top-0 z-20 border-b bg-brand-950/70 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <span className="font-display text-xl font-black text-glow">💎 GEM<span className="text-accent">ZONE</span></span>
-          <nav className="hidden gap-6 text-sm text-muted-foreground sm:flex">
+          <span className="font-display text-xl font-black text-glow">💎 GEM<span className="text-brand-400">ZONE</span></span>
+          <nav className="hidden gap-6 text-sm text-on-dark-muted sm:flex">
             <a href="#topup">Top Up</a><a href="#topup">Games</a><a href="#help">ជំនួយ</a>
           </nav>
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 md:grid-cols-2">
-        <div>
-          <p className="mb-3 inline-block rounded-full border px-3 py-1 text-xs text-primary">⚡ ចូលភ្លាមៗ ក្នុង 1-3 នាទី</p>
-          <h1 className="font-display text-4xl font-black leading-tight md:text-6xl">
-            GAME <span className="text-primary text-glow">TOP UP</span> <span className="text-accent">3D</span>
-          </h1>
-          <p className="mt-4 text-lg text-muted-foreground">បញ្ចូលពេជ្រហ្គេម លឿន ថោក សុវត្ថិភាព — បង់ប្រាក់តាម KHQR។</p>
-          <a href="#topup" className="btn-3d mt-8 inline-block rounded-xl px-8 py-4 font-display font-bold">TOP UP NOW</a>
+      <div className="overflow-hidden border-y border-brand-400/25 bg-primary py-2 text-sm font-semibold text-primary-foreground">
+        <div className="marquee-track">
+          {[0, 1].map((k) => (
+            <span key={k} className="flex shrink-0 items-center gap-10 pr-10">
+              <span>⚡ បញ្ចូលពេជ្រក្នុង 1-3 នាទី</span>
+              <span>💎 តម្លៃថោកបំផុត</span>
+              <span>🔒 បង់ប្រាក់សុវត្ថិភាព</span>
+              <span>🎧 ជំនួយ 24 ម៉ោង</span>
+            </span>
+          ))}
         </div>
-        <img src={hero} alt="Glowing 3D diamonds and gold coins" width={1280} height={896} className="animate-float rounded-3xl card-3d" />
+      </div>
+
+      <section className="relative mx-auto grid max-w-6xl items-center gap-8 overflow-hidden px-4 py-12 md:grid-cols-2">
+        <span className="sparkle" style={{ top: "14%", left: "4%", animationDelay: "0.3s" }} />
+        <span className="sparkle" style={{ top: "58%", left: "40%", animationDelay: "1.4s" }} />
+        <span className="sparkle" style={{ top: "80%", left: "22%", animationDelay: "2.2s" }} />
+        <div>
+          <p className="mb-3 inline-block rounded-full border border-brand-400/40 bg-brand-400/10 px-3 py-1 text-xs text-brand-400">⚡ ចូលភ្លាមៗ ក្នុង 1-3 នាទី</p>
+          <h1 className="font-display text-4xl font-black leading-tight md:text-6xl">
+            GAME <span className="text-brand-400 text-glow">TOP UP</span> <span className="text-on-dark text-glow">3D</span>
+          </h1>
+          <p className="mt-4 text-lg text-on-dark-muted">បញ្ចូលពេជ្រហ្គេម លឿន ថោក សុវត្ថិភាព — បង់ប្រាក់តាម KHQR។</p>
+          <a href="#topup" className="btn-3d glow-pulse mt-8 inline-block rounded-xl px-8 py-4 font-display font-bold">TOP UP NOW</a>
+        </div>
+        <div className="relative">
+          <div className="grid grid-cols-3 gap-4 [perspective:900px]">
+            {games.map((g, i) => (
+              <button key={g.id} onClick={() => setGame(g)}
+                className={`tile-3d p-3 text-center ${game.id === g.id ? "tile-active" : ""}`}
+                style={{ "--shine-delay": `${i * 0.45}s` } as CSSProperties}>
+                <span className="sparkle" style={{ top: "10%", left: "12%", animationDelay: `${i * 0.4}s` }} />
+                <span className="sparkle" style={{ top: "56%", left: "74%", animationDelay: `${i * 0.4 + 1.1}s` }} />
+                <img src={g.icon} alt={g.name} width={151} height={151} className="w-full rounded-[26%] object-cover" />
+                <span className="mt-2 block truncate text-[11px] font-semibold">{g.name}</span>
+              </button>
+            ))}
+          </div>
+          <div className="mt-5 flex justify-center gap-2">
+            {games.map((g) => (
+              <button key={g.id} onClick={() => setGame(g)} aria-label={g.name}
+                className={`h-2 rounded-full transition-all ${game.id === g.id ? "w-7 bg-primary" : "w-2 bg-brand-400/60 hover:bg-brand-400"}`} />
+            ))}
+          </div>
+        </div>
       </section>
+
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-4 pb-4">
+        <span className="chip-3d px-4 py-2 text-xs font-bold">🔥 HOT</span>
+        {games.map((g) => (
+          <button key={g.id} onClick={() => setGame(g)} data-active={game.id === g.id}
+            className="chip-3d px-4 py-2 text-xs font-bold uppercase">{g.name}</button>
+        ))}
+      </div>
 
       <main id="topup" className="mx-auto grid max-w-6xl gap-6 px-4 pb-20 lg:grid-cols-[1fr_340px]">
         <div className="space-y-6">
           <section className="card-3d rounded-2xl p-5">
             <Step n={1} title="ជ្រើសរើសហ្គេម" />
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {games.map((g) => (
+            <div className="grid grid-cols-2 gap-3 [perspective:900px] sm:grid-cols-3">
+              {games.map((g, i) => (
                 <button key={g.id} onClick={() => setGame(g)}
-                  className={`card-3d rounded-xl p-4 text-center hover:-translate-y-1 ${game.id === g.id ? "card-3d-active" : ""}`}>
-                  <div className="text-4xl">{g.emoji}</div>
+                  className={`tile-3d p-3 text-center ${game.id === g.id ? "tile-active" : ""}`}
+                  style={{ "--shine-delay": `${i * 0.45}s` } as CSSProperties}>
+                  <img src={g.icon} alt={g.name} width={151} height={151} className="w-full rounded-[26%] object-cover" />
                   <div className="mt-2 text-sm font-semibold">{g.name}</div>
                 </button>
               ))}
@@ -137,7 +188,7 @@ function Index() {
             <span className="font-display text-3xl font-black text-accent">${selected?.price.toFixed(2) ?? "0.00"}</span>
           </div>
           <button disabled={!canBuy} onClick={() => setDone(true)}
-            className="btn-3d mt-5 w-full rounded-xl py-4 font-display font-bold disabled:opacity-40">
+            className="btn-3d glow-pulse mt-5 w-full rounded-xl py-4 font-display font-bold disabled:opacity-40">
             ទិញឥឡូវ
           </button>
           {done && <p className="mt-3 text-center text-sm text-primary">✅ ការបញ្ជាទិញបានទទួល! (សាកល្បង)</p>}
