@@ -41,9 +41,9 @@ function Step({ n, title }: { n: number; title: string }) {
 }
 
 function Index() {
-  const [game, setGame] = useState(games[0]);
+  const [game, setGame] = useState(games[0]!);
   const [pkg, setPkg] = useState<number | null>(5);
-  const [pay, setPay] = useState(payments[0]);
+  const [pay, setPay] = useState(payments[0]!);
   const [uid, setUid] = useState("");
   const [zone, setZone] = useState("");
   const [done, setDone] = useState(false);
