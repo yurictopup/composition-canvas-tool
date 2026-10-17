@@ -24,7 +24,7 @@ function Profile() {
       <section className="w-full">
         <div className="tile-clean">
           <img src={banner.url} alt="រូបបដារបស់ហាង" width={1920} height={1080}
-            className="block h-[220px] w-full object-cover sm:h-[320px]" />
+            className="block h-[150px] w-full object-cover sm:h-[210px]" />
         </div>
       </section>
 

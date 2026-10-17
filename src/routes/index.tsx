@@ -30,7 +30,7 @@ function Index() {
       <section className="w-full">
         <Link to="/" hash="games" className="tile-clean block">
           <img src={banner.url} alt="រូបបដាហ្គេម ពេជ្រភ្លឺភ្លឹបភ្ល្លែត" width={1920} height={1080}
-            className="block h-[280px] w-full object-cover sm:h-[420px] lg:h-[520px]" />
+            className="block h-[170px] w-full object-cover sm:h-[240px] lg:h-[300px]" />
         </Link>
       </section>
 
