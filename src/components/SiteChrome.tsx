@@ -4,9 +4,9 @@ import { store } from "@/lib/games";
 
 export function SiteChrome({ children }: { children: ReactNode }) {
   return (
-    <div className="page-gradient min-h-screen">
+    <div className="page-gradient flex min-h-screen flex-col">
       <header className="sticky top-0 z-20 border-b border-brand-400/20 bg-brand-950/70 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+        <div className="mx-auto flex w-full max-w-[1500px] items-center justify-between px-4 py-3 sm:px-6">
           <Link to="/" className="font-display text-xl font-black text-glow">
             💎 YURIC<span className="text-brand-400"> TOPUP</span>
           </Link>
@@ -30,9 +30,9 @@ export function SiteChrome({ children }: { children: ReactNode }) {
         </div>
       </div>
 
-      {children}
+      <div className="flex flex-1 flex-col">{children}</div>
 
-      <footer id="help" className="border-t border-brand-100/50 py-8 text-center text-sm text-muted-foreground">
+      <footer id="help" className="border-t border-brand-100/50 py-6 text-center text-sm text-muted-foreground">
         © 2026 {store.name} · Telegram: {store.telegram}
       </footer>
     </div>

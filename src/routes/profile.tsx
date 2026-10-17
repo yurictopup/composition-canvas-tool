@@ -20,11 +20,11 @@ export const Route = createFileRoute("/profile")({
 function Profile() {
   return (
     <SiteChrome>
-      <main className="mx-auto max-w-4xl px-4 py-8">
+      <main className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6">
         <div className="card-3d overflow-hidden rounded-3xl">
           <div className="tile-clean">
             <img src={banner.url} alt="រូបបដារបស់ហាង" width={1920} height={1080}
-              className="aspect-[3/1] w-full object-cover" />
+              className="block aspect-[3/1] w-full object-cover" />
           </div>
 
           <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end">
