@@ -132,12 +132,12 @@
 .animate-float { animation: float 5s ease-in-out infinite; }
 
 @keyframes shine {
-  0% { transform: translateX(-130%) skewX(-18deg); }
-  60%, 100% { transform: translateX(230%) skewX(-18deg); }
+  0% { transform: translateX(-130%) skewX(-16deg); }
+  60%, 100% { transform: translateX(230%) skewX(-16deg); }
 }
 @keyframes twinkle {
   0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
-  50% { opacity: 1; transform: scale(1) rotate(90deg); }
+  50% { opacity: 0.9; transform: scale(0.9) rotate(90deg); }
 }
 @keyframes marquee {
   from { transform: translateX(0); }
@@ -145,7 +145,28 @@
 }
 @keyframes glow-pulse {
   0%, 100% { box-shadow: 0 6px 0 oklch(0.3 0.12 266), 0 12px 24px oklch(0.42 0.19 266 / 0.45); }
-  50% { box-shadow: 0 6px 0 oklch(0.3 0.12 266), 0 12px 24px oklch(0.42 0.19 266 / 0.45), 0 0 28px 5px oklch(0.72 0.13 252 / 0.6); }
+  50% { box-shadow: 0 6px 0 oklch(0.3 0.12 266), 0 12px 24px oklch(0.42 0.19 266 / 0.45), 0 0 22px 4px oklch(0.72 0.13 252 / 0.5); }
+}
+
+/* clean game tile: the picture stays untouched, only a soft light sweep on top */
+@utility tile-clean {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 20px oklch(0.25 0.09 264 / 0.28), 0 0 0 1px oklch(0.86 0.06 252 / 0.7);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 28px oklch(0.25 0.09 264 / 0.34), 0 0 18px oklch(0.72 0.13 252 / 0.4);
+  }
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -40% -12%;
+    background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.3), transparent);
+    animation: shine 6s ease-in-out infinite;
+    animation-delay: var(--shine-delay, 0s);
+    pointer-events: none;
+  }
 }
 
 @utility tile-3d {
@@ -158,15 +179,15 @@
   box-shadow: 0 10px 24px oklch(0.25 0.09 264 / 0.25), 0 1px 0 oklch(1 0 0) inset;
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   &:hover {
-    transform: translateY(-6px) rotateX(8deg) rotateY(-6deg) scale(1.05);
-    box-shadow: 0 24px 44px oklch(0.25 0.09 264 / 0.38), 0 0 26px oklch(0.72 0.13 252 / 0.5);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 36px oklch(0.25 0.09 264 / 0.34), 0 0 22px oklch(0.72 0.13 252 / 0.45);
   }
   &::after {
     content: "";
     position: absolute;
     inset: -40% -12%;
-    background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.8), transparent);
-    animation: shine 3.8s ease-in-out infinite;
+    background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.3), transparent);
+    animation: shine 6s ease-in-out infinite;
     animation-delay: var(--shine-delay, 0s);
     pointer-events: none;
   }
@@ -177,12 +198,12 @@
 }
 @utility sparkle {
   position: absolute;
-  height: 10px;
-  width: 10px;
+  height: 9px;
+  width: 9px;
   background: oklch(1 0 0);
   clip-path: polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%);
-  filter: drop-shadow(0 0 6px oklch(0.8 0.16 250));
-  animation: twinkle 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 5px oklch(0.8 0.16 250));
+  animation: twinkle 3.2s ease-in-out infinite;
   pointer-events: none;
 }
 @utility chip-3d {
@@ -206,5 +227,5 @@
   will-change: transform;
 }
 @utility glow-pulse {
-  animation: glow-pulse 2.8s ease-in-out infinite;
+  animation: glow-pulse 3.2s ease-in-out infinite;
 }
