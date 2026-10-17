@@ -22,10 +22,6 @@ function Index() {
   return (
     <SiteChrome>
       <section className="relative mx-auto grid max-w-6xl items-center gap-8 overflow-hidden px-4 py-12 md:grid-cols-2">
-        <span className="sparkle" style={{ top: "14%", left: "4%", animationDelay: "0.3s" }} />
-        <span className="sparkle" style={{ top: "58%", left: "40%", animationDelay: "1.4s" }} />
-        <span className="sparkle" style={{ top: "80%", left: "22%", animationDelay: "2.2s" }} />
-
         <div>
           <p className="mb-3 inline-block rounded-full border border-brand-400/40 bg-brand-400/10 px-3 py-1 text-xs text-brand-400">
             ⚡ ចូលភ្លាមៗ ក្នុង 1-3 នាទី
