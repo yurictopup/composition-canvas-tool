@@ -51,11 +51,11 @@ function Index() {
   const canBuy = uid.trim() && selected;
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
+    <div className="page-gradient min-h-screen">
+      <header className="sticky top-0 z-20 border-b bg-brand-950/70 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <span className="font-display text-xl font-black text-glow">💎 GEM<span className="text-accent">ZONE</span></span>
-          <nav className="hidden gap-6 text-sm text-muted-foreground sm:flex">
+          <span className="font-display text-xl font-black text-glow">💎 GEM<span className="text-brand-400">ZONE</span></span>
+          <nav className="hidden gap-6 text-sm text-on-dark-muted sm:flex">
             <a href="#topup">Top Up</a><a href="#topup">Games</a><a href="#help">ជំនួយ</a>
           </nav>
         </div>
@@ -63,11 +63,11 @@ function Index() {
 
       <section className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 md:grid-cols-2">
         <div>
-          <p className="mb-3 inline-block rounded-full border px-3 py-1 text-xs text-primary">⚡ ចូលភ្លាមៗ ក្នុង 1-3 នាទី</p>
+          <p className="mb-3 inline-block rounded-full border border-brand-400/40 bg-brand-400/10 px-3 py-1 text-xs text-brand-400">⚡ ចូលភ្លាមៗ ក្នុង 1-3 នាទី</p>
           <h1 className="font-display text-4xl font-black leading-tight md:text-6xl">
-            GAME <span className="text-primary text-glow">TOP UP</span> <span className="text-accent">3D</span>
+            GAME <span className="text-brand-400 text-glow">TOP UP</span> <span className="text-on-dark text-glow">3D</span>
           </h1>
-          <p className="mt-4 text-lg text-muted-foreground">បញ្ចូលពេជ្រហ្គេម លឿន ថោក សុវត្ថិភាព — បង់ប្រាក់តាម KHQR។</p>
+          <p className="mt-4 text-lg text-on-dark-muted">បញ្ចូលពេជ្រហ្គេម លឿន ថោក សុវត្ថិភាព — បង់ប្រាក់តាម KHQR។</p>
           <a href="#topup" className="btn-3d mt-8 inline-block rounded-xl px-8 py-4 font-display font-bold">TOP UP NOW</a>
         </div>
         <img src={hero} alt="Glowing 3D diamonds and gold coins" width={1280} height={896} className="animate-float rounded-3xl card-3d" />
