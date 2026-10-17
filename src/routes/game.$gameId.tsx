@@ -10,9 +10,9 @@ export const Route = createFileRoute("/game/$gameId")({
     const unit = game?.unit ?? "ពេជ្រ";
     return {
       meta: [
-        { title: `${name} — GemZone` },
+        { title: `${name} — Yuric Topup` },
         { name: "description", content: `បញ្ចូល ${unit} ${name} លឿន សុវត្ថិភាព តាម ABA KHQR។` },
-        { property: "og:title", content: `${name} — GemZone` },
+        { property: "og:title", content: `${name} — Yuric Topup` },
         { property: "og:description", content: `បញ្ចូល ${name} ក្នុង 1-3 នាទី តាម KHQR។` },
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" },
@@ -48,12 +48,12 @@ function GamePage() {
 
   return (
     <SiteChrome>
-      <main className="mx-auto max-w-5xl px-4 py-8">
+      <main className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6">
         <Link to="/" hash="games" className="text-sm text-on-dark-muted transition-colors hover:text-on-dark">← ត្រឡប់ទៅហ្គេម</Link>
 
         <div className="card-3d mt-3 flex items-center gap-4 rounded-3xl p-5">
           <span className="tile-clean block w-20 shrink-0 rounded-[26%] sm:w-24">
-            <img src={game.icon} alt={game.name} width={151} height={151} className="aspect-square w-full object-cover" />
+            <img src={game.icon} alt={game.name} width={151} height={151} className="block aspect-square w-full object-cover" />
           </span>
           <div>
             <h1 className="font-display text-2xl font-black">{game.name}</h1>
