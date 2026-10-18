@@ -2,7 +2,7 @@ import mlbb from "@/assets/mlbb.png.asset.json";
 import freefire from "@/assets/freefire.png.asset.json";
 import roblox from "@/assets/roblox.png.asset.json";
 import magicchess from "@/assets/magicchess.png.asset.json";
-import pubg from "@/assets/pubg.png.asset.json";
+import pubg from "@/assets/pubg-clean.png";
 import hok from "@/assets/hok.png.asset.json";
 
 export const games = [
@@ -10,7 +10,7 @@ export const games = [
   { id: "ff", name: "Free Fire", icon: freefire.url, unit: "Diamonds", blurb: "ពេជ្រ Free Fire តម្លៃថោក" },
   { id: "roblox", name: "Roblox", icon: roblox.url, unit: "Robux", blurb: "Robux ចូលលឿន" },
   { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess.url, unit: "Diamonds", blurb: "Magic Chess ចូលភ្លាម" },
-  { id: "pubg", name: "PUBG Mobile", icon: pubg.url, unit: "UC", blurb: "UC PUBG ចូលលឿន" },
+  { id: "pubg", name: "PUBG Mobile", icon: pubg, unit: "UC", blurb: "UC PUBG ចូលលឿន" },
   { id: "hok", name: "Honor of Kings", icon: hok.url, unit: "Tokens", blurb: "Tokens HoK ចូលភ្លាម" },
 ];
 
