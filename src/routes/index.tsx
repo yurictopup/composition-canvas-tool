@@ -13,6 +13,8 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "ជ្រើសហ្គេម បញ្ចូល ID រួចបង់ប្រាក់តាម KHQR — ពេជ្រចូលក្នុង 1-3 នាទី។" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: banner.url },
+      { name: "twitter:image", content: banner.url },
     ],
   }),
   component: Index,
@@ -27,14 +29,14 @@ const steps = [
 function Index() {
   return (
     <SiteChrome>
-      <section className="mx-auto w-full max-w-[768px] px-4 pt-4 sm:px-6">
+      <section className="mx-auto w-full max-w-[1500px] px-4 pt-4 sm:px-6">
         <Link to="/" hash="games" className="block overflow-hidden rounded-lg">
           <img src={banner.url} alt="រូបបដាហ្គេម ពេជ្រភ្លឺភ្លឹបភ្ល្លែត" width={1920} height={1080}
-            className="block aspect-[3/1] w-full object-cover" />
+            className="block aspect-[3/1] w-full object-cover sm:aspect-[4/1]" />
         </Link>
       </section>
 
-      <section id="games" className="mx-auto w-full max-w-[1500px] px-4 pt-6 pb-6 sm:px-6">
+      <section id="games" className="mx-auto w-full max-w-[1500px] scroll-mt-6 px-4 pt-8 pb-6 sm:px-6 sm:pt-10">
         <div className="card-3d rounded-3xl p-5 sm:p-7">
           <h2 className="text-center font-display text-xl font-bold tracking-wide">TOPUP</h2>
           <p className="mt-1 text-center text-sm text-muted-foreground">ជ្រើសរើសហ្គេម</p>
