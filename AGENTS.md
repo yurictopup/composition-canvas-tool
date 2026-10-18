@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep game-specific identifier configuration and format validation in `src/lib/player-id.ts`, with concrete rule tests; formats are not proof of a real account.
+- Games awaiting provider lookup and package data must not inherit another game's packages or enable purchases; this avoids false verification and invented offers.

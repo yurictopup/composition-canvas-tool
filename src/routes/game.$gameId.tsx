@@ -2,6 +2,8 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { findGame, packages, payments } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
+import { Button } from "@/components/ui/button";
+import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 
 export const Route = createFileRoute("/game/$gameId")({
   head: ({ params }) => {
@@ -19,31 +21,41 @@ export const Route = createFileRoute("/game/$gameId")({
       ],
     };
   },
-  component: GamePage,
+  component: GameRoute,
 });
 
-function GamePage() {
+function GameRoute() {
   const { gameId } = Route.useParams();
+  return <GamePage key={gameId} gameId={gameId} />;
+}
+
+function GamePage({ gameId }: { gameId: string }) {
   const game = findGame(gameId);
   const [uid, setUid] = useState("");
   const [zone, setZone] = useState("");
   const [check, setCheck] = useState<{ ok: boolean; msg: string } | null>(null);
   const [pkg, setPkg] = useState<number | null>(null);
-  const [pay, setPay] = useState(payments[0]!);
+  const [pay, setPay] = useState(payments[0] ?? "ABA KHQR");
   const [done, setDone] = useState(false);
 
   if (!game) throw notFound();
 
+  const idConfig = getIdConfig(gameId);
+  const availablePackages = idConfig.requiresLookup ? [] : packages;
   const selected = pkg !== null ? packages[pkg] : null;
   const canBuy = !!check?.ok && !!selected;
 
   function runCheck() {
-    const v = uid.trim();
-    if (!/^\d{4,12}$/.test(v)) {
-      setCheck({ ok: false, msg: "ID ត្រូវជាលេខ 4 ដល់ 12 ខ្ទង់។" });
+    const error = validatePlayerId(gameId, uid, zone);
+    if (error) {
+      setCheck({ ok: false, msg: error });
       return;
     }
-    setCheck({ ok: true, msg: `រកឃើញ ID ${v} — សូមជ្រើសកញ្ចប់។` });
+    if (idConfig.requiresLookup) {
+      setCheck({ ok: false, msg: "មិនទាន់អាចស្វែងរកឈ្មោះគណនីបានទេ — សេវា Check ID មិនទាន់ភ្ជាប់។" });
+      return;
+    }
+    setCheck({ ok: true, msg: `ទម្រង់ ID ${uid.trim()} ត្រឹមត្រូវ — មិនទាន់បានផ្ទៀងផ្ទាត់គណនីពិតទេ។` });
   }
 
   return (
@@ -66,21 +78,29 @@ function GamePage() {
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">1</span>
             បញ្ចូល Player ID
           </h2>
-          <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-            <input value={uid} onChange={(e) => { setUid(e.target.value); setCheck(null); }} placeholder="User ID"
-              className="rounded-xl border bg-input px-4 py-3 outline-none focus:border-primary" />
-            <input value={zone} onChange={(e) => setZone(e.target.value)} placeholder="Zone ID (បើមាន)"
-              className="rounded-xl border bg-input px-4 py-3 outline-none focus:border-primary" />
-            <button onClick={runCheck} className="chip-3d px-6 py-3 text-sm font-bold">Check ID</button>
-          </div>
+          <form onSubmit={(e) => { e.preventDefault(); runCheck(); }} className={`grid items-end gap-3 ${idConfig.secondary ? "sm:grid-cols-[1fr_1fr_auto]" : "sm:grid-cols-[1fr_auto]"}`}>
+            <label className="grid min-w-0 gap-2 text-sm font-semibold">
+              {idConfig.primary.label}
+              <input value={uid} onChange={(e) => { setUid(e.target.value); setCheck(null); setDone(false); }} placeholder={idConfig.primary.placeholder}
+                inputMode={idConfig.primary.numeric ? "numeric" : "text"} autoComplete="off" spellCheck={false}
+                className="min-w-0 rounded-lg border bg-input px-4 py-3 font-normal outline-none focus:border-primary" />
+            </label>
+            {idConfig.secondary && <label className="grid min-w-0 gap-2 text-sm font-semibold">
+              {idConfig.secondary.label}
+              <input value={zone} onChange={(e) => { setZone(e.target.value); setCheck(null); setDone(false); }} placeholder={idConfig.secondary.placeholder}
+                inputMode={idConfig.secondary.numeric ? "numeric" : "text"} autoComplete="off" spellCheck={false}
+                className="min-w-0 rounded-lg border bg-input px-4 py-3 font-normal outline-none focus:border-primary" />
+            </label>}
+            <Button type="submit" className="h-12 px-6 font-bold">Check ID</Button>
+          </form>
           {check && (
-            <p className={`mt-3 text-sm font-semibold ${check.ok ? "text-primary" : "text-destructive"}`}>
+            <p role="status" className={`mt-3 text-sm font-semibold ${check.ok ? "text-primary" : "text-destructive"}`}>
               {check.ok ? "✅" : "⚠️"} {check.msg}
             </p>
           )}
-          <p className="mt-3 text-xs text-muted-foreground">
+          {!idConfig.requiresLookup && <p className="mt-3 text-xs text-muted-foreground">
             ការត្រួតពិនិត្យនី ពិនិត្យតែទម្រង់លេខប៉ុណ្ណោះ — ការសួរពីប្រព័ន្ធហ្គេមពិតប្រាកដ នឹងដាក់នៅពេលភ្ជាប់ជាមួយអ្នកផ្គត់ផ្គង់។
-          </p>
+          </p>}
         </section>
 
         <section className="card-3d mt-5 rounded-3xl p-5">
@@ -89,7 +109,7 @@ function GamePage() {
             ជ្រើសកញ្ចប់ {game.unit}
           </h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {packages.map((p, i) => (
+            {availablePackages.map((p, i) => (
               <button key={p.amt} onClick={() => setPkg(i)}
                 className={`card-3d relative rounded-2xl p-4 text-left transition-transform hover:-translate-y-0.5 ${pkg === i ? "card-3d-active" : ""}`}>
                 {p.hot && <span className="absolute -top-2 right-2 rounded-full bg-accent px-2 text-[11px] font-bold text-accent-foreground">HOT</span>}
@@ -99,6 +119,7 @@ function GamePage() {
               </button>
             ))}
           </div>
+          {idConfig.requiresLookup && <p className="text-sm text-muted-foreground">កញ្ចប់ និងតម្លៃមិនទាន់មាន។</p>}
         </section>
 
         <section className="card-3d mt-5 rounded-3xl p-5">
