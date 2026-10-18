@@ -17,5 +17,6 @@
 - [ ] User to confirm: real Telegram handle (now @yuric_topup), real prices, the "1–3 minutes" claim
 - [x] Add CODM, Wild Rift, Blood Strike, Clash of Clans with game-specific ID fields and artwork
 - [ ] Package amounts and prices for the four new games — awaiting the shop's real offers
-- [ ] Real account-name Check ID for the four new games — needs a supported provider and credentials
+- [x] Configure game-specific ID fields and honest Check ID unavailable states for all ten games; purchases require real verification
+- [ ] Real account-name Check ID — needs supported providers and credentials; do not treat format checks as verified accounts
 - [ ] Avatar picture for the profile — user has none yet, "YT" placeholder in place
