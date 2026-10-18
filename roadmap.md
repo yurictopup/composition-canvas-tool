@@ -15,6 +15,7 @@
 - [x] Home banner resized to the latest reference: compact, centered, 3:1 artwork with side margins
 - [x] Latest banner adjustment: span the game section width following the red-box reference, with games moved below
 - [ ] User to confirm: real Telegram handle (now @yuric_topup), real prices, the "1–3 minutes" claim
-- [ ] Add CODM, Wild Rift, Blood Strike, Clash of Clans with game-specific ID fields and artwork
+- [x] Add CODM, Wild Rift, Blood Strike, Clash of Clans with game-specific ID fields and artwork
+- [ ] Package amounts and prices for the four new games — awaiting the shop's real offers
 - [ ] Real account-name Check ID for the four new games — needs a supported provider and credentials
 - [ ] Avatar picture for the profile — user has none yet, "YT" placeholder in place
