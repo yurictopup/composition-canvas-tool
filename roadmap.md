@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Add Genshin Impact and Honkai: Star Rail to reach twelve games, with UID and Server selection; keep lookup and purchases unavailable until supported
+
 - [x] Blue → white gradient colour pass (chosen palette #0a1a3f → #1e40af → #60a5fa → #ffffff)
 - [x] HOME: real game artwork instead of emoji (6 icons cut from the uploaded strip)
 - [x] HOME: 3D look with twinkling/sparkling light effects (style only, no copied text)

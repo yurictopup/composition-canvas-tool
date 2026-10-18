@@ -1,5 +1,12 @@
-export type IdField = { label: string; placeholder: string; numeric?: boolean };
+export type IdField = { label: string; placeholder: string; numeric?: boolean; options?: readonly string[] };
 export type IdConfig = { primary: IdField; secondary?: IdField; requiresLookup?: boolean };
+
+const hoyoServers = ["Asia", "America", "Europe", "TW, HK, MO"] as const;
+const hoyoIdConfig: IdConfig = {
+  primary: { label: "UID", placeholder: "UID", numeric: true },
+  secondary: { label: "Server", placeholder: "ជ្រើសរើស Server", options: hoyoServers },
+  requiresLookup: true,
+};
 
 export const idConfigs: Record<string, IdConfig> = {
   mlbb: { primary: { label: "User ID", placeholder: "User ID", numeric: true }, secondary: { label: "Zone ID", placeholder: "Zone ID", numeric: true }, requiresLookup: true },
@@ -12,6 +19,8 @@ export const idConfigs: Record<string, IdConfig> = {
   wildrift: { primary: { label: "Riot ID", placeholder: "Riot ID" }, secondary: { label: "Tagline", placeholder: "#XXXX" }, requiresLookup: true },
   bloodstrike: { primary: { label: "User ID", placeholder: "User ID", numeric: true }, requiresLookup: true },
   coc: { primary: { label: "Player Tag", placeholder: "#XXXXXX" }, requiresLookup: true },
+  genshin: hoyoIdConfig,
+  starrail: hoyoIdConfig,
 };
 
 export function getIdConfig(gameId: string): IdConfig {
@@ -23,6 +32,10 @@ export function getIdConfig(gameId: string): IdConfig {
 
 export function validatePlayerId(gameId: string, primary: string, secondary = ""): string | null {
   const id = primary.trim();
+  if (gameId === "genshin" || gameId === "starrail") {
+    if (!/^\d+$/.test(id)) return "UID ត្រូវតែជាលេខ។";
+    return hoyoServers.some((server) => server === secondary) ? null : "សូមជ្រើសរើស Server។";
+  }
   if (gameId === "roblox") return /^[a-zA-Z0-9_]+$/.test(id) ? null : "សូមបញ្ចូល Roblox Username។";
   if (gameId === "mlbb" || gameId === "magicchess") {
     if (!/^\d+$/.test(id)) return "User ID ត្រូវតែជាលេខ។";

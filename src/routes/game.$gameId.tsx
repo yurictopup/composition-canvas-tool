@@ -41,7 +41,7 @@ function GamePage({ gameId }: { gameId: string }) {
   if (!game) throw notFound();
 
   const idConfig = getIdConfig(gameId);
-  const packagesPending = ["codm", "wildrift", "bloodstrike", "coc", "roblox"].includes(gameId);
+  const packagesPending = ["codm", "wildrift", "bloodstrike", "coc", "roblox", "genshin", "starrail"].includes(gameId);
   const availablePackages = packagesPending ? [] : packages;
   const selected = pkg !== null ? packages[pkg] : null;
   const canBuy = !!check?.ok && !!selected;
@@ -88,9 +88,15 @@ function GamePage({ gameId }: { gameId: string }) {
             </label>
             {idConfig.secondary && <label className="grid min-w-0 gap-2 text-sm font-semibold">
               {idConfig.secondary.label}
-              <input value={zone} onChange={(e) => { setZone(e.target.value); setCheck(null); setDone(false); }} placeholder={idConfig.secondary.placeholder}
+              {idConfig.secondary.options ? (
+                <select value={zone} onChange={(e) => { setZone(e.target.value); setCheck(null); setDone(false); }}
+                  className="h-12 min-w-0 rounded-lg border bg-input px-4 font-normal outline-none focus:border-primary">
+                  <option value="">{idConfig.secondary.placeholder}</option>
+                  {idConfig.secondary.options.map((server) => <option key={server} value={server}>{server}</option>)}
+                </select>
+              ) : <input value={zone} onChange={(e) => { setZone(e.target.value); setCheck(null); setDone(false); }} placeholder={idConfig.secondary.placeholder}
                 inputMode={idConfig.secondary.numeric ? "numeric" : "text"} autoComplete="off" spellCheck={false}
-                className="min-w-0 rounded-lg border bg-input px-4 py-3 font-normal outline-none focus:border-primary" />
+                className="min-w-0 rounded-lg border bg-input px-4 py-3 font-normal outline-none focus:border-primary" />}
             </label>}
             <Button type="submit" className="h-12 px-6 font-bold">Check ID</Button>
           </form>
