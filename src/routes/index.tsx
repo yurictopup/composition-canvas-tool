@@ -31,8 +31,8 @@ function Index() {
     <SiteChrome>
       <section className="w-full">
         <Link to="/" hash="games" className="block">
-          <img src={banner.url} alt="រូបបដាហ្គេម ពេជ្រភ្លឺភ្លឹបភ្ល្លែត" width={1920} height={1080}
-            className="block aspect-[3/1] w-full object-cover sm:aspect-[4/1]" />
+          <img src={banner.url} alt="រូបបដាហ្គេម ពេជ្រភ្លឺភ្លឹបភ្ល្លែត" width={1280} height={725}
+            className="block h-auto w-full" />
         </Link>
       </section>
 
