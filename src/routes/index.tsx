@@ -36,8 +36,8 @@ function Index() {
 
       <section id="games" className="mx-auto w-full max-w-[1500px] px-4 pt-6 pb-6 sm:px-6">
         <div className="card-3d rounded-3xl p-5 sm:p-7">
-          <h2 className="font-display text-xl font-bold">ជ្រើសរើសហ្គេម</h2>
-          <p className="mt-1 text-sm text-muted-foreground">ចុចហ្គេមមួយ ដើម្បីបញ្ចូល ID និងជ្រើសកញ្ចប់។</p>
+          <h2 className="text-center font-display text-xl font-bold tracking-wide">TOPUP</h2>
+          <p className="mt-1 text-center text-sm text-muted-foreground">ជ្រើសរើសហ្គេម</p>
           <div className="mt-6 grid grid-cols-3 gap-4 sm:grid-cols-6 sm:gap-5">
             {games.map((g, i) => (
               <Link key={g.id} to="/game/$gameId" params={{ gameId: g.id }}
