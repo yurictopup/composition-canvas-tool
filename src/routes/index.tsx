@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
 import banner from "@/assets/banner-angkor.png.asset.json";
 import mascot from "@/assets/mascot-cut.png";
-import { games, payments } from "@/lib/games";
+import { games } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 
 export const Route = createFileRoute("/")({
@@ -20,12 +20,6 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
-
-const steps = [
-  { title: "ជ្រើសហ្គេម", body: "ចុចហ្គេមមួយ ដើម្បីបើកទំព័របញ្ចូលរបស់ហ្គេមនន។" },
-  { title: "បញ្ចូល ID", body: "បញ្ចូល User ID (និង Zone ID បើមាន) រួចចុច Check ID។" },
-  { title: "បង់ប្រាក់", body: "បង់តាម KHQR រួចរង់ចាំពេជ្រចូល 1-3 នាទី។" },
-];
 
 function Index() {
   return (
@@ -62,31 +56,6 @@ function Index() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-[1500px] px-4 pb-6 sm:px-6">
-        <div className="grid gap-4 sm:grid-cols-3">
-          {steps.map((s, i) => (
-            <div key={s.title} className="card-3d rounded-3xl p-5">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary font-display font-bold text-primary-foreground">{i + 1}</span>
-              <h3 className="mt-3 font-display font-bold">{s.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{s.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto w-full max-w-[1500px] px-4 pb-10 sm:px-6">
-        <div className="card-3d flex flex-wrap items-center justify-between gap-4 rounded-3xl p-5">
-          <div>
-            <h3 className="font-display font-bold">វិធីបង់ប្រាក់</h3>
-            <p className="text-sm text-muted-foreground">ជ្រើសបាន 1 ក្នុង 4 វិធី</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {payments.map((m) => (
-              <span key={m} className="chip-3d px-4 py-2 text-xs font-bold">{m}</span>
-            ))}
-          </div>
-        </div>
-      </section>
     </SiteChrome>
   );
 }
