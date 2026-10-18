@@ -34,7 +34,7 @@ function Index() {
         <Link to="/" hash="games" className="relative block aspect-[3/1] overflow-hidden rounded-lg bg-[radial-gradient(ellipse_at_center,#1e3a8a_0%,#0a1a3f_75%)] sm:aspect-[10/3]">
           <img src={banner.url} alt="រូបបដាហ្គេម ពេជ្រភ្លឺភ្លឹបភ្ល្លែត" width={1280} height={725}
             className="absolute inset-0 block h-full w-full object-cover object-[50%_22%]" />
-          <span className="pointer-events-none absolute bottom-0 right-[6%] block h-[72%] w-auto">
+          <span className="pointer-events-none absolute bottom-0 right-[5%] block h-[92%] w-auto">
             <span className="mascot-backdrop" aria-hidden="true" />
             <img src={mascot} alt="តួអង្គ Yuric ពេជ្រភ្លឺភ្លឹប" aria-hidden="true"
               className="relative block h-full w-auto object-contain drop-shadow-[0_0_18px_rgba(96,165,250,0.55)]" />
