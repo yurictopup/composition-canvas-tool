@@ -24,9 +24,27 @@ describe("Game-specific player identifiers", () => {
     expect(validatePlayerId("coc", "#XXXXXX")).toBeNull();
     expect(validatePlayerId("coc", "XXXXXX")).not.toBeNull();
   });
-  it("all four games require real lookup rather than format-only verification", () => {
-    for (const id of ["codm", "wildrift", "bloodstrike", "coc"]) {
+  it("all games require real lookup rather than format-only verification", () => {
+    for (const id of ["mlbb", "ff", "pubg", "hok", "magicchess", "roblox", "codm", "wildrift", "bloodstrike", "coc"]) {
       expect(getIdConfig(id).requiresLookup).toBe(true);
     }
+  });
+  it("MLBB and Magic Chess require a numeric zone as well as user ID", () => {
+    for (const id of ["mlbb", "magicchess"]) {
+      expect(validatePlayerId(id, "12345678", "1234")).toBeNull();
+      expect(validatePlayerId(id, "12345678", "")).not.toBeNull();
+    }
+  });
+  it("single-ID games do not ask for a zone", () => {
+    for (const id of ["ff", "pubg", "hok"]) {
+      expect(getIdConfig(id).secondary).toBeUndefined();
+      expect(validatePlayerId(id, "12345678")).toBeNull();
+      expect(validatePlayerId(id, "abc")).not.toBeNull();
+    }
+  });
+  it("Roblox asks for a username rather than pretending to top up by numeric ID", () => {
+    expect(getIdConfig("roblox").primary.numeric).not.toBe(true);
+    expect(validatePlayerId("roblox", "Yuric_Player")).toBeNull();
+    expect(validatePlayerId("roblox", "")).not.toBeNull();
   });
 });

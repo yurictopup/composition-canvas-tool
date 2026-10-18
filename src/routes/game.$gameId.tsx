@@ -41,7 +41,8 @@ function GamePage({ gameId }: { gameId: string }) {
   if (!game) throw notFound();
 
   const idConfig = getIdConfig(gameId);
-  const availablePackages = idConfig.requiresLookup ? [] : packages;
+  const packagesPending = ["codm", "wildrift", "bloodstrike", "coc", "roblox"].includes(gameId);
+  const availablePackages = packagesPending ? [] : packages;
   const selected = pkg !== null ? packages[pkg] : null;
   const canBuy = !!check?.ok && !!selected;
 
@@ -98,9 +99,7 @@ function GamePage({ gameId }: { gameId: string }) {
               {check.ok ? "✅" : "⚠️"} {check.msg}
             </p>
           )}
-          {!idConfig.requiresLookup && <p className="mt-3 text-xs text-muted-foreground">
-            ការត្រួតពិនិត្យនី ពិនិត្យតែទម្រង់លេខប៉ុណ្ណោះ — ការសួរពីប្រព័ន្ធហ្គេមពិតប្រាកដ នឹងដាក់នៅពេលភ្ជាប់ជាមួយអ្នកផ្គត់ផ្គង់។
-          </p>}
+          {gameId === "roblox" && <p className="mt-3 text-sm text-muted-foreground">Roblox ប្រើ Gift Card ឬការទិញតាមប្រព័ន្ធផ្លូវការ — មិនមែនបញ្ចូល Robux តាម User ID ដោយផ្ទាល់ទេ។</p>}
         </section>
 
         <section className="card-3d mt-5 rounded-3xl p-5">
@@ -119,7 +118,7 @@ function GamePage({ gameId }: { gameId: string }) {
               </button>
             ))}
           </div>
-          {idConfig.requiresLookup && <p className="text-sm text-muted-foreground">កញ្ចប់ និងតម្លៃមិនទាន់មាន។</p>}
+          {packagesPending && <p className="text-sm text-muted-foreground">កញ្ចប់ និងតម្លៃមិនទាន់មាន។</p>}
         </section>
 
         <section className="card-3d mt-5 rounded-3xl p-5">
