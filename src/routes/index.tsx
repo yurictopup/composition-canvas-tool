@@ -27,10 +27,10 @@ const steps = [
 function Index() {
   return (
     <SiteChrome>
-      <section className="w-full">
-        <Link to="/" hash="games" className="tile-clean block">
+      <section className="mx-auto w-full max-w-[768px] px-4 pt-4 sm:px-6">
+        <Link to="/" hash="games" className="block overflow-hidden rounded-lg">
           <img src={banner.url} alt="រូបបដាហ្គេម ពេជ្រភ្លឺភ្លឹបភ្ល្លែត" width={1920} height={1080}
-            className="block h-[170px] w-full object-cover sm:h-[240px] lg:h-[300px]" />
+            className="block aspect-[3/1] w-full object-cover" />
         </Link>
       </section>
 

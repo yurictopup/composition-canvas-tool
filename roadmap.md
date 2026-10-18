@@ -12,6 +12,7 @@
 - [x] Game pictures: keep the badges/logos baked into the artwork (user's choice)
 - [x] Layout widened so content spans the screen; banner full width; hero text block removed
 - [x] Banner shortened (was 520px tall on desktop, now 300px; profile 210px)
+- [x] Home banner resized to the latest reference: compact, centered, 3:1 artwork with side margins
 - [ ] User to confirm: real Telegram handle (now @yuric_topup), real prices, the "1–3 minutes" claim
 - [ ] More games ("game mode បន្ថែមទៀត") — needs artwork from the user
 - [ ] Avatar picture for the profile — user has none yet, "YT" placeholder in place
