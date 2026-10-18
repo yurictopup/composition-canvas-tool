@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
-import banner from "@/assets/banner.png.asset.json";
+import banner from "@/assets/banner-angkor.png.asset.json";
 import { games, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 
