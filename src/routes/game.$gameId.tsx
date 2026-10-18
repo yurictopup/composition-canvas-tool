@@ -69,7 +69,7 @@ function GamePage({ gameId }: { gameId: string }) {
           </span>
           <div>
             <h1 className="font-display text-2xl font-black">{game.name}</h1>
-            <p className="text-sm text-muted-foreground">{game.blurb} · ចូលក្នុង 1-3 នាទី</p>
+            <p className="text-sm text-muted-foreground">{idConfig.requiresLookup ? game.unit : `${game.blurb} · ចូលក្នុង 1-3 នាទី`}</p>
           </div>
         </div>
 

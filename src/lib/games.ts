@@ -4,6 +4,10 @@ import roblox from "@/assets/roblox.png.asset.json";
 import magicchess from "@/assets/magicchess.png.asset.json";
 import pubg from "@/assets/pubg-clean.png";
 import hok from "@/assets/hok.png.asset.json";
+import codm from "@/assets/codm.jpg.asset.json";
+import wildrift from "@/assets/wildrift.jpg.asset.json";
+import bloodstrike from "@/assets/bloodstrike.jpg.asset.json";
+import coc from "@/assets/coc.jpg.asset.json";
 
 export const games = [
   { id: "mlbb", name: "Mobile Legends", icon: mlbb.url, unit: "Diamonds", blurb: "ពេជ្រ MLBB ចូលភ្លាមៗ" },
@@ -12,6 +16,10 @@ export const games = [
   { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess.url, unit: "Diamonds", blurb: "Magic Chess ចូលភ្លាម" },
   { id: "pubg", name: "PUBG Mobile", icon: pubg, unit: "UC", blurb: "UC PUBG ចូលលឿន" },
   { id: "hok", name: "Honor of Kings", icon: hok.url, unit: "Tokens", blurb: "Tokens HoK ចូលភ្លាម" },
+  { id: "codm", name: "Call of Duty: Mobile", icon: codm.url, unit: "CP", blurb: "Call of Duty: Mobile" },
+  { id: "wildrift", name: "League of Legends: Wild Rift", icon: wildrift.url, unit: "Wild Cores", blurb: "League of Legends: Wild Rift" },
+  { id: "bloodstrike", name: "Blood Strike", icon: bloodstrike.url, unit: "Gold", blurb: "Blood Strike" },
+  { id: "coc", name: "Clash of Clans", icon: coc.url, unit: "Gems", blurb: "Clash of Clans" },
 ];
 
 export type Game = (typeof games)[number];
