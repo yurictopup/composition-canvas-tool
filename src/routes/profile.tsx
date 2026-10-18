@@ -13,6 +13,8 @@ export const Route = createFileRoute("/profile")({
       { property: "og:description", content: "ទំព័រប្រវត្តិរបស់ Yuric Topup — ទំនាក់ទំនង និងហ្គេមទាំងអស់។" },
       { property: "og:type", content: "profile" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: banner.url },
+      { name: "twitter:image", content: banner.url },
     ],
   }),
   component: Profile,

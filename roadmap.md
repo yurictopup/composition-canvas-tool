@@ -1,5 +1,9 @@
 # Roadmap
 
+- [x] Remove all three instruction boxes and payment-method strip shown in the uploaded home-page screenshot; verified banner and twelve games remain
+
+- [x] Add Genshin Impact and Honkai: Star Rail to reach twelve games, with UID and Server selection; verified on desktop and mobile, lookup and purchases remain unavailable until supported
+
 - [x] Blue → white gradient colour pass (chosen palette #0a1a3f → #1e40af → #60a5fa → #ffffff)
 - [x] HOME: real game artwork instead of emoji (6 icons cut from the uploaded strip)
 - [x] HOME: 3D look with twinkling/sparkling light effects (style only, no copied text)
@@ -16,7 +20,7 @@
 - [x] Latest banner adjustment: span the game section width following the red-box reference, with games moved below
 - [ ] User to confirm: real Telegram handle (now @yuric_topup), real prices, the "1–3 minutes" claim
 - [x] Add CODM, Wild Rift, Blood Strike, Clash of Clans with game-specific ID fields and artwork
-- [ ] Package amounts and prices for the four new games — awaiting the shop's real offers
+- [ ] Package amounts and prices for the six new games — awaiting the shop's real offers
 - [x] Configure game-specific ID fields and honest Check ID unavailable states for all ten games; purchases require real verification
 - [ ] Real account-name Check ID — needs supported providers and credentials; do not treat format checks as verified accounts
 - [ ] Avatar picture for the profile — user has none yet, "YT" placeholder in place

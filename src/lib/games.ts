@@ -8,6 +8,8 @@ import codm from "@/assets/codm.jpg.asset.json";
 import wildrift from "@/assets/wildrift.jpg.asset.json";
 import bloodstrike from "@/assets/bloodstrike.jpg.asset.json";
 import coc from "@/assets/coc.jpg.asset.json";
+import genshin from "@/assets/genshin.jpg.asset.json";
+import starrail from "@/assets/starrail.jpg.asset.json";
 
 export const games = [
   { id: "mlbb", name: "Mobile Legends", icon: mlbb.url, unit: "Diamonds", blurb: "ពេជ្រ MLBB ចូលភ្លាមៗ" },
@@ -20,6 +22,8 @@ export const games = [
   { id: "wildrift", name: "League of Legends: Wild Rift", icon: wildrift.url, unit: "Wild Cores", blurb: "League of Legends: Wild Rift" },
   { id: "bloodstrike", name: "Blood Strike", icon: bloodstrike.url, unit: "Gold", blurb: "Blood Strike" },
   { id: "coc", name: "Clash of Clans", icon: coc.url, unit: "Gems", blurb: "Clash of Clans" },
+  { id: "genshin", name: "Genshin Impact", icon: genshin.url, unit: "Genesis Crystals", blurb: "Genshin Impact" },
+  { id: "starrail", name: "Honkai: Star Rail", icon: starrail.url, unit: "Oneiric Shards", blurb: "Honkai: Star Rail" },
 ];
 
 export type Game = (typeof games)[number];

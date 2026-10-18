@@ -2,6 +2,21 @@ import { describe, expect, it } from "vitest";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 
 describe("Game-specific player identifiers", () => {
+  for (const gameId of ["genshin", "starrail"]) {
+    it(`${gameId} requires numeric UID`, () => {
+      expect(getIdConfig(gameId).primary.numeric).toBe(true);
+      expect(validatePlayerId(gameId, "812345678", "Asia")).toBeNull();
+      expect(validatePlayerId(gameId, "Player#123", "Asia")).not.toBeNull();
+      expect(validatePlayerId(gameId, "", "Asia")).not.toBeNull();
+    });
+    it(`${gameId} requires a supported server selection`, () => {
+      for (const server of ["Asia", "America", "Europe", "TW, HK, MO"]) {
+        expect(validatePlayerId(gameId, "812345678", server)).toBeNull();
+      }
+      expect(validatePlayerId(gameId, "812345678", "")).not.toBeNull();
+      expect(validatePlayerId(gameId, "812345678", "invented")).not.toBeNull();
+    });
+  }
   it("CODM uses numeric Player UID", () => {
     expect(getIdConfig("codm").primary.label).toBe("Player ID (UID)");
     expect(getIdConfig("codm").secondary).toBeUndefined();
@@ -25,7 +40,7 @@ describe("Game-specific player identifiers", () => {
     expect(validatePlayerId("coc", "XXXXXX")).not.toBeNull();
   });
   it("all games require real lookup rather than format-only verification", () => {
-    for (const id of ["mlbb", "ff", "pubg", "hok", "magicchess", "roblox", "codm", "wildrift", "bloodstrike", "coc"]) {
+    for (const id of ["mlbb", "ff", "pubg", "hok", "magicchess", "roblox", "codm", "wildrift", "bloodstrike", "coc", "genshin", "starrail"]) {
       expect(getIdConfig(id).requiresLookup).toBe(true);
     }
   });
