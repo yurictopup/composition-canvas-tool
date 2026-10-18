@@ -31,9 +31,11 @@ function Index() {
   return (
     <SiteChrome>
       <section className="mx-auto w-full max-w-[1500px] px-4 pt-4 sm:px-6">
-        <Link to="/" hash="games" className="block overflow-hidden rounded-lg">
+        <Link to="/" hash="games" className="relative block overflow-hidden rounded-lg">
           <img src={banner.url} alt="រូបបដាហ្គេម ពេជ្រភ្លឺភ្លឹបភ្ល្លែត" width={1280} height={725}
             className="block aspect-[3/1] w-full object-cover sm:aspect-[10/3]" />
+          <img src={mascot} alt="តួអង្គ Yuric ពេជ្រភ្លឺភ្លឹប" aria-hidden="true"
+            className="pointer-events-none absolute bottom-0 right-[3%] h-[88%] w-auto object-contain drop-shadow-[0_0_18px_rgba(96,165,250,0.55)]" />
         </Link>
       </section>
 
