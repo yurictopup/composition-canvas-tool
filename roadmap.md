@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Real email login/signup via Lovable Cloud (email-only, no profile data); header nav links ហ្គេម/ប្រវត្តិ replaced by session-aware ចូលគណនី/ចេញ; verified real signup returns check-email confirmation
+
+
 - [x] Remove all three instruction boxes and payment-method strip shown in the uploaded home-page screenshot; verified banner and twelve games remain
 
 - [x] Add Genshin Impact and Honkai: Star Rail to reach twelve games, with UID and Server selection; verified on desktop and mobile, lookup and purchases remain unavailable until supported
