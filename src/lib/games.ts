@@ -32,17 +32,130 @@ export function findGame(id: string | undefined): Game | undefined {
   return games.find((g) => g.id === id);
 }
 
-export const packages = [
-  { amt: 86, price: 1.5 },
-  { amt: 172, price: 3 },
-  { amt: 257, price: 4.5 },
-  { amt: 344, price: 6 },
-  { amt: 514, price: 9 },
-  { amt: 706, price: 12, hot: true },
-  { amt: 1412, price: 24 },
-  { amt: 2195, price: 36 },
-  { amt: 3688, price: 60 },
-];
+export type GamePackage = { amt: string; price: number | null; hot?: boolean };
+
+// Real in-game denominations per game. Prices stay null until the shop
+// provides its real selling prices — unpriced packages cannot be purchased.
+export const gamePackages: Record<string, GamePackage[]> = {
+  mlbb: [
+    { amt: "86", price: null },
+    { amt: "172", price: null },
+    { amt: "257", price: null },
+    { amt: "344", price: null },
+    { amt: "514", price: null },
+    { amt: "706", price: null, hot: true },
+    { amt: "1412", price: null },
+    { amt: "2195", price: null },
+    { amt: "3688", price: null },
+  ],
+  ff: [
+    { amt: "50", price: null },
+    { amt: "115", price: null },
+    { amt: "240", price: null },
+    { amt: "355", price: null },
+    { amt: "480", price: null },
+    { amt: "505", price: null, hot: true },
+    { amt: "610", price: null },
+    { amt: "850", price: null },
+    { amt: "1080", price: null },
+    { amt: "1240", price: null },
+    { amt: "2530", price: null },
+  ],
+  pubg: [
+    { amt: "60", price: null },
+    { amt: "120", price: null },
+    { amt: "180", price: null },
+    { amt: "325", price: null },
+    { amt: "660", price: null },
+    { amt: "720", price: null },
+    { amt: "985", price: null },
+    { amt: "1800", price: null, hot: true },
+    { amt: "3850", price: null },
+    { amt: "8100", price: null },
+  ],
+  hok: [
+    { amt: "16", price: null },
+    { amt: "80", price: null },
+    { amt: "240", price: null },
+    { amt: "400", price: null },
+    { amt: "560", price: null },
+    { amt: "800", price: null },
+    { amt: "1600", price: null },
+    { amt: "2400", price: null },
+    { amt: "4000", price: null },
+    { amt: "8000", price: null },
+  ],
+  magicchess: [
+    { amt: "12", price: null },
+    { amt: "59", price: null },
+    { amt: "86", price: null },
+    { amt: "172", price: null },
+    { amt: "257", price: null },
+    { amt: "344", price: null },
+    { amt: "514", price: null },
+    { amt: "706", price: null, hot: true },
+    { amt: "1050", price: null },
+    { amt: "2195", price: null },
+  ],
+  codm: [
+    { amt: "80", price: null },
+    { amt: "400", price: null },
+    { amt: "800", price: null },
+    { amt: "2000", price: null },
+    { amt: "5000", price: null },
+    { amt: "10800", price: null },
+  ],
+  wildrift: [
+    { amt: "425", price: null },
+    { amt: "950", price: null },
+    { amt: "1850", price: null },
+    { amt: "3275", price: null },
+    { amt: "4750", price: null },
+    { amt: "9500", price: null },
+  ],
+  bloodstrike: [
+    { amt: "24", price: null },
+    { amt: "60", price: null },
+    { amt: "90", price: null },
+    { amt: "180", price: null },
+    { amt: "300", price: null },
+    { amt: "600", price: null },
+    { amt: "1200", price: null },
+    { amt: "1800", price: null },
+    { amt: "3600", price: null },
+    { amt: "6000", price: null },
+  ],
+  coc: [
+    { amt: "80", price: null },
+    { amt: "500", price: null },
+    { amt: "1200", price: null },
+    { amt: "2500", price: null },
+    { amt: "6500", price: null },
+    { amt: "14000", price: null },
+  ],
+  genshin: [
+    { amt: "60", price: null },
+    { amt: "300 + 30", price: null },
+    { amt: "980 + 110", price: null },
+    { amt: "1980 + 260", price: null },
+    { amt: "3280 + 600", price: null, hot: true },
+    { amt: "6480 + 1600", price: null },
+  ],
+  starrail: [
+    { amt: "60", price: null },
+    { amt: "300 + 30", price: null },
+    { amt: "980 + 110", price: null },
+    { amt: "1980 + 260", price: null },
+    { amt: "3280 + 600", price: null, hot: true },
+    { amt: "6480 + 1600", price: null },
+  ],
+  // Roblox sells via Gift Card / official store — no direct ID top-up packages.
+  roblox: [],
+};
+
+export function getPackages(gameId: string): GamePackage[] {
+  return gamePackages[gameId] ?? [];
+}
 
 export const payments = ["ABA KHQR", "Wing", "ACLEDA", "Bakong"];
 
