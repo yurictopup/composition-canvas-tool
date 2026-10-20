@@ -112,18 +112,24 @@ function GamePage({ gameId }: { gameId: string }) {
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">2</span>
             ជ្រើសកញ្ចប់ {game.unit}
           </h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {availablePackages.map((p, i) => (
-              <button key={p.amt} onClick={() => setPkg(i)}
-                className={`card-3d relative rounded-2xl p-4 text-left transition-transform hover:-translate-y-0.5 ${pkg === i ? "card-3d-active" : ""}`}>
-                {p.hot && <span className="absolute -top-2 right-2 rounded-full bg-accent px-2 text-[11px] font-bold text-accent-foreground">HOT</span>}
-                <div className="font-display font-bold">💎 {p.amt}</div>
-                <div className="text-xs text-muted-foreground">{game.unit}</div>
-                <div className="mt-2 font-bold text-accent">${p.price.toFixed(2)}</div>
-              </button>
-            ))}
-          </div>
-          {packagesPending && <p className="text-sm text-muted-foreground">កញ្ចប់ និងតម្លៃមិនទាន់មាន។</p>}
+          {availablePackages.length > 0 ? (
+            <>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {availablePackages.map((p, i) => (
+                  <button key={p.amt} onClick={() => setPkg(i)}
+                    className={`card-3d relative rounded-2xl p-4 text-left transition-transform hover:-translate-y-0.5 ${pkg === i ? "card-3d-active" : ""}`}>
+                    {p.hot && <span className="absolute -top-2 right-2 rounded-full bg-accent px-2 text-[11px] font-bold text-accent-foreground">HOT</span>}
+                    <div className="font-display font-bold">💎 {p.amt}</div>
+                    <div className="text-xs text-muted-foreground">{game.unit}</div>
+                    <div className="mt-2 font-bold text-accent">{p.price !== null ? `$${p.price.toFixed(2)}` : "—"}</div>
+                  </button>
+                ))}
+              </div>
+              <p className="mt-3 text-sm text-muted-foreground">តម្លៃមិនទាន់កំណត់ — ប៊ូតុងទិញនឹងបើកពេលហាងដាក់តម្លៃរួច។</p>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">កញ្ចប់ និងតម្លៃមិនទាន់មាន។</p>
+          )}
         </section>
 
         <section className="card-3d mt-5 rounded-3xl p-5">
@@ -149,7 +155,7 @@ function GamePage({ gameId }: { gameId: string }) {
           </dl>
           <div className="mt-4 flex items-end justify-between border-t pt-4">
             <span className="text-muted-foreground">សរុប</span>
-            <span className="font-display text-3xl font-black text-accent">${selected?.price.toFixed(2) ?? "0.00"}</span>
+            <span className="font-display text-3xl font-black text-accent">{selected?.price != null ? `$${selected.price.toFixed(2)}` : "—"}</span>
           </div>
           <button disabled={!canBuy} onClick={() => setDone(true)}
             className="btn-3d glow-pulse mt-5 w-full rounded-xl py-4 font-display font-bold disabled:opacity-40">
