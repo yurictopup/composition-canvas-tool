@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
-import { findGame, packages, payments } from "@/lib/games";
+import { findGame, getPackages, payments } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
@@ -41,10 +41,9 @@ function GamePage({ gameId }: { gameId: string }) {
   if (!game) throw notFound();
 
   const idConfig = getIdConfig(gameId);
-  const packagesPending = ["codm", "wildrift", "bloodstrike", "coc", "roblox", "genshin", "starrail"].includes(gameId);
-  const availablePackages = packagesPending ? [] : packages;
-  const selected = pkg !== null ? packages[pkg] : null;
-  const canBuy = !!check?.ok && !!selected;
+  const availablePackages = getPackages(gameId);
+  const selected = pkg !== null ? (availablePackages[pkg] ?? null) : null;
+  const canBuy = !!check?.ok && !!selected && selected.price !== null;
 
   function runCheck() {
     const error = validatePlayerId(gameId, uid, zone);
