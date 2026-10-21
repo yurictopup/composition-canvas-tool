@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "ចូលគណនី — Yuric Topup" },
-      { name: "description", content: "ចូល ឬចុះឈ្មោះគណនី Yuric Topup តាម Email ដើម្បីបញ្ចូលពេជ្រហ្គេម។" },
-      { property: "og:title", content: "ចូលគណនី — Yuric Topup" },
-      { property: "og:description", content: "ចូល ឬចុះឈ្មោះគណនី Yuric Topup តាម Email។" },
+      { title: "Sign in — Yuric Topup" },
+      { name: "description", content: "Sign in or create a Yuric Topup account with your email to top up game diamonds." },
+      { property: "og:title", content: "Sign in — Yuric Topup" },
+      { property: "og:description", content: "Sign in or create a Yuric Topup account with your email." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -30,11 +30,11 @@ function AuthPage() {
     e.preventDefault();
     setMsg(null);
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
-      setMsg({ ok: false, text: "សូមបញ្ចូល Email ឱ្យត្រឹមត្រូវ។" });
+      setMsg({ ok: false, text: "Please enter a valid email address." });
       return;
     }
     if (password.length < 6) {
-      setMsg({ ok: false, text: "ពាក្យសម្ងាត់ត្រូវមានយ៉ាងតិច 6 តួអក្សរ។" });
+      setMsg({ ok: false, text: "Password must be at least 6 characters." });
       return;
     }
     setBusy(true);
@@ -42,7 +42,7 @@ function AuthPage() {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) {
-          setMsg({ ok: false, text: "Email ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ។" });
+          setMsg({ ok: false, text: "Incorrect email or password." });
           return;
         }
         navigate({ to: "/" });
@@ -57,7 +57,7 @@ function AuthPage() {
           return;
         }
         if (!data.session) {
-          setMsg({ ok: true, text: "ចុះឈ្មោះរួចរាល់! សូមពិនិត្យ Email របស់អ្នក ដើម្បីបញ្ជាក់គណនី។" });
+          setMsg({ ok: true, text: "Sign-up complete! Check your email to confirm your account." });
           return;
         }
         navigate({ to: "/" });
@@ -72,10 +72,10 @@ function AuthPage() {
       <main className="mx-auto flex w-full max-w-[480px] flex-1 items-center px-4 py-10 sm:px-6">
         <section className="card-3d w-full rounded-3xl p-6 sm:p-8">
           <h1 className="text-center font-display text-2xl font-black">
-            {mode === "login" ? "ចូលគណនី" : "ចុះឈ្មោះ"}
+            {mode === "login" ? "Sign In" : "Sign Up"}
           </h1>
           <p className="mt-1 text-center text-sm text-muted-foreground">
-            {mode === "login" ? "ចូលដោយ Email របស់អ្នក" : "បង្កើតគណនីថ្មីដោយ Email"}
+            {mode === "login" ? "Sign in with your email" : "Create a new account with your email"}
           </p>
 
           <form onSubmit={submit} className="mt-6 grid gap-4">
@@ -91,7 +91,7 @@ function AuthPage() {
               />
             </label>
             <label className="grid gap-2 text-sm font-semibold">
-              ពាក្យសម្ងាត់
+              Password
               <input
                 type="password"
                 value={password}
@@ -102,7 +102,7 @@ function AuthPage() {
               />
             </label>
             <Button type="submit" disabled={busy} className="h-12 font-display font-bold">
-              {busy ? "កំពុងដំណើរការ…" : mode === "login" ? "ចូលគណនី" : "ចុះឈ្មោះ"}
+              {busy ? "Processing…" : mode === "login" ? "Sign In" : "Sign Up"}
             </Button>
           </form>
 
@@ -113,17 +113,17 @@ function AuthPage() {
           )}
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            {mode === "login" ? "មិនទាន់មានគណនី?" : "មានគណនីរួចហើយ?"}{" "}
+            {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
             <button
               type="button"
               onClick={() => { setMode(mode === "login" ? "signup" : "login"); setMsg(null); }}
               className="font-semibold text-primary underline-offset-2 hover:underline"
             >
-              {mode === "login" ? "ចុះឈ្មោះ" : "ចូលគណនី"}
+              {mode === "login" ? "Sign Up" : "Sign In"}
             </button>
           </p>
           <p className="mt-3 text-center text-sm">
-            <Link to="/" className="text-muted-foreground hover:text-foreground">← ត្រឡប់ទៅទំព័រដើម</Link>
+            <Link to="/" className="text-muted-foreground hover:text-foreground">← Back to home</Link>
           </p>
         </section>
       </main>

@@ -8,14 +8,14 @@ import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 export const Route = createFileRoute("/game/$gameId")({
   head: ({ params }) => {
     const game = findGame(params.gameId);
-    const name = game?.name ?? "ហ្គេម";
-    const unit = game?.unit ?? "ពេជ្រ";
+    const name = game?.name ?? "Game";
+    const unit = game?.unit ?? "Diamonds";
     return {
       meta: [
         { title: `${name} — Yuric Topup` },
-        { name: "description", content: `បញ្ចូល ${unit} ${name} លឿន សុវត្ថិភាព តាម ABA KHQR។` },
+        { name: "description", content: `Top up ${unit} ${name} — fast and secure via ABA KHQR.` },
         { property: "og:title", content: `${name} — Yuric Topup` },
-        { property: "og:description", content: `បញ្ចូល ${name} ក្នុង 1-3 នាទី តាម KHQR។` },
+        { property: "og:description", content: `Top up ${name} in 1-3 minutes via KHQR.` },
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" },
       ],
@@ -52,16 +52,16 @@ function GamePage({ gameId }: { gameId: string }) {
       return;
     }
     if (idConfig.requiresLookup) {
-      setCheck({ ok: false, msg: "មិនទាន់អាចស្វែងរកឈ្មោះគណនីបានទេ — សេវា Check ID មិនទាន់ភ្ជាប់។" });
+      setCheck({ ok: false, msg: "Account name lookup is not available yet — the Check ID service is not connected." });
       return;
     }
-    setCheck({ ok: true, msg: `ទម្រង់ ID ${uid.trim()} ត្រឹមត្រូវ — មិនទាន់បានផ្ទៀងផ្ទាត់គណនីពិតទេ។` });
+    setCheck({ ok: true, msg: `ID format ${uid.trim()} is valid — real account not yet verified.` });
   }
 
   return (
     <SiteChrome>
       <main className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6">
-        <Link to="/" hash="games" className="text-sm text-on-dark-muted transition-colors hover:text-on-dark">← ត្រឡប់ទៅហ្គេម</Link>
+        <Link to="/" hash="games" className="text-sm text-on-dark-muted transition-colors hover:text-on-dark">← Back to games</Link>
 
         <div className="card-3d mt-3 flex items-center gap-4 rounded-3xl p-5">
           <span className="tile-clean block w-20 shrink-0 rounded-[26%] sm:w-24">
@@ -69,14 +69,14 @@ function GamePage({ gameId }: { gameId: string }) {
           </span>
           <div>
             <h1 className="font-display text-2xl font-black">{game.name}</h1>
-            <p className="text-sm text-muted-foreground">{idConfig.requiresLookup ? game.unit : `${game.blurb} · ចូលក្នុង 1-3 នាទី`}</p>
+            <p className="text-sm text-muted-foreground">{idConfig.requiresLookup ? game.unit : `${game.blurb} · Delivered in 1-3 minutes`}</p>
           </div>
         </div>
 
         <section className="card-3d mt-5 rounded-3xl p-5">
           <h2 className="mb-4 flex items-center gap-3 font-display text-lg font-bold">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">1</span>
-            បញ្ចូល Player ID
+            Enter Player ID
           </h2>
           <form onSubmit={(e) => { e.preventDefault(); runCheck(); }} className={`grid items-end gap-3 ${idConfig.secondary ? "sm:grid-cols-[1fr_1fr_auto]" : "sm:grid-cols-[1fr_auto]"}`}>
             <label className="grid min-w-0 gap-2 text-sm font-semibold">
@@ -104,13 +104,13 @@ function GamePage({ gameId }: { gameId: string }) {
               {check.ok ? "✅" : "⚠️"} {check.msg}
             </p>
           )}
-          {gameId === "roblox" && <p className="mt-3 text-sm text-muted-foreground">Roblox ប្រើ Gift Card ឬការទិញតាមប្រព័ន្ធផ្លូវការ — មិនមែនបញ្ចូល Robux តាម User ID ដោយផ្ទាល់ទេ។</p>}
+          {gameId === "roblox" && <p className="mt-3 text-sm text-muted-foreground">Roblox uses Gift Cards or official store purchases — Robux cannot be topped up directly by User ID.</p>}
         </section>
 
         <section className="card-3d mt-5 rounded-3xl p-5">
           <h2 className="mb-4 flex items-center gap-3 font-display text-lg font-bold">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">2</span>
-            ជ្រើសកញ្ចប់ {game.unit}
+            Choose a {game.unit} package
           </h2>
           {availablePackages.length > 0 ? (
             <>
@@ -125,17 +125,17 @@ function GamePage({ gameId }: { gameId: string }) {
                   </button>
                 ))}
               </div>
-              <p className="mt-3 text-sm text-muted-foreground">តម្លៃមិនទាន់កំណត់ — ប៊ូតុងទិញនឹងបើកពេលហាងដាក់តម្លៃរួច។</p>
+              <p className="mt-3 text-sm text-muted-foreground">Prices not set yet — the Buy button will unlock once the shop sets its prices.</p>
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">កញ្ចប់ និងតម្លៃមិនទាន់មាន។</p>
+            <p className="text-sm text-muted-foreground">No packages or prices yet.</p>
           )}
         </section>
 
         <section className="card-3d mt-5 rounded-3xl p-5">
           <h2 className="mb-4 flex items-center gap-3 font-display text-lg font-bold">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">3</span>
-            វិធីបង់ប្រាក់
+            Payment Method
           </h2>
           <div className="flex flex-wrap gap-2">
             {payments.map((m) => (
@@ -146,22 +146,22 @@ function GamePage({ gameId }: { gameId: string }) {
         </section>
 
         <aside className="card-3d mt-5 rounded-3xl p-5">
-          <h3 className="font-display text-lg font-bold">សង្ខេបការបញ្ជាទិញ</h3>
+          <h3 className="font-display text-lg font-bold">Order Summary</h3>
           <dl className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between"><dt className="text-muted-foreground">ហ្គេម</dt><dd>{game.name}</dd></div>
+            <div className="flex justify-between"><dt className="text-muted-foreground">Game</dt><dd>{game.name}</dd></div>
             <div className="flex justify-between"><dt className="text-muted-foreground">ID</dt><dd>{uid || "—"}{zone && ` (${zone})`}</dd></div>
-            <div className="flex justify-between"><dt className="text-muted-foreground">កញ្ចប់</dt><dd>{selected ? `${selected.amt} ${game.unit}` : "—"}</dd></div>
-            <div className="flex justify-between"><dt className="text-muted-foreground">បង់ប្រាក់</dt><dd>{pay}</dd></div>
+            <div className="flex justify-between"><dt className="text-muted-foreground">Package</dt><dd>{selected ? `${selected.amt} ${game.unit}` : "—"}</dd></div>
+            <div className="flex justify-between"><dt className="text-muted-foreground">Payment</dt><dd>{pay}</dd></div>
           </dl>
           <div className="mt-4 flex items-end justify-between border-t pt-4">
-            <span className="text-muted-foreground">សរុប</span>
+            <span className="text-muted-foreground">Total</span>
             <span className="font-display text-3xl font-black text-accent">{selected?.price != null ? `$${selected.price.toFixed(2)}` : "—"}</span>
           </div>
           <button disabled={!canBuy} onClick={() => setDone(true)}
             className="btn-3d glow-pulse mt-5 w-full rounded-xl py-4 font-display font-bold disabled:opacity-40">
-            ទិញឥឡូវ
+            Buy Now
           </button>
-          {done && <p className="mt-3 text-center text-sm text-primary">✅ ការបញ្ជាទិញបានទទួល! (សាកល្បង)</p>}
+          {done && <p className="mt-3 text-center text-sm text-primary">✅ Order received! (test)</p>}
         </aside>
       </main>
     </SiteChrome>

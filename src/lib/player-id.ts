@@ -4,7 +4,7 @@ export type IdConfig = { primary: IdField; secondary?: IdField; requiresLookup?:
 const hoyoServers = ["Asia", "America", "Europe", "TW, HK, MO"] as const;
 const hoyoIdConfig: IdConfig = {
   primary: { label: "UID", placeholder: "UID", numeric: true },
-  secondary: { label: "Server", placeholder: "ជ្រើសរើស Server", options: hoyoServers },
+  secondary: { label: "Server", placeholder: "Select server", options: hoyoServers },
   requiresLookup: true,
 };
 
@@ -26,31 +26,31 @@ export const idConfigs: Record<string, IdConfig> = {
 export function getIdConfig(gameId: string): IdConfig {
   return idConfigs[gameId] ?? {
     primary: { label: "User ID", placeholder: "User ID", numeric: true },
-    secondary: { label: "Zone ID (បើមាន)", placeholder: "Zone ID (បើមាន)", numeric: true },
+    secondary: { label: "Zone ID (optional)", placeholder: "Zone ID (optional)", numeric: true },
   };
 }
 
 export function validatePlayerId(gameId: string, primary: string, secondary = ""): string | null {
   const id = primary.trim();
   if (gameId === "genshin" || gameId === "starrail") {
-    if (!/^\d+$/.test(id)) return "UID ត្រូវតែជាលេខ។";
-    return hoyoServers.some((server) => server === secondary) ? null : "សូមជ្រើសរើស Server។";
+    if (!/^\d+$/.test(id)) return "UID must be numeric.";
+    return hoyoServers.some((server) => server === secondary) ? null : "Please select a server.";
   }
-  if (gameId === "roblox") return /^[a-zA-Z0-9_]+$/.test(id) ? null : "សូមបញ្ចូល Roblox Username។";
+  if (gameId === "roblox") return /^[a-zA-Z0-9_]+$/.test(id) ? null : "Please enter your Roblox username.";
   if (gameId === "mlbb" || gameId === "magicchess") {
-    if (!/^\d+$/.test(id)) return "User ID ត្រូវតែជាលេខ។";
-    return /^\d+$/.test(secondary.trim()) ? null : "សូមបញ្ចូល Zone ID ជាលេខ។";
+    if (!/^\d+$/.test(id)) return "User ID must be numeric.";
+    return /^\d+$/.test(secondary.trim()) ? null : "Please enter a numeric Zone ID.";
   }
   if (gameId === "wildrift") {
-    if (!id || id.includes("#")) return "សូមបញ្ចូល Riot ID ហើយដាក់ Tagline នៅប្រអប់ផ្សេង។";
-    if (!/^#?[a-zA-Z0-9]+$/.test(secondary.trim())) return "សូមបញ្ចូល Tagline ដូចជា #XXXX។";
+    if (!id || id.includes("#")) return "Enter your Riot ID and put the tagline in the second field.";
+    if (!/^#?[a-zA-Z0-9]+$/.test(secondary.trim())) return "Enter a tagline like #XXXX.";
     return null;
   }
   if (gameId === "coc") {
-    return /^#[A-Z0-9]+$/i.test(id) ? null : "សូមបញ្ចូល Player Tag ដោយចាប់ផ្ដើមជាមួយ #។";
+    return /^#[A-Z0-9]+$/i.test(id) ? null : "Player Tag must start with #.";
   }
   if (["codm", "bloodstrike", "ff", "pubg", "hok"].includes(gameId)) {
-    return /^\d+$/.test(id) ? null : "ID ត្រូវតែជាលេខ។";
+    return /^\d+$/.test(id) ? null : "ID must be numeric.";
   }
-  return /^\d{4,12}$/.test(id) ? null : "ID ត្រូវជាលេខ 4 ដល់ 12 ខ្ទង់។";
+  return /^\d{4,12}$/.test(id) ? null : "ID must be 4-12 digits.";
 }

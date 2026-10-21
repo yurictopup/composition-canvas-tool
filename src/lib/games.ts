@@ -12,11 +12,11 @@ import genshin from "@/assets/genshin.jpg.asset.json";
 import starrail from "@/assets/starrail.jpg.asset.json";
 
 export const games = [
-  { id: "mlbb", name: "Mobile Legends", icon: mlbb.url, unit: "Diamonds", blurb: "ពេជ្រ MLBB ចូលភ្លាមៗ" },
-  { id: "ff", name: "Free Fire", icon: freefire.url, unit: "Diamonds", blurb: "ពេជ្រ Free Fire តម្លៃថោក" },
-  { id: "roblox", name: "Roblox", icon: roblox.url, unit: "Robux", blurb: "Robux ចូលលឿន" },
-  { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess.url, unit: "Diamonds", blurb: "Magic Chess ចូលភ្លាម" },
-  { id: "pubg", name: "PUBG Mobile", icon: pubg, unit: "UC", blurb: "UC PUBG ចូលលឿន" },
+  { id: "mlbb", name: "Mobile Legends", icon: mlbb.url, unit: "Diamonds", blurb: "Instant MLBB diamond delivery" },
+  { id: "ff", name: "Free Fire", icon: freefire.url, unit: "Diamonds", blurb: "Free Fire diamonds at the best price" },
+  { id: "roblox", name: "Roblox", icon: roblox.url, unit: "Robux", blurb: "Fast Robux delivery" },
+  { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess.url, unit: "Diamonds", blurb: "Instant Magic Chess delivery" },
+  { id: "pubg", name: "PUBG Mobile", icon: pubg, unit: "UC", blurb: "Fast PUBG UC delivery" },
   { id: "hok", name: "Honor of Kings", icon: hok.url, unit: "Tokens", blurb: "Tokens HoK ចូលភ្លាម" },
   { id: "codm", name: "Call of Duty: Mobile", icon: codm.url, unit: "CP", blurb: "Call of Duty: Mobile" },
   { id: "wildrift", name: "League of Legends: Wild Rift", icon: wildrift.url, unit: "Wild Cores", blurb: "League of Legends: Wild Rift" },
@@ -162,5 +162,5 @@ export const payments = ["ABA KHQR", "Wing", "ACLEDA", "Bakong"];
 export const store = {
   name: "Yuric Topup",
   telegram: "@yuric_topup",
-  hours: "24 ម៉ោង",
+  hours: "24 Hours",
 };
