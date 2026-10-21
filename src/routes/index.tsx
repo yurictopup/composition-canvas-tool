@@ -4,6 +4,17 @@ import banner from "@/assets/banner-angkor.png.asset.json";
 import mascot from "@/assets/mascot-cut.png";
 import { games } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+const gameTabs = [
+  { id: "all", label: "ទាំងអស់", items: games },
+  ...["mlbb", "ff", "roblox", "pubg"].map((id) => ({
+    id,
+    label: games.find((game) => game.id === id)?.name ?? id,
+    items: games.filter((game) => game.id === id),
+  })),
+  { id: "other", label: "ហ្គេមផ្សេងទៀត", items: games.filter((game) => !["mlbb", "ff", "roblox", "pubg"].includes(game.id)) },
+];
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,12 +49,21 @@ function Index() {
         </Link>
       </section>
 
-      <section id="games" className="mx-auto w-full max-w-[1500px] scroll-mt-6 px-4 pt-8 pb-6 sm:px-6 sm:pt-10">
-        <div className="card-3d rounded-3xl p-5 sm:p-7">
-          <h2 className="text-center font-display text-xl font-bold tracking-wide">TOPUP</h2>
-          <p className="mt-1 text-center text-sm text-muted-foreground">ជ្រើសរើសហ្គេម</p>
-          <div className="mt-6 grid grid-cols-3 gap-4 sm:grid-cols-6 sm:gap-5">
-            {games.map((g, i) => (
+      <section id="games" className="mx-auto w-full max-w-[1500px] scroll-mt-6 px-4 pt-5 pb-6 sm:px-6 sm:pt-6">
+        <Tabs defaultValue="all">
+          <div className="overflow-x-auto pb-3">
+            <TabsList aria-label="ជ្រើសរើសហ្គេម" className="h-auto w-max justify-start gap-2 bg-transparent p-0 sm:gap-3">
+              {gameTabs.map((tab) => (
+                <TabsTrigger key={tab.id} value={tab.id} className="min-h-10 rounded-lg border border-border bg-secondary px-4 py-2 text-secondary-foreground shadow-sm hover:bg-card data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md">
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+          {gameTabs.map((tab) => (
+            <TabsContent key={tab.id} value={tab.id} className="mt-1 min-h-52 rounded-lg border border-border bg-card p-4 text-card-foreground sm:p-6">
+              <div className="grid grid-cols-3 gap-x-4 gap-y-6 sm:grid-cols-6 sm:gap-x-5">
+            {tab.items.map((g, i) => (
               <Link key={g.id} to="/game/$gameId" params={{ gameId: g.id }}
                 className="block text-center" style={{ "--shine-delay": `${i * 0.5}s` } as CSSProperties}>
                 <span className="tile-clean block rounded-[26%]">
@@ -52,8 +72,10 @@ function Index() {
                 <span className="mt-2 block truncate text-[11px] font-semibold">{g.name}</span>
               </Link>
             ))}
-          </div>
-        </div>
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
       </section>
 
     </SiteChrome>
