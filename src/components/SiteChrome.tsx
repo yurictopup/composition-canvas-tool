@@ -36,7 +36,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
                   onClick={signOut}
                   className="rounded-lg border border-brand-400/40 px-4 py-1.5 font-semibold text-on-dark-muted transition-colors hover:text-on-dark"
                 >
-                  ចេញ
+                  Sign Out
                 </button>
               </>
             ) : (
@@ -44,7 +44,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
                 to="/auth"
                 className="rounded-lg bg-primary px-4 py-1.5 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
               >
-                ចូលគណនី
+                Sign In
               </Link>
             )}
           </nav>
@@ -55,10 +55,10 @@ export function SiteChrome({ children }: { children: ReactNode }) {
         <div className="marquee-track">
           {[0, 1].map((k) => (
             <span key={k} className="flex shrink-0 items-center gap-10 pr-10">
-              <span>⚡ បញ្ចូលពេជ្រក្នុង 1-3 នាទី</span>
-              <span>💎 តម្លៃថោកបំផុត</span>
-              <span>🔒 បង់ប្រាក់សុវត្ថិភាព</span>
-              <span>🎧 ជំនួយ {store.hours}</span>
+              <span>⚡ Instant delivery in 1-3 minutes</span>
+              <span>💎 Best prices</span>
+              <span>🔒 Secure payment</span>
+              <span>🎧 Support {store.hours}</span>
             </span>
           ))}
         </div>

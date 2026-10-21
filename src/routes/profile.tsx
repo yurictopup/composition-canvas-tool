@@ -7,10 +7,10 @@ import { SiteChrome } from "@/components/SiteChrome";
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "ប្រវត្តិ — Yuric Topup" },
-      { name: "description", content: "ទំព័រប្រវត្តិរបស់ Yuric Topup — ទំនាក់ទំនង វិធីបង់ប្រាក់ និងហ្គេមទាំងអស់។" },
-      { property: "og:title", content: "ប្រវត្តិ — Yuric Topup" },
-      { property: "og:description", content: "ទំព័រប្រវត្តិរបស់ Yuric Topup — ទំនាក់ទំនង និងហ្គេមទាំងអស់។" },
+      { title: "Shop — Yuric Topup" },
+      { name: "description", content: "Yuric Topup shop page — contact, payment methods, and all games." },
+      { property: "og:title", content: "Shop — Yuric Topup" },
+      { property: "og:description", content: "Yuric Topup shop page — contact and all games." },
       { property: "og:type", content: "profile" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: banner.url },
@@ -25,7 +25,7 @@ function Profile() {
     <SiteChrome>
       <section className="w-full">
         <div className="tile-clean">
-          <img src={banner.url} alt="រូបបដារបស់ហាង" width={1920} height={1080}
+          <img src={banner.url} alt="Shop banner" width={1920} height={1080}
             className="block h-[150px] w-full object-cover sm:h-[210px]" />
         </div>
       </section>
@@ -38,17 +38,17 @@ function Profile() {
           <div className="min-w-0 pb-1">
             <h1 className="font-display text-2xl font-black">{store.name}</h1>
             <p className="text-sm text-muted-foreground">
-              ជំនួយ {store.hours} · Telegram: {store.telegram}
+              Support {store.hours} · Telegram: {store.telegram}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              ⚠️ រូបតំណាង (YT) នៅសល់ជាកន្លែងទំនេរ — សូមផ្ញើរូបតំណាងពិត ដើម្បីដាក់ជារូបរបស់អ្នក។
+              ⚠️ Placeholder avatar (YT) — send a real photo to replace it.
             </p>
           </div>
         </div>
 
         <section className="card-3d mt-5 rounded-3xl p-5 sm:p-7">
-          <h2 className="font-display text-xl font-bold">ហ្គេមទាំងអស់</h2>
-          <p className="mt-1 text-sm text-muted-foreground">ចុចហ្គេមមួយ ដើម្បីបញ្ចូល ID និងជ្រើសកញ្ចប់។</p>
+          <h2 className="font-display text-xl font-bold">All Games</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Tap a game to enter your ID and pick a package.</p>
           <div className="mt-6 grid grid-cols-3 gap-4 sm:grid-cols-6 sm:gap-5">
             {games.map((g, i) => (
               <Link key={g.id} to="/game/$gameId" params={{ gameId: g.id }}
