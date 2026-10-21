@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Add game category tabs below the home banner in Yuric Topup's blue-white style, keeping existing game artwork and links.
+
 - [x] Real email login/signup via Lovable Cloud (email-only, no profile data); header nav links ហ្គេម/ប្រវត្តិ replaced by session-aware ចូលគណនី/ចេញ; verified real signup returns check-email confirmation
 
 

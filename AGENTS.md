@@ -12,3 +12,4 @@
 - Keep game-specific identifier configuration and format validation in `src/lib/player-id.ts`, with concrete rule tests; formats are not proof of a real account.
 - Render selector-based identifier fields from the options in the player ID configuration; this keeps server choices and validation in one place.
 - Games awaiting provider lookup and package data must not inherit another game's packages or enable purchases; this avoids false verification and invented offers.
+- Home game categories use the shared Tabs controls and existing game catalog; this keeps filtering accessible without changing game offers.
