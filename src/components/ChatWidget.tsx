@@ -174,7 +174,7 @@ export function ChatWidget() {
                     onChange={(e) => setDraft(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                     placeholder="Type a message…"
-                    className="h-10 flex-1 rounded-xl border border-input bg-background px-3 text-sm text-foreground outline-none focus:border-brand-400"
+                    className="h-10 flex-1 rounded-xl border border-input bg-card px-3 text-sm text-card-foreground outline-none focus:border-brand-400"
                   />
                   <button
                     type="button"
