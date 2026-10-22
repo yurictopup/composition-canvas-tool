@@ -161,6 +161,6 @@ export const payments = ["ABA KHQR", "Wing", "ACLEDA", "Bakong"];
 
 export const store = {
   name: "Yuric Topup",
-  telegram: "@yuric_topup",
+  telegram: "@Yuricccc",
   hours: "24 Hours",
 };
