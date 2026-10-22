@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { store } from "@/lib/games";
+import { ChatWidget } from "@/components/ChatWidget";
 
 export function SiteChrome({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
@@ -69,6 +70,8 @@ export function SiteChrome({ children }: { children: ReactNode }) {
       <footer id="help" className="border-t border-brand-100/50 py-6 text-center text-sm text-muted-foreground">
         © 2026 {store.name} · Telegram: {store.telegram}
       </footer>
+
+      <ChatWidget />
     </div>
   );
 }
