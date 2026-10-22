@@ -23,10 +23,12 @@
 - [x] Banner shortened (was 520px tall on desktop, now 300px; profile 210px)
 - [x] Home banner resized to the latest reference: compact, centered, 3:1 artwork with side margins
 - [x] Latest banner adjustment: span the game section width following the red-box reference, with games moved below
-- [ ] User to confirm: real Telegram handle (now @yuric_topup), real prices, the "1–3 minutes" claim
+- [x] Real Telegram handle confirmed: @Yuricccc (updated in footer + chat widget)
+- [ ] User to confirm: real prices, the "1–3 minutes" claim, and the chat bot's FAQ answers (currently placeholders I wrote)
 - [x] Add CODM, Wild Rift, Blood Strike, Clash of Clans with game-specific ID fields and artwork
 - [x] Per-game real denominations for all games (MLBB/FF/PUBG/HoK/Magic Chess/CODM/Wild Rift/Blood Strike/COC/Genshin/Star Rail); Roblox stays package-less
 - [ ] Real prices per package — user will supply them; packages show "—" and buying stays disabled until priced
 - [x] Configure game-specific ID fields and honest Check ID unavailable states for all ten games; purchases require real verification
 - [ ] Real account-name Check ID — needs supported providers and credentials; do not treat format checks as verified accounts
 - [ ] Avatar picture for the profile — user has none yet, "YT" placeholder in place
+- [x] Yuric Bot chat widget: iron-bot avatar, sky-blue/white style, FAQ threads (no persistence), Telegram @Yuricccc button; verified in preview
