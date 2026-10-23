@@ -342,7 +342,7 @@ export function ChatWidget({
                 className={`flex-1 overflow-y-auto bg-gradient-to-b from-brand-100/50 to-card px-4 pb-4 pt-4 ${scroll}`}
               >
                 <div className="card-3d rounded-2xl p-4">
-                  <p className="text-lg font-bold leading-8 text-brand-700">សួស្តី! 👋</p>
+                  <p className="font-khmer text-lg leading-8 text-brand-700">សួស្តី! 👋</p>
                   <p className="mt-1 text-sm leading-7 text-muted-foreground">
                     សួរខ្ញុំអំពីហ្គេម កញ្ចប់ ការបង់ប្រាក់ ឬ Player ID បានគ្រប់ពេល
                     ឬជ្រើសសំណួរខាងក្រោម។
@@ -399,7 +399,7 @@ export function ChatWidget({
                           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-100 text-brand-700 transition-colors group-hover:bg-brand-700 group-hover:text-primary-foreground">
                             <FaqIcon className="h-4 w-4" />
                           </span>
-                          <span className="flex-1">{f.q}</span>
+                          <span className="flex-1 font-khmer text-[13px] leading-6">{f.q}</span>
                           <ChevronRight className="h-4 w-4 shrink-0 text-brand-500 transition-transform group-hover:translate-x-0.5" />
                         </button>
                       </li>
