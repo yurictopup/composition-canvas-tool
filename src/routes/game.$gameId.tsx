@@ -74,7 +74,7 @@ function GamePage({ gameId }: { gameId: string }) {
         </div>
 
         <section className="card-3d mt-5 rounded-3xl p-5">
-          <h2 className="mb-4 flex items-center gap-3 font-sans text-lg font-bold">
+          <h2 className="mb-4 flex items-center gap-3 font-khmer text-lg">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">1</span>
             បញ្ចូល Player ID
           </h2>
@@ -108,7 +108,7 @@ function GamePage({ gameId }: { gameId: string }) {
         </section>
 
         <section className="card-3d mt-5 rounded-3xl p-5">
-          <h2 className="mb-4 flex items-center gap-3 font-sans text-lg font-bold">
+          <h2 className="mb-4 flex items-center gap-3 font-khmer text-lg">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">2</span>
             ជ្រើសរើសកញ្ចប់ពេជ្រ
           </h2>
@@ -133,7 +133,7 @@ function GamePage({ gameId }: { gameId: string }) {
         </section>
 
         <section className="card-3d mt-5 rounded-3xl p-5">
-          <h2 className="mb-4 flex items-center gap-3 font-sans text-lg font-bold">
+          <h2 className="mb-4 flex items-center gap-3 font-khmer text-lg">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">3</span>
             ជ្រើសរើសវិធីបង់ប្រាក់
           </h2>
@@ -146,7 +146,7 @@ function GamePage({ gameId }: { gameId: string }) {
         </section>
 
         <aside className="card-3d mt-5 rounded-3xl p-5">
-          <h3 className="font-sans text-lg font-bold">សង្ខេបការបញ្ជាទិញ</h3>
+          <h3 className="font-khmer text-lg">សង្ខេបការបញ្ជាទិញ</h3>
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between"><dt className="text-muted-foreground">Game</dt><dd>{game.name}</dd></div>
             <div className="flex justify-between"><dt className="text-muted-foreground">ID</dt><dd>{uid || "—"}{zone && ` (${zone})`}</dd></div>
