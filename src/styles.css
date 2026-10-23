@@ -265,3 +265,25 @@
   mix-blend-mode: screen;
   pointer-events: none;
 }
+/* BotLogo (Yuric Bot head): motion */
+.yt-bot[data-animated="true"] .yt-bot-float{animation:yt-bot-float 3.2s ease-in-out infinite;transform-origin:60px 60px}
+.yt-bot[data-animated="true"] .yt-bot-tilt{animation:yt-bot-tilt 6.4s ease-in-out infinite;transform-origin:60px 96px}
+.yt-bot[data-animated="true"] .yt-bot-ball{animation:yt-bot-pulse 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.yt-bot[data-animated="true"] .yt-bot-ear{animation:yt-bot-ear 1.6s ease-in-out infinite}
+.yt-bot[data-animated="true"] .yt-bot-eyes{animation:yt-bot-blink 3.2s ease-in-out infinite;transform-origin:60px 62px}
+.yt-bot[data-animated="true"] .yt-bot-mouth{animation:yt-bot-smile 3.2s ease-in-out infinite;transform-origin:60px 75px}
+.yt-bot[data-animated="true"] .yt-bot-sheen{animation:yt-bot-sheen 6.4s ease-in-out infinite}
+.yt-bot[data-animated="true"] .yt-bot-s1{animation:yt-bot-tw 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.yt-bot[data-animated="true"] .yt-bot-s2{animation:yt-bot-tw 3.2s ease-in-out 1.07s infinite;transform-box:fill-box;transform-origin:center}
+.yt-bot[data-animated="true"] .yt-bot-s3{animation:yt-bot-tw 3.2s ease-in-out 2.13s infinite;transform-box:fill-box;transform-origin:center}
+@keyframes yt-bot-float{0%,100%{transform:translateY(1.5px)}50%{transform:translateY(-3px)}}
+@keyframes yt-bot-tilt{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+@keyframes yt-bot-pulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.18);opacity:1}}
+@keyframes yt-bot-ear{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes yt-bot-blink{0%,88%,100%{transform:scaleY(1)}92%{transform:scaleY(.15)}96%{transform:scaleY(1)}}
+@keyframes yt-bot-smile{0%,100%{transform:scaleX(1)}50%{transform:scaleX(1.15)}}
+@keyframes yt-bot-sheen{0%,55%{transform:translateX(-70px)}85%,100%{transform:translateX(70px)}}
+@keyframes yt-bot-tw{0%,100%{opacity:0;transform:scale(.3) rotate(0deg)}50%{opacity:1;transform:scale(1) rotate(90deg)}}
+@media (prefers-reduced-motion: reduce){.yt-bot *{animation:none!important}}
+.yt-bot[data-stars="false"] .yt-bot-s1,.yt-bot[data-stars="false"] .yt-bot-s2,.yt-bot[data-stars="false"] .yt-bot-s3{display:none}
+
