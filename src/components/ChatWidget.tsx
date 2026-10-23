@@ -195,20 +195,22 @@ export function ChatWidget({
 
   return (
     <>
-      {/* launcher */}
+      {/* launcher — no container circle; bot head floats freely */}
       <button
         type="button"
         data-chat-launcher=""
         aria-label={open ? "បិទការជជែក" : "បើកការជជែក"}
         onClick={() => setOpen((v) => !v)}
-        className={`fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full border-2 border-brand-100 shadow-[0_10px_26px_oklch(0.25_0.09_264/0.4)] transition-transform hover:scale-105 ${open ? "bg-card" : "bg-[radial-gradient(circle_at_50%_40%,var(--brand-700),var(--brand-950)_80%)]"}`}
+        className="fixed bottom-4 right-4 z-40 grid h-16 w-16 place-items-center transition-transform hover:scale-105 drop-shadow-[0_8px_22px_oklch(0.25_0.09_264/0.55)]"
       >
         {open ? (
-          <X className="h-6 w-6 text-brand-700" />
+          <span className="grid h-10 w-10 place-items-center rounded-full bg-[radial-gradient(circle_at_50%_40%,var(--brand-700),var(--brand-950)_80%)] shadow-lg ring-2 ring-brand-100/60">
+            <X className="h-5 w-5 text-white" />
+          </span>
         ) : (
           <>
-            <BotLogo size={48} stars={false} title="Yuric Bot" className="-mt-1" />
-            <span className="absolute right-0.5 top-0.5 h-3 w-3 rounded-full border-2 border-card bg-brand-400 shadow-[0_0_8px_oklch(0.72_0.13_252/0.9)]" />
+            <BotLogo size={60} stars animated title="Yuric Bot" />
+            <span className="absolute right-1 top-1 h-3 w-3 rounded-full border-2 border-white/40 bg-brand-400 shadow-[0_0_8px_oklch(0.72_0.13_252/0.9)]" />
           </>
         )}
       </button>
