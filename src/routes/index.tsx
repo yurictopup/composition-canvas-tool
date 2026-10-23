@@ -54,7 +54,7 @@ function Index() {
           <div className="overflow-x-auto pb-3">
             <TabsList aria-label="ជ្រើសរើសហ្គេម" className="h-auto w-max justify-start gap-2 bg-transparent p-0 sm:gap-3">
               {gameTabs.map((tab) => (
-                <TabsTrigger key={tab.id} value={tab.id} className="min-h-10 rounded-lg border border-border bg-secondary px-4 py-2 text-secondary-foreground shadow-sm hover:bg-card data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md">
+                <TabsTrigger key={tab.id} value={tab.id} className={`min-h-10 rounded-lg border border-border bg-secondary px-4 py-2 text-secondary-foreground shadow-sm hover:bg-card data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md ${/[ក-៍]/.test(tab.label) ? "font-khmer" : ""}`}>
                   {tab.label}
                 </TabsTrigger>
               ))}
