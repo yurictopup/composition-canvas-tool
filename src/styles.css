@@ -7,6 +7,7 @@
 @theme inline {
   --font-display: "Orbitron", sans-serif;
   --font-sans: "Kantumruy Pro", "Exo 2", sans-serif;
+  --font-khmer: "Koulen", "Kantumruy Pro", sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
