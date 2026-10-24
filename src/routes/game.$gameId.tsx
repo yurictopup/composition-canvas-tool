@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
-import { findGame, getPackages, payments } from "@/lib/games";
+import { findGame, getPackages, mlbbHotItems, payments } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
@@ -112,21 +112,39 @@ function GamePage({ gameId }: { gameId: string }) {
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">2</span>
             ជ្រើសរើសកញ្ចប់ពេជ្រ
           </h2>
-          {availablePackages.length > 0 ? (
-            <>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {availablePackages.map((p, i) => (
-                  <button key={p.amt} onClick={() => setPkg(i)}
-                    className={`card-3d relative rounded-2xl p-4 text-left transition-transform hover:-translate-y-0.5 ${pkg === i ? "card-3d-active" : ""}`}>
-                    {p.hot && <span className="absolute -top-2 right-2 rounded-full bg-accent px-2 text-[11px] font-bold text-accent-foreground">HOT</span>}
-                    <div className="font-display font-bold">💎 {p.amt}</div>
-                    <div className="text-xs text-muted-foreground">{game.unit}</div>
-                    <div className="mt-2 font-bold text-accent">{p.price !== null ? `$${p.price.toFixed(2)}` : "—"}</div>
-                  </button>
+
+          {gameId === "mlbb" && mlbbHotItems.length > 0 && (
+            <div className="mb-5">
+              <p className="mb-3 flex items-center gap-2 text-sm font-bold text-rose-500">
+                🔥 Hot Items
+              </p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {mlbbHotItems.map((item) => (
+                  <div key={item.label}
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3">
+                    <div>
+                      <div className="text-sm font-bold text-card-foreground">{item.label}</div>
+                      <div className="text-sm font-bold text-rose-500">${item.price.toFixed(2)}</div>
+                    </div>
+                    <img src={item.img} alt={item.label} className="h-12 w-12 shrink-0 rounded-full object-cover" />
+                  </div>
                 ))}
               </div>
-              <p className="mt-3 text-sm text-muted-foreground">Prices not set yet — the Buy button will unlock once the shop sets its prices.</p>
-            </>
+            </div>
+          )}
+
+          {availablePackages.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {availablePackages.map((p, i) => (
+                <button key={p.amt} onClick={() => setPkg(i)}
+                  className={`card-3d relative rounded-2xl p-4 text-left transition-transform hover:-translate-y-0.5 ${pkg === i ? "card-3d-active" : ""}`}>
+                  {p.hot && <span className="absolute -top-2 right-2 rounded-full bg-accent px-2 text-[11px] font-bold text-accent-foreground">HOT</span>}
+                  <div className="font-display font-bold">💎 {p.amt}</div>
+                  <div className="text-xs text-muted-foreground">{game.unit}</div>
+                  <div className="mt-2 font-bold text-accent">{p.price !== null ? `$${p.price.toFixed(2)}` : "—"}</div>
+                </button>
+              ))}
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground">No packages or prices yet.</p>
           )}

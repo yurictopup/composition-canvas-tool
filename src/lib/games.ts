@@ -1,4 +1,8 @@
 import mlbb from "@/assets/mlbb.png.asset.json";
+import mlbbWeeklyPass from "@/assets/mlbb-weekly-pass.png";
+import mlbbWeeklyX3 from "@/assets/mlbb-weekly-x3.png";
+import mlbb165Weekly from "@/assets/mlbb-165-weekly.png";
+import mlbbTwilight from "@/assets/mlbb-twilight.png";
 import freefire from "@/assets/freefire.png.asset.json";
 import roblox from "@/assets/roblox.png.asset.json";
 import magicchess from "@/assets/magicchess.png.asset.json";
@@ -32,7 +36,8 @@ export function findGame(id: string | undefined): Game | undefined {
   return games.find((g) => g.id === id);
 }
 
-export type GamePackage = { amt: string; price: number | null; hot?: boolean };
+export type GamePackage = { amt: string; price: number | null; hot?: boolean; img?: string };
+export type HotItem = { label: string; price: number; img: string };
 
 // Real in-game denominations per game. Prices stay null until the shop
 // provides its real selling prices — unpriced packages cannot be purchased.
@@ -171,6 +176,13 @@ export const gamePackages: Record<string, GamePackage[]> = {
 export function getPackages(gameId: string): GamePackage[] {
   return gamePackages[gameId] ?? [];
 }
+
+export const mlbbHotItems: HotItem[] = [
+  { label: "WeeklyPass", price: 1.59, img: mlbbWeeklyPass },
+  { label: "Weekly X3 [Full Ticket]", price: 4.74, img: mlbbWeeklyX3 },
+  { label: "165 + Weekly [Full Ticket]", price: 3.99, img: mlbb165Weekly },
+  { label: "Twilight", price: 8.99, img: mlbbTwilight },
+];
 
 export const payments = ["ABA KHQR", "Wing", "ACLEDA", "Bakong"];
 
