@@ -39,11 +39,15 @@ export type GamePackage = { amt: string; price: number | null; hot?: boolean };
 export const gamePackages: Record<string, GamePackage[]> = {
   mlbb: [
     { amt: "86", price: 1.29 },
+    { amt: "165", price: 2.45 },
     { amt: "172", price: 2.65 },
-    { amt: "257", price: 3.75 },
-    { amt: "344", price: 4.89 },
+    { amt: "275", price: 3.75 },
+    { amt: "312", price: 4.29 },
+    { amt: "343", price: 4.89 },
+    { amt: "361", price: 4.95 },
     { amt: "429", price: 6.09 },
     { amt: "514", price: 7.19 },
+    { amt: "565", price: 7.69 },
     { amt: "600", price: 8.49 },
     { amt: "706", price: 9.85, hot: true },
     { amt: "878", price: 12.19 },
