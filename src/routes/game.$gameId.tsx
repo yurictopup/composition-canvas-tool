@@ -35,6 +35,7 @@ function GamePage({ gameId }: { gameId: string }) {
   const [zone, setZone] = useState("");
   const [check, setCheck] = useState<{ ok: boolean; msg: string } | null>(null);
   const [pkg, setPkg] = useState<number | null>(null);
+  const [hotPkg, setHotPkg] = useState<number | null>(null);
   const [pay, setPay] = useState(payments[0] ?? "ABA KHQR");
   const [done, setDone] = useState(false);
 
@@ -42,8 +43,14 @@ function GamePage({ gameId }: { gameId: string }) {
 
   const idConfig = getIdConfig(gameId);
   const availablePackages = getPackages(gameId);
-  const selected = pkg !== null ? (availablePackages[pkg] ?? null) : null;
+  const hotItems = gameId === "mlbb" ? mlbbHotItems : [];
+  const selected = hotPkg !== null
+    ? { amt: hotItems[hotPkg]!.label, price: hotItems[hotPkg]!.price }
+    : pkg !== null ? (availablePackages[pkg] ?? null) : null;
   const canBuy = !!check?.ok && !!selected && selected.price !== null;
+
+  function selectPkg(i: number) { setPkg(i); setHotPkg(null); }
+  function selectHot(i: number) { setHotPkg(i); setPkg(null); }
 
   function runCheck() {
     const error = validatePlayerId(gameId, uid, zone);
@@ -113,21 +120,19 @@ function GamePage({ gameId }: { gameId: string }) {
             ជ្រើសរើសកញ្ចប់ពេជ្រ
           </h2>
 
-          {gameId === "mlbb" && mlbbHotItems.length > 0 && (
+          {hotItems.length > 0 && (
             <div className="mb-5">
-              <p className="mb-3 flex items-center gap-2 text-sm font-bold text-rose-500">
-                🔥 Hot Items
-              </p>
+              <p className="mb-3 flex items-center gap-2 text-sm font-bold text-rose-500">🔥 Hot Items</p>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {mlbbHotItems.map((item) => (
-                  <div key={item.label}
-                    className="flex items-center justify-between gap-3 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3">
+                {hotItems.map((item, i) => (
+                  <button key={item.label} onClick={() => selectHot(i)}
+                    className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition-all hover:-translate-y-0.5 ${hotPkg === i ? "border-rose-400 bg-rose-100 ring-2 ring-rose-300 shadow-[0_0_14px_rgba(244,63,94,0.25)]" : "border-rose-100 bg-rose-50"}`}>
                     <div>
-                      <div className="text-sm font-bold text-card-foreground">{item.label}</div>
+                      <div className={`text-sm font-bold ${hotPkg === i ? "text-rose-600" : "text-card-foreground"}`}>{item.label}</div>
                       <div className="text-sm font-bold text-rose-500">${item.price.toFixed(2)}</div>
                     </div>
-                    <img src={item.img} alt={item.label} className="h-12 w-12 shrink-0 rounded-full object-cover" />
-                  </div>
+                    <img src={item.img} alt={item.label} className={`h-12 w-12 shrink-0 rounded-full object-cover transition-transform ${hotPkg === i ? "scale-110" : ""}`} />
+                  </button>
                 ))}
               </div>
             </div>
@@ -136,15 +141,15 @@ function GamePage({ gameId }: { gameId: string }) {
           {availablePackages.length > 0 ? (
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
               {availablePackages.map((p, i) => (
-                <button key={p.amt} onClick={() => setPkg(i)}
-                  className={`relative flex items-center justify-between rounded-2xl border px-4 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${pkg === i ? "border-primary bg-primary/10 ring-2 ring-primary shadow-[0_0_16px_oklch(0.42_0.19_266/0.35)]" : "border-border/60 bg-white"}`}>
+                <button key={p.amt} onClick={() => selectPkg(i)}
+                  className={`relative flex items-center justify-between rounded-2xl border px-4 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${pkg === i && hotPkg === null ? "border-primary bg-primary/10 ring-2 ring-primary shadow-[0_0_16px_oklch(0.42_0.19_266/0.35)]" : "border-border/60 bg-white"}`}>
                   {p.hot && <span className="absolute -top-2 right-2 rounded-full bg-accent px-2 text-[10px] font-bold text-accent-foreground">HOT</span>}
                   <div>
-                    <div className={`text-base font-bold ${pkg === i ? "text-primary" : "text-card-foreground"}`}>{p.amt}</div>
+                    <div className={`text-base font-bold ${pkg === i && hotPkg === null ? "text-primary" : "text-card-foreground"}`}>{p.amt}</div>
                     <div className="text-xs text-muted-foreground">{game.unit}</div>
-                    <div className={`mt-1 text-sm font-bold ${pkg === i ? "text-primary" : "text-primary/70"}`}>{p.price !== null ? `$${p.price.toFixed(2)}` : "—"}</div>
+                    <div className={`mt-1 text-sm font-bold ${pkg === i && hotPkg === null ? "text-primary" : "text-primary/70"}`}>{p.price !== null ? `$${p.price.toFixed(2)}` : "—"}</div>
                   </div>
-                  <span className={`text-2xl transition-transform ${pkg === i ? "scale-125" : ""}`}>💎</span>
+                  <span className={`text-2xl transition-transform ${pkg === i && hotPkg === null ? "scale-125" : ""}`}>💎</span>
                 </button>
               ))}
             </div>
