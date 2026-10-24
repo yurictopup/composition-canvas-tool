@@ -134,14 +134,17 @@ function GamePage({ gameId }: { gameId: string }) {
           )}
 
           {availablePackages.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
               {availablePackages.map((p, i) => (
                 <button key={p.amt} onClick={() => setPkg(i)}
-                  className={`card-3d relative rounded-2xl p-4 text-left transition-transform hover:-translate-y-0.5 ${pkg === i ? "card-3d-active" : ""}`}>
-                  {p.hot && <span className="absolute -top-2 right-2 rounded-full bg-accent px-2 text-[11px] font-bold text-accent-foreground">HOT</span>}
-                  <div className="font-display font-bold">💎 {p.amt}</div>
-                  <div className="text-xs text-muted-foreground">{game.unit}</div>
-                  <div className="mt-2 font-bold text-accent">{p.price !== null ? `$${p.price.toFixed(2)}` : "—"}</div>
+                  className={`relative flex items-center justify-between rounded-2xl border bg-white px-4 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${pkg === i ? "border-primary ring-2 ring-primary/30" : "border-border/60"}`}>
+                  {p.hot && <span className="absolute -top-2 right-2 rounded-full bg-accent px-2 text-[10px] font-bold text-accent-foreground">HOT</span>}
+                  <div>
+                    <div className="text-base font-bold text-card-foreground">{p.amt}</div>
+                    <div className="text-xs text-muted-foreground">{game.unit}</div>
+                    <div className="mt-1 text-sm font-bold text-primary">{p.price !== null ? `$${p.price.toFixed(2)}` : "—"}</div>
+                  </div>
+                  <span className="text-2xl">💎</span>
                 </button>
               ))}
             </div>
