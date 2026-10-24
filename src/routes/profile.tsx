@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
-import banner from "@/assets/banner.png.asset.json";
+import banner from "@/assets/banner-angkor.png";
 import { games, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 
@@ -13,8 +13,8 @@ export const Route = createFileRoute("/profile")({
       { property: "og:description", content: "Yuric Topup shop page — contact and all games." },
       { property: "og:type", content: "profile" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: banner.url },
-      { name: "twitter:image", content: banner.url },
+      { property: "og:image", content: banner },
+      { name: "twitter:image", content: banner },
     ],
   }),
   component: Profile,
@@ -25,7 +25,7 @@ function Profile() {
     <SiteChrome>
       <section className="w-full">
         <div className="tile-clean">
-          <img src={banner.url} alt="Shop banner" width={1920} height={1080}
+          <img src={banner} alt="Shop banner" width={1920} height={1080}
             className="block h-[150px] w-full object-cover sm:h-[210px]" />
         </div>
       </section>

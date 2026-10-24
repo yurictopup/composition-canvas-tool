@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
-import banner from "@/assets/banner-angkor.png.asset.json";
+import banner from "@/assets/banner-angkor.png";
 import mascot from "@/assets/mascot-cut.png";
 import { games } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
@@ -36,8 +36,8 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: banner.url },
-      { name: "twitter:image", content: banner.url },
+      { property: "og:image", content: banner },
+      { name: "twitter:image", content: banner },
     ],
   }),
   component: Index,
@@ -53,7 +53,7 @@ function Index() {
           className="relative block aspect-[3/1] overflow-hidden rounded-lg bg-[radial-gradient(ellipse_at_center,#1e3a8a_0%,#0a1a3f_75%)] sm:aspect-[10/3]"
         >
           <img
-            src={banner.url}
+            src={banner}
             alt="រូបបដាហ្គេម ពេជ្រភ្លឺភ្លឹបភ្ល្លែត"
             width={1280}
             height={725}

@@ -1,33 +1,33 @@
-import mlbb from "@/assets/mlbb.png.asset.json";
+import mlbb from "@/assets/mlbb.png";
 import mlbbWeeklyPass from "@/assets/mlbb-weekly-pass.png";
 import mlbbWeeklyX3 from "@/assets/mlbb-weekly-x3.png";
 import mlbb165Weekly from "@/assets/mlbb-165-weekly.png";
 import mlbbTwilight from "@/assets/mlbb-twilight.png";
-import freefire from "@/assets/freefire.png.asset.json";
-import roblox from "@/assets/roblox.png.asset.json";
-import magicchess from "@/assets/magicchess.png.asset.json";
+import freefire from "@/assets/freefire.png";
+import roblox from "@/assets/roblox.png";
+import magicchess from "@/assets/magicchess.png";
 import pubg from "@/assets/pubg-clean.png";
-import hok from "@/assets/hok.png.asset.json";
-import codm from "@/assets/codm.jpg.asset.json";
-import wildrift from "@/assets/wildrift.jpg.asset.json";
-import bloodstrike from "@/assets/bloodstrike.jpg.asset.json";
-import coc from "@/assets/coc.jpg.asset.json";
-import genshin from "@/assets/genshin.jpg.asset.json";
-import starrail from "@/assets/starrail.jpg.asset.json";
+import hok from "@/assets/hok.png";
+import codm from "@/assets/codm.jpg";
+import wildrift from "@/assets/wildrift.jpg";
+import bloodstrike from "@/assets/bloodstrike.jpg";
+import coc from "@/assets/coc.jpg";
+import genshin from "@/assets/genshin.jpg";
+import starrail from "@/assets/starrail.jpg";
 
 export const games = [
-  { id: "mlbb", name: "Mobile Legends", icon: mlbb.url, unit: "Diamonds", blurb: "Instant MLBB diamond delivery" },
-  { id: "ff", name: "Free Fire", icon: freefire.url, unit: "Diamonds", blurb: "Free Fire diamonds at the best price" },
-  { id: "roblox", name: "Roblox", icon: roblox.url, unit: "Robux", blurb: "Fast Robux delivery" },
-  { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess.url, unit: "Diamonds", blurb: "Instant Magic Chess delivery" },
+  { id: "mlbb", name: "Mobile Legends", icon: mlbb, unit: "Diamonds", blurb: "Instant MLBB diamond delivery" },
+  { id: "ff", name: "Free Fire", icon: freefire, unit: "Diamonds", blurb: "Free Fire diamonds at the best price" },
+  { id: "roblox", name: "Roblox", icon: roblox, unit: "Robux", blurb: "Fast Robux delivery" },
+  { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess, unit: "Diamonds", blurb: "Instant Magic Chess delivery" },
   { id: "pubg", name: "PUBG Mobile", icon: pubg, unit: "UC", blurb: "Fast PUBG UC delivery" },
-  { id: "hok", name: "Honor of Kings", icon: hok.url, unit: "Tokens", blurb: "Tokens HoK ចូលភ្លាម" },
-  { id: "codm", name: "Call of Duty: Mobile", icon: codm.url, unit: "CP", blurb: "Call of Duty: Mobile" },
-  { id: "wildrift", name: "League of Legends: Wild Rift", icon: wildrift.url, unit: "Wild Cores", blurb: "League of Legends: Wild Rift" },
-  { id: "bloodstrike", name: "Blood Strike", icon: bloodstrike.url, unit: "Gold", blurb: "Blood Strike" },
-  { id: "coc", name: "Clash of Clans", icon: coc.url, unit: "Gems", blurb: "Clash of Clans" },
-  { id: "genshin", name: "Genshin Impact", icon: genshin.url, unit: "Genesis Crystals", blurb: "Genshin Impact" },
-  { id: "starrail", name: "Honkai: Star Rail", icon: starrail.url, unit: "Oneiric Shards", blurb: "Honkai: Star Rail" },
+  { id: "hok", name: "Honor of Kings", icon: hok, unit: "Tokens", blurb: "Tokens HoK ចូលភ្លាម" },
+  { id: "codm", name: "Call of Duty: Mobile", icon: codm, unit: "CP", blurb: "Call of Duty: Mobile" },
+  { id: "wildrift", name: "League of Legends: Wild Rift", icon: wildrift, unit: "Wild Cores", blurb: "League of Legends: Wild Rift" },
+  { id: "bloodstrike", name: "Blood Strike", icon: bloodstrike, unit: "Gold", blurb: "Blood Strike" },
+  { id: "coc", name: "Clash of Clans", icon: coc, unit: "Gems", blurb: "Clash of Clans" },
+  { id: "genshin", name: "Genshin Impact", icon: genshin, unit: "Genesis Crystals", blurb: "Genshin Impact" },
+  { id: "starrail", name: "Honkai: Star Rail", icon: starrail, unit: "Oneiric Shards", blurb: "Honkai: Star Rail" },
 ];
 
 export type Game = (typeof games)[number];
