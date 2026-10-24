@@ -184,7 +184,7 @@ export const mlbbHotItems: HotItem[] = [
   { label: "Twilight", price: 8.99, img: mlbbTwilight },
 ];
 
-export const payments = ["ABA KHQR", "Wing", "ACLEDA", "Bakong"];
+export const payments = ["Bakong"];
 
 export const store = {
   name: "Yuric Topup",
