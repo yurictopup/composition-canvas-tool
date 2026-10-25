@@ -162,4 +162,9 @@ export const store = {
   name: "Yuric Topup",
   telegram: "@Yuricccc",
   hours: "24 Hours",
+  ownerEmail: "yurictopup@gmail.com",
 };
+
+export function isOwner(email: string | null | undefined): boolean {
+  return email?.toLowerCase() === store.ownerEmail.toLowerCase();
+}
