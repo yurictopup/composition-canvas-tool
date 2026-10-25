@@ -43,30 +43,17 @@ export type HotItem = { label: string; price: number; img: string };
 // provides its real selling prices — unpriced packages cannot be purchased.
 export const gamePackages: Record<string, GamePackage[]> = {
   mlbb: [
-    { amt: "86", price: 1.29 },
-    { amt: "165", price: 2.45 },
-    { amt: "172", price: 2.65 },
-    { amt: "275", price: 3.75 },
-    { amt: "312", price: 4.29 },
-    { amt: "343", price: 4.89 },
-    { amt: "361", price: 4.95 },
-    { amt: "429", price: 6.09 },
-    { amt: "514", price: 7.19 },
-    { amt: "565", price: 7.69 },
-    { amt: "600", price: 8.49 },
-    { amt: "706", price: 9.85, hot: true },
-    { amt: "878", price: 12.19 },
-    { amt: "1049", price: 14.79 },
-    { amt: "1412", price: 19.59 },
-    { amt: "2195", price: 29.69 },
-    { amt: "2538", price: 34.49 },
-    { amt: "3688", price: 49.5 },
-    { amt: "4394", price: 58.49 },
-    { amt: "5532", price: 73.99 },
-    { amt: "6238", price: 83.49 },
-    { amt: "7727", price: 103.49 },
-    { amt: "9288", price: 124.49 },
-    { amt: "11483", price: 153.49 },
+    { amt: "5", price: 0.11 },
+    { amt: "11 + 1", price: 0.22 },
+    { amt: "22 + 2", price: 0.44 },
+    { amt: "56 + 5", price: 1.09 },
+    { amt: "112 + 10", price: 2.19 },
+    { amt: "223 + 20", price: 4.39 },
+    { amt: "336 + 33", price: 6.59 },
+    { amt: "570 + 66", price: 10.99, hot: true },
+    { amt: "1163 + 156", price: 21.99 },
+    { amt: "2398 + 383", price: 43.99 },
+    { amt: "6042 + 1007", price: 109.99 },
   ],
   ff: [
     { amt: "100", price: 0.99 },
@@ -163,10 +150,10 @@ export function getPackages(gameId: string): GamePackage[] {
 }
 
 export const mlbbHotItems: HotItem[] = [
-  { label: "WeeklyPass", price: 1.59, img: mlbbWeeklyPass },
-  { label: "Weekly X3 [Full Ticket]", price: 4.74, img: mlbbWeeklyX3 },
-  { label: "165 + Weekly [Full Ticket]", price: 3.99, img: mlbb165Weekly },
-  { label: "Twilight", price: 8.99, img: mlbbTwilight },
+  { label: "Weekly Pass", price: 2.29, img: mlbbWeeklyPass },
+  { label: "Weekly Elite Pack", price: 1.09, img: mlbbWeeklyX3 },
+  { label: "Weekly + 223💎", price: 6.59, img: mlbb165Weekly },
+  { label: "Twilight Pass", price: 10.99, img: mlbbTwilight },
 ];
 
 export const payments = ["Bakong"];
