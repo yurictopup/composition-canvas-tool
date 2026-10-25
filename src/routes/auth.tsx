@@ -18,23 +18,39 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+function passwordStrength(pw: string): { score: number; label: string; color: string } {
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (pw.length >= 12) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  if (score <= 1) return { score, label: "Weak", color: "bg-red-500" };
+  if (score <= 2) return { score, label: "Fair", color: "bg-orange-400" };
+  if (score <= 3) return { score, label: "Good", color: "bg-yellow-400" };
+  return { score, label: "Strong", color: "bg-green-500" };
+}
+
 function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const pwStr = mode === "signup" ? passwordStrength(password) : null;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
-      setMsg({ ok: false, text: "Please enter a valid email address." });
+      setMsg({ ok: false, text: "សូមបញ្ចូល email ត្រឹមត្រូវ។" });
       return;
     }
-    if (password.length < 6) {
-      setMsg({ ok: false, text: "Password must be at least 6 characters." });
+    if (password.length < 8) {
+      setMsg({ ok: false, text: "Password ត្រូវការយ៉ាងតិច 8 តួអក្សរ។" });
       return;
     }
     setBusy(true);
@@ -42,7 +58,11 @@ function AuthPage() {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) {
-          setMsg({ ok: false, text: "Incorrect email or password." });
+          if (error.message.includes("rate") || error.message.includes("limit")) {
+            setMsg({ ok: false, text: "ព្យាយាមច្រើនពេក។ សូមរង់ចាំ 1 នាទីទៀត។" });
+          } else {
+            setMsg({ ok: false, text: "Email ឬ Password មិនត្រឹមត្រូវ។" });
+          }
           return;
         }
         navigate({ to: "/" });
@@ -57,7 +77,7 @@ function AuthPage() {
           return;
         }
         if (!data.session) {
-          setMsg({ ok: true, text: "Sign-up complete! Check your email to confirm your account." });
+          setMsg({ ok: true, text: "បង្កើតគណនីបានរួច! សូមពិនិត្យ email ដើម្បី confirm គណនី។" });
           return;
         }
         navigate({ to: "/" });
@@ -71,14 +91,17 @@ function AuthPage() {
     <SiteChrome>
       <main className="mx-auto flex w-full max-w-[480px] flex-1 items-center px-4 py-10 sm:px-6">
         <section className="card-3d w-full rounded-3xl p-6 sm:p-8">
-          <h1 className="text-center font-display text-2xl font-black">
-            {mode === "login" ? "Sign In" : "Sign Up"}
-          </h1>
-          <p className="mt-1 text-center text-sm text-muted-foreground">
-            {mode === "login" ? "Sign in with your email" : "Create a new account with your email"}
-          </p>
+          <div className="mb-6 text-center">
+            <div className="text-3xl mb-2">💎</div>
+            <h1 className="font-display text-2xl font-black">
+              {mode === "login" ? "Sign In" : "Sign Up"}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {mode === "login" ? "ចូលគណនី Yuric Topup" : "បង្កើតគណនីថ្មី"}
+            </p>
+          </div>
 
-          <form onSubmit={submit} className="mt-6 grid gap-4">
+          <form onSubmit={submit} className="grid gap-4">
             <label className="grid gap-2 text-sm font-semibold">
               Email
               <input
@@ -87,20 +110,53 @@ function AuthPage() {
                 onChange={(e) => { setEmail(e.target.value); setMsg(null); }}
                 placeholder="you@example.com"
                 autoComplete="email"
+                required
                 className="rounded-lg border bg-input px-4 py-3 font-normal outline-none focus:border-primary"
               />
             </label>
+
             <label className="grid gap-2 text-sm font-semibold">
               Password
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => { setPassword(e.target.value); setMsg(null); }}
-                placeholder="••••••••"
-                autoComplete={mode === "login" ? "current-password" : "new-password"}
-                className="rounded-lg border bg-input px-4 py-3 font-normal outline-none focus:border-primary"
-              />
+              <div className="relative">
+                <input
+                  type={showPw ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setMsg(null); }}
+                  placeholder="••••••••"
+                  autoComplete={mode === "login" ? "current-password" : "new-password"}
+                  required
+                  minLength={8}
+                  className="w-full rounded-lg border bg-input px-4 py-3 pr-12 font-normal outline-none focus:border-primary"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw(!showPw)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-lg text-muted-foreground hover:text-foreground"
+                  aria-label={showPw ? "Hide password" : "Show password"}
+                >
+                  {showPw ? "🙈" : "👁️"}
+                </button>
+              </div>
             </label>
+
+            {/* Password strength bar — signup only */}
+            {pwStr && password.length > 0 && (
+              <div className="grid gap-1.5">
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className={`h-1.5 flex-1 rounded-full transition-colors ${i <= pwStr.score ? pwStr.color : "bg-muted"}`}
+                    />
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Password: <span className="font-semibold">{pwStr.label}</span>
+                  {pwStr.score < 3 && " — ដាក់ Capital letter, number, ឬ symbol ដើម្បី strong ជាង"}
+                </p>
+              </div>
+            )}
+
             <Button type="submit" disabled={busy} className="h-12 font-display font-bold">
               {busy ? "Processing…" : mode === "login" ? "Sign In" : "Sign Up"}
             </Button>
@@ -112,18 +168,23 @@ function AuthPage() {
             </p>
           )}
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
+          {/* Security note */}
+          <div className="mt-5 rounded-xl bg-muted/50 px-4 py-3 text-xs text-muted-foreground text-center">
+            🔒 ព័ត៌មានរបស់អ្នកមានសុវត្តិភាព — encrypted ដោយ Supabase
+          </div>
+
+          <p className="mt-5 text-center text-sm text-muted-foreground">
+            {mode === "login" ? "គ្មានគណនី?" : "មានគណនីហើយ?"}{" "}
             <button
               type="button"
-              onClick={() => { setMode(mode === "login" ? "signup" : "login"); setMsg(null); }}
+              onClick={() => { setMode(mode === "login" ? "signup" : "login"); setMsg(null); setPassword(""); }}
               className="font-semibold text-primary underline-offset-2 hover:underline"
             >
               {mode === "login" ? "Sign Up" : "Sign In"}
             </button>
           </p>
           <p className="mt-3 text-center text-sm">
-            <Link to="/" className="text-muted-foreground hover:text-foreground">← Back to home</Link>
+            <Link to="/" className="text-muted-foreground hover:text-foreground">← ត្រឡប់ទៅ Home</Link>
           </p>
         </section>
       </main>
