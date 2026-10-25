@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { store } from "@/lib/games";
+import { store, games } from "@/lib/games";
 import { ChatWidget } from "@/components/ChatWidget";
 
 export function SiteChrome({ children }: { children: ReactNode }) {
@@ -69,8 +69,74 @@ export function SiteChrome({ children }: { children: ReactNode }) {
 
       <div className="flex flex-1 flex-col">{children}</div>
 
-      <footer id="help" className="border-t border-brand-100/50 py-6 text-center text-sm text-muted-foreground">
-        © 2026 {store.name} · Telegram: {store.telegram}
+      <footer id="help" className="border-t border-brand-400/20 bg-brand-950/80 mt-8 text-sm text-on-dark-muted">
+        <div className="mx-auto w-full max-w-[1500px] px-4 py-10 sm:px-6">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+
+            {/* Brand */}
+            <div>
+              <div className="font-display text-xl font-black text-glow mb-2">
+                💎 YURIC<span className="text-brand-400"> TOPUP</span>
+              </div>
+              <p className="text-xs text-on-dark-muted leading-relaxed mb-3">
+                ផ្គត់ផ្គង់ diamond លឿន · ថ្លៃថោក · មាន 24 ម៉ោង
+              </p>
+              <ul className="space-y-1 text-xs">
+                <li className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-green-400 inline-block" /> 24/7 Customer Support</li>
+                <li className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-blue-400 inline-block" /> Instant Delivery</li>
+              </ul>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="font-bold text-on-dark mb-3">Quick Links</h3>
+              <ul className="space-y-2">
+                <li><Link to="/" className="hover:text-on-dark transition-colors">Home</Link></li>
+                <li><Link to="/profile" className="hover:text-on-dark transition-colors">Transaction History</Link></li>
+                <li><a href={`https://t.me/${store.telegram.replace("@","")}`} target="_blank" rel="noopener noreferrer" className="hover:text-on-dark transition-colors">Track Order</a></li>
+              </ul>
+            </div>
+
+            {/* Categories + Follow Us */}
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-bold text-on-dark mb-3">Categories</h3>
+                <ul className="space-y-2">
+                  <li><Link to="/" hash="games" className="hover:text-on-dark transition-colors">Hot 🔥</Link></li>
+                  {games.slice(0, 6).map((g) => (
+                    <li key={g.id}>
+                      <Link to="/game/$gameId" params={{ gameId: g.id }} className="hover:text-on-dark transition-colors">
+                        {g.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-bold text-on-dark mb-3">Follow Us</h3>
+                <ul className="space-y-3">
+                  <li>
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-on-dark transition-colors">
+                      <span className="grid h-8 w-8 place-items-center rounded-full bg-brand-800 text-base">f</span>
+                      Facebook
+                    </a>
+                  </li>
+                  <li>
+                    <a href={`https://t.me/${store.telegram.replace("@","")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-on-dark transition-colors">
+                      <span className="grid h-8 w-8 place-items-center rounded-full bg-brand-800 text-base">✈</span>
+                      Telegram
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="mt-8 border-t border-brand-400/20 pt-5 text-center text-xs text-on-dark-muted">
+            © 2026 {store.name} · All rights reserved
+          </div>
+        </div>
       </footer>
 
       <ChatWidget />
