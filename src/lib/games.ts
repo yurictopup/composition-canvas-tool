@@ -14,6 +14,12 @@ import bloodstrike from "@/assets/bloodstrike.jpg";
 import coc from "@/assets/coc.jpg";
 import genshin from "@/assets/genshin.jpg";
 import starrail from "@/assets/starrail.jpg";
+import valorant from "@/assets/valorant.svg";
+import deltaforce from "@/assets/deltaforce.svg";
+import arenabreakout from "@/assets/arenabreakout.svg";
+import brawlstars from "@/assets/brawlstars.svg";
+import clashroyale from "@/assets/clashroyale.svg";
+import zzz from "@/assets/zzz.svg";
 
 export const games = [
   { id: "mlbb", name: "Mobile Legends", icon: mlbb, unit: "Diamonds", blurb: "Instant MLBB diamond delivery" },
@@ -28,6 +34,12 @@ export const games = [
   { id: "coc", name: "Clash of Clans", icon: coc, unit: "Gems", blurb: "Clash of Clans" },
   { id: "genshin", name: "Genshin Impact", icon: genshin, unit: "Genesis Crystals", blurb: "Genshin Impact" },
   { id: "starrail", name: "Honkai: Star Rail", icon: starrail, unit: "Oneiric Shards", blurb: "Honkai: Star Rail" },
+  { id: "valorant", name: "Valorant", icon: valorant, unit: "VP", blurb: "Valorant" },
+  { id: "deltaforce", name: "Delta Force", icon: deltaforce, unit: "Delta Coins", blurb: "Delta Force" },
+  { id: "arenabreakout", name: "Arena Breakout", icon: arenabreakout, unit: "Bonds", blurb: "Arena Breakout" },
+  { id: "brawlstars", name: "Brawl Stars", icon: brawlstars, unit: "Gems", blurb: "Brawl Stars" },
+  { id: "clashroyale", name: "Clash Royale", icon: clashroyale, unit: "Gems", blurb: "Clash Royale" },
+  { id: "zzz", name: "Zenless Zone Zero", icon: zzz, unit: "Monochrome", blurb: "Zenless Zone Zero" },
 ];
 
 export type Game = (typeof games)[number];
@@ -135,6 +147,55 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "6480 + 1600", price: 99.99 },
   ],
   starrail: [
+    { amt: "60", price: 0.99 },
+    { amt: "300 + 30", price: 4.99 },
+    { amt: "980 + 110", price: 14.99 },
+    { amt: "1980 + 260", price: 29.99 },
+    { amt: "3280 + 600", price: 49.99, hot: true },
+    { amt: "6480 + 1600", price: 99.99 },
+  ],
+  valorant: [
+    { amt: "475", price: 4.99 },
+    { amt: "1000", price: 9.99 },
+    { amt: "2050", price: 19.99, hot: true },
+    { amt: "3650", price: 34.99 },
+    { amt: "5350", price: 49.99 },
+    { amt: "11000", price: 99.99 },
+  ],
+  deltaforce: [
+    { amt: "60", price: 0.99 },
+    { amt: "300 + 36", price: 4.99 },
+    { amt: "680 + 90", price: 9.99, hot: true },
+    { amt: "1280 + 190", price: 19.99 },
+    { amt: "1980 + 340", price: 29.99 },
+    { amt: "3280 + 600", price: 49.99 },
+    { amt: "6480 + 1300", price: 99.99 },
+  ],
+  arenabreakout: [
+    { amt: "60", price: 0.99 },
+    { amt: "310", price: 4.99 },
+    { amt: "630", price: 9.99, hot: true },
+    { amt: "1580", price: 24.99 },
+    { amt: "3200", price: 49.99 },
+    { amt: "6500", price: 99.99 },
+  ],
+  brawlstars: [
+    { amt: "30", price: 1.99 },
+    { amt: "80", price: 4.99 },
+    { amt: "170", price: 9.99, hot: true },
+    { amt: "360", price: 19.99 },
+    { amt: "950", price: 49.99 },
+    { amt: "2000", price: 99.99 },
+  ],
+  clashroyale: [
+    { amt: "80", price: 0.99 },
+    { amt: "500", price: 4.99 },
+    { amt: "1200", price: 9.99, hot: true },
+    { amt: "2500", price: 19.99 },
+    { amt: "6500", price: 49.99 },
+    { amt: "14000", price: 99.99 },
+  ],
+  zzz: [
     { amt: "60", price: 0.99 },
     { amt: "300 + 30", price: 4.99 },
     { amt: "980 + 110", price: 14.99 },

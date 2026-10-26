@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c6f432"/><stop offset="1" stop-color="#111827"/></linearGradient>
+    <radialGradient id="h" cx="0.3" cy="0.2" r="0.8"><stop offset="0" stop-color="#fff" stop-opacity="0.35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="256" height="256" fill="url(#g)"/>
+  <rect width="256" height="256" fill="url(#h)"/>
+  <path d="M0 196 L256 150 L256 256 L0 256 Z" fill="#000" opacity="0.18"/>
+  <text textLength="132" lengthAdjust="spacingAndGlyphs" x="128" y="132" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="66" letter-spacing="-2" fill="#111827" stroke="#000" stroke-opacity="0.25" stroke-width="2">ZZZ</text>
+  <text textLength="176" lengthAdjust="spacingAndGlyphs" x="128" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="30"  fill="#111827" opacity="0.9">ZENLESS</text>
+</svg>
