@@ -16,6 +16,7 @@ export default defineConfig({
     cloudflare: {
       // Cloudflare Workers Builds runs `wrangler preview` for non-main branches,
       // which requires a `previews` block in the generated wrangler.json.
+      // @ts-expect-error nitro reads `wrangler` at build time, but its types don't list it yet.
       wrangler: { previews: {} },
     },
   },
