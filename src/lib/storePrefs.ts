@@ -116,8 +116,8 @@ const KM: Record<string, string> = {
   "Place Order": "បញ្ជាទិញ",
   "Processing…": "កំពុងដំណើរការ…",
   "Check your Player ID first to order": "សូមពិនិត្យ Player ID ជាមុន ដើម្បីបញ្ជាទិញ",
-  "Roblox uses Gift Cards — Robux cannot be topped up directly by User ID.":
-    "Roblox ប្រើ Gift Card — មិនអាចបញ្ចូល Robux តាម User ID ផ្ទាល់បានទេ។",
+  "We send Robux to this Roblox username. We never ask for your password.":
+    "យើងផ្ញើ Robux ទៅឈ្មោះ Roblox នេះ។ យើងមិនសុំលេខសម្ងាត់របស់អ្នកទេ។",
 };
 
 export function translate(l: StoreLang, s: string) {

@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
+import { CurrencyIcon } from "@/components/CurrencyIcon";
 import { findGame, getPackages, mlbbHotItems, payments, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { useStorePrefs } from "@/lib/storePrefs";
@@ -261,7 +262,7 @@ function GamePage({ gameId }: { gameId: string }) {
             </p>
           )}
           {gameId === "roblox" && (
-            <p className="mt-3 text-sm text-muted-foreground">{t("Roblox uses Gift Cards — Robux cannot be topped up directly by User ID.")}</p>
+            <p className="mt-3 text-sm text-muted-foreground">{t("We send Robux to this Roblox username. We never ask for your password.")}</p>
           )}
         </section>
 
@@ -303,7 +304,7 @@ function GamePage({ gameId }: { gameId: string }) {
                       {p.price !== null ? `$${p.price.toFixed(2)}` : "—"}
                     </div>
                   </div>
-                  <span className={`text-2xl transition-transform ${pkg === i && hotPkg === null ? "scale-125" : ""}`}>💎</span>
+                  <CurrencyIcon gameId={game.id} className={`h-9 w-9 shrink-0 transition-transform ${pkg === i && hotPkg === null ? "scale-125" : ""}`} />
                 </button>
               ))}
             </div>

@@ -229,7 +229,7 @@ export function answer(
   // Roblox works differently from every other game.
   if (game?.id === "roblox") {
     return {
-      text: "Roblox មិនអាចបញ្ចូល Robux ដោយផ្ទាល់តាម User ID បានទេ។ Robux ត្រូវទិញតាម Gift Card ឬហាងផ្លូវការរបស់ Roblox។ សូមសួរ Admin តាម Telegram ថាហាងមាន Gift Card ឬអត់។",
+      text: "យើងលក់ Robux 80, 500, 1000 និង 2000។ សូមបញ្ចូលឈ្មោះ Roblox (Username) ចុច Check ID ហើយបង់ប្រាក់។ យើងមិនសុំលេខសម្ងាត់ទេ។ មានសំណួរ សូមសួរ Admin តាម Telegram។",
       actions: [telegramAction],
       suggestions: ["ហ្គេមអ្វីខ្លះ?", "បង់ប្រាក់តាមអ្វី?"],
     };

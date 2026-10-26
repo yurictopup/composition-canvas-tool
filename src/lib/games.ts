@@ -203,8 +203,13 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "3280 + 600", price: 49.99, hot: true },
     { amt: "6480 + 1600", price: 99.99 },
   ],
-  // Roblox sells via Gift Card / official store — no direct ID top-up packages.
-  roblox: [],
+  // Robux are sent by the team to the buyer's Roblox username.
+  roblox: [
+    { amt: "80", price: 0.89 },
+    { amt: "500", price: 4.45 },
+    { amt: "1000", price: 8.89, hot: true },
+    { amt: "2000", price: 17.79 },
+  ],
 };
 
 export function getPackages(gameId: string): GamePackage[] {
