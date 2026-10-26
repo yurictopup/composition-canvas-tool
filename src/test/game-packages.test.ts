@@ -4,32 +4,63 @@ import { gamePackages, getPackages } from "@/lib/games";
 describe("Per-game packages", () => {
   it("MLBB lists real diamond denominations", () => {
     expect(getPackages("mlbb").map((p) => p.amt)).toEqual([
-      "86", "172", "257", "344", "514", "706", "1412", "2195", "3688",
+      "5",
+      "11 + 1",
+      "22 + 2",
+      "56 + 5",
+      "112 + 10",
+      "223 + 20",
+      "336 + 33",
+      "570 + 66",
+      "1163 + 156",
+      "2398 + 383",
+      "6042 + 1007",
     ]);
   });
 
   it("Free Fire lists real diamond denominations", () => {
     expect(getPackages("ff").map((p) => p.amt)).toEqual([
-      "50", "115", "240", "355", "480", "505", "610", "850", "1080", "1240", "2530",
+      "100",
+      "310",
+      "520",
+      "1080 + 108",
+      "2200 + 220",
+      "5600 + 560",
     ]);
   });
 
   it("PUBG lists real UC denominations", () => {
     expect(getPackages("pubg").map((p) => p.amt)).toEqual([
-      "60", "120", "180", "325", "660", "720", "985", "1800", "3850", "8100",
+      "60",
+      "325 + 25",
+      "660 + 60",
+      "1800 + 300",
+      "3850",
+      "8100",
     ]);
   });
 
   it("Honor of Kings lists real token denominations", () => {
     expect(getPackages("hok").map((p) => p.amt)).toEqual([
-      "16", "80", "240", "400", "560", "800", "1600", "2400", "4000", "8000",
+      "80",
+      "240",
+      "400",
+      "800",
+      "1200",
+      "2400",
+      "4000 + 180",
     ]);
   });
 
   it("Genshin and Star Rail list bonus-inclusive denominations", () => {
     for (const id of ["genshin", "starrail"]) {
       expect(getPackages(id).map((p) => p.amt)).toEqual([
-        "60", "300 + 30", "980 + 110", "1980 + 260", "3280 + 600", "6480 + 1600",
+        "60",
+        "300 + 30",
+        "980 + 110",
+        "1980 + 260",
+        "3280 + 600",
+        "6480 + 1600",
       ]);
     }
   });

@@ -109,7 +109,7 @@ function GamePage({ gameId }: { gameId: string }) {
   }
 
   async function handleBuy() {
-    if (!canBuy || !selected || selected.price === null) return;
+    if (!game || !canBuy || !selected || selected.price === null) return;
     setBusy(true);
     setOrderErr(null);
 
@@ -137,8 +137,9 @@ function GamePage({ gameId }: { gameId: string }) {
       setOrderId(data.id);
       // The database sets the final price; show what was actually charged.
       setPaidPrice(Number(data.price_usd));
-    } catch (e: any) {
-      setOrderErr(e.message ?? "Order failed. Please try again.");
+    } catch (e) {
+      const message = (e as { message?: string } | null)?.message;
+      setOrderErr(message ?? "Order failed. Please try again.");
     } finally {
       setBusy(false);
     }
