@@ -100,7 +100,9 @@ function GamePage({ gameId }: { gameId: string }) {
       const result = await lookupPlayer({ data: { gameId, primary: uid, secondary: zone || undefined } });
       if (result.status === "found") next = { ok: true, msg: `Nickname: ${result.name}` };
       else if (result.status === "not_found") next = { ok: false, msg: "Player not found. Please check your ID." };
-      else if (result.status === "unsupported") next = { ok: false, msg: "Account name lookup is not available yet." };
+      // No supplier name check for this game yet: a well-formed ID may still
+      // order, and the owner delivers it by hand from /admin.
+      else if (result.status === "unsupported") next = { ok: true, msg: `ID ${uid.trim()} — please double-check it before paying.` };
       else next = { ok: false, msg: "Name check is busy right now. Please try again." };
     } catch {
       next = { ok: false, msg: "Name check is busy right now. Please try again." };

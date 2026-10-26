@@ -11,6 +11,7 @@
 
 - Keep game-specific identifier configuration and format validation in `src/lib/player-id.ts`, with concrete rule tests; formats are not proof of a real account.
 - Render selector-based identifier fields from the options in the player ID configuration; this keeps server choices and validation in one place.
-- Games awaiting provider lookup and package data must not inherit another game's packages or enable purchases; this avoids false verification and invented offers.
+- Games without package data must not inherit another game's packages or enable purchases; this avoids invented offers.
+- When no supplier name check is set up for a game (lookup `unsupported`), a well-formed ID may order and the owner delivers by hand from /admin; the page must not claim the account was verified. Supplier errors (`unavailable`) still block buying.
 - Home game categories use the shared Tabs controls and existing game catalog; this keeps filtering accessible without changing game offers.
 - Account-name lookups run only on the server (`src/lib/player-lookup.functions.ts`) with the supplier token in a secret; supplier errors or empty answers must never count as a verified account.
