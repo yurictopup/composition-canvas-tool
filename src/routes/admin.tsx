@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
-  Crown,
   LayoutDashboard,
   Menu,
   RefreshCw,
@@ -149,16 +148,15 @@ function AdminPage() {
 
       {/* ── Vertical menu ── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col bg-white shadow-[0_2px_8px_rgb(47_43_61_/_0.12)] transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 vx-side flex w-[260px] flex-col transition-transform lg:translate-x-0 ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--vx-primary)] text-white">
-              <Crown size={18} />
+            <span className="font-display text-lg font-black text-white text-glow">
+              💎 YURIC<span className="text-brand-400"> TOPUP</span>
             </span>
-            <span className="text-[22px] font-bold tracking-tight text-[var(--vx-heading)]">Yuric Topup</span>
           </div>
           <button className="lg:hidden" onClick={() => setMenuOpen(false)} aria-label="Close menu">
             <X size={20} />
@@ -176,7 +174,7 @@ function AdminPage() {
                     key={n.id}
                     onClick={() => openTab(n.id)}
                     className={`mb-1 flex w-full items-center gap-3 rounded-md px-4 py-2 text-[15px] transition-colors ${
-                      tab === n.id ? "vx-nav-active" : "text-[var(--vx-heading)] hover:bg-[#f3f2f4]"
+                      tab === n.id ? "vx-nav-active" : "text-[var(--vx-muted)] hover:bg-white/10 hover:text-white"
                     }`}
                   >
                     {n.icon}
@@ -211,7 +209,7 @@ function AdminPage() {
         <div className="px-4 pb-5">
           <Link
             to="/"
-            className="flex items-center gap-3 rounded-md px-4 py-2 text-[15px] text-[var(--vx-heading)] hover:bg-[#f3f2f4]"
+            className="flex items-center gap-3 rounded-md px-4 py-2 text-[15px] text-[var(--vx-muted)] hover:bg-white/10 hover:text-white"
           >
             <ArrowLeft size={20} />
             Back to Store
@@ -247,7 +245,7 @@ function AdminPage() {
             <button
               onClick={loadData}
               title="Refresh"
-              className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--vx-heading)] hover:bg-[#f3f2f4]"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--vx-heading)] hover:bg-[var(--vx-hover)]"
             >
               <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
             </button>
@@ -322,7 +320,7 @@ function AdminPage() {
                         </thead>
                         <tbody className="divide-y divide-[var(--vx-border)]">
                           {shownOrders.map((o) => (
-                            <tr key={o.id} className="transition-colors hover:bg-[#f8f7fa]">
+                            <tr key={o.id} className="transition-colors hover:bg-[var(--vx-hover)]">
                               <td className="px-4 py-3 text-xs font-medium text-[var(--vx-primary)]">#{o.id.slice(0, 8).toUpperCase()}</td>
                               <td className="px-4 py-3 max-w-[160px] truncate text-xs">{o.user_email}</td>
                               <td className="px-4 py-3 font-medium text-[var(--vx-heading)]">{o.game_name}</td>
@@ -388,7 +386,7 @@ function AdminPage() {
                             const spent = userOrders.filter(o => o.status === "completed").reduce((s, o) => s + Number(o.price_usd), 0);
                             const last = userOrders[0]?.created_at;
                             return (
-                              <tr key={email} className="transition-colors hover:bg-[#f8f7fa]">
+                              <tr key={email} className="transition-colors hover:bg-[var(--vx-hover)]">
                                 <td className="px-6 py-3">
                                   <div className="flex items-center gap-3">
                                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--vx-primary-soft)] text-xs font-semibold uppercase text-[var(--vx-primary)]">
@@ -453,7 +451,7 @@ function AdminPage() {
                           </thead>
                           <tbody className="divide-y divide-[var(--vx-border)]">
                             {completedOrders.map((o) => (
-                              <tr key={o.id} className="hover:bg-[#f8f7fa]">
+                              <tr key={o.id} className="hover:bg-[var(--vx-hover)]">
                                 <td className="px-6 py-3 text-xs text-[var(--vx-muted)]">{fmtDate(o.created_at)}</td>
                                 <td className="px-6 py-3 text-xs">{o.user_email}</td>
                                 <td className="px-6 py-3">{o.game_name} — {o.package_amt}</td>
