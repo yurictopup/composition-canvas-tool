@@ -32,7 +32,16 @@ export function parseOfferIds(raw: string | undefined): Record<string, number> {
   }
 }
 
-async function post(
+export class GamesDropError extends Error {
+  constructor(
+    message: string,
+    readonly code: string | null,
+  ) {
+    super(message);
+  }
+}
+
+export async function gamesDropPost(
   fetchImpl: Fetch,
   token: string,
   path: string,
@@ -44,7 +53,18 @@ async function post(
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
-  if (!res.ok) throw new Error(`GamesDrop ${path} returned HTTP ${res.status}`);
+  if (!res.ok) {
+    const detail = (await res.json().catch(() => null)) as {
+      code?: unknown;
+      message?: unknown;
+    } | null;
+    const code = typeof detail?.code === "string" ? detail.code : null;
+    const message = typeof detail?.message === "string" ? detail.message : "";
+    throw new GamesDropError(
+      `GamesDrop ${path} returned HTTP ${res.status}${code ? ` ${code}` : ""}${message ? `: ${message}` : ""}`,
+      code,
+    );
+  }
   return res.json();
 }
 
@@ -56,7 +76,7 @@ async function resolveServer(
   offerId: number,
   label: string,
 ): Promise<string | null> {
-  const servers = await post(fetchImpl, token, "/api/v1/partner/product-offer/servers", {
+  const servers = await gamesDropPost(fetchImpl, token, "/api/v1/partner/product-offer/servers", {
     offerId,
   });
   if (!servers || typeof servers !== "object") return null;
@@ -65,6 +85,22 @@ async function resolveServer(
     if (name.trim().toLowerCase() === wanted && typeof value === "string") return value;
   }
   return null;
+}
+
+/** The player fields GamesDrop expects for one of our games; null if the server isn't offered. */
+export async function gamesDropTarget(
+  input: LookupInput,
+  opts: { fetchImpl: Fetch; token: string; offerId: number; usesServerPicker: boolean },
+): Promise<{ gameUserId: string; gameServerId?: string } | null> {
+  const primary = input.primary.trim();
+  const secondary = input.secondary?.trim() ?? "";
+  if (input.gameId === "wildrift")
+    return { gameUserId: `${primary}#${secondary.replace(/^#/, "")}` };
+  if (opts.usesServerPicker && secondary) {
+    const server = await resolveServer(opts.fetchImpl, opts.token, opts.offerId, secondary);
+    return server ? { gameUserId: primary, gameServerId: server } : null;
+  }
+  return secondary ? { gameUserId: primary, gameServerId: secondary } : { gameUserId: primary };
 }
 
 export async function lookupWithGamesDrop(
@@ -79,25 +115,19 @@ export async function lookupWithGamesDrop(
   const offerId = opts.offerIds[input.gameId];
   if (!opts.token || !offerId) return { status: "unsupported" };
   const fetchImpl = opts.fetchImpl ?? fetch;
-  const primary = input.primary.trim();
-  const secondary = input.secondary?.trim() ?? "";
 
   try {
-    let gameUserId = primary;
-    let gameServerId: string | undefined = secondary || undefined;
-    if (input.gameId === "wildrift") {
-      gameUserId = `${primary}#${secondary.replace(/^#/, "")}`;
-      gameServerId = undefined;
-    } else if (opts.usesServerPicker && secondary) {
-      const server = await resolveServer(fetchImpl, opts.token, offerId, secondary);
-      if (!server) return { status: "unavailable" };
-      gameServerId = server;
-    }
-
-    const data = (await post(fetchImpl, opts.token, "/api/v1/offers/check-game-data", {
+    const target = await gamesDropTarget(input, {
+      fetchImpl,
+      token: opts.token,
       offerId,
-      gameUserId,
-      ...(gameServerId ? { gameServerId } : {}),
+      usesServerPicker: opts.usesServerPicker,
+    });
+    if (!target) return { status: "unavailable" };
+
+    const data = (await gamesDropPost(fetchImpl, opts.token, "/api/v1/offers/check-game-data", {
+      offerId,
+      ...target,
     })) as { status?: unknown; gameUserLogin?: unknown };
 
     if (data.status === "VALID") {

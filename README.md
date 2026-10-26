@@ -33,3 +33,7 @@ Check ID looks up the in-game name through the [GamesDrop partner API](https://g
 - `GAMESDROP_OFFER_IDS`: JSON mapping game ids to GamesDrop offer ids (`offerGroupId` from `/api/v1/offers/sync`), e.g. `{"mlbb":1001,"ff":2002}`.
 
 Games missing from `GAMESDROP_OFFER_IDS` keep saying the lookup is not available, and buying stays disabled for them. Offer `999` is GamesDrop's test offer (the docs say its validation always answers VALID), so `{"mlbb":999}` can be used to try the connection before real offers are mapped.
+
+## Automatic delivery (GamesDrop)
+
+Each package can be linked to a GamesDrop offer in **/admin → Prices** (use "Search GamesDrop" to find offer IDs). Paid orders for linked packages get a **🚀 Deliver** button in **/admin → Orders**, which buys the package from your GamesDrop balance and tops up the player. The order id is sent as GamesDrop's `transactionId`, so the same order is never bought twice. Linked offers also turn on the name check, so `GAMESDROP_OFFER_IDS` is optional. Run `supabase/migrations/20261026100000_gamesdrop_delivery.sql` after the secure-order migration.

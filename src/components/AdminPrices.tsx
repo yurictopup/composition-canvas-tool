@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { games, getPackages, mlbbHotItems } from "@/lib/games";
 import { fetchPrices, packageKey, type PriceMap } from "@/lib/prices";
+import { GamesDropOfferSearch } from "@/components/GamesDropOfferSearch";
 
 // Owner-only price editor. Each row is one package from games.ts; saving
 // writes it to product_prices, which the database charges and the shop shows.
@@ -27,11 +28,62 @@ export function AdminPrices() {
   const [saving, setSaving] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [gameFilter, setGameFilter] = useState(games[0]!.id);
+  // GamesDrop offer per package, used for automatic delivery.
+  const [offers, setOffers] = useState<Record<string, number>>({});
+  const [offerDrafts, setOfferDrafts] = useState<Record<string, string>>({});
 
   async function load() {
     const map = await fetchPrices();
     setLoadErr(!map);
     setPrices(map);
+    const { data } = await supabase
+      .from("supplier_offers")
+      .select("game_id, package_amt, gamesdrop_offer_id");
+    const next: Record<string, number> = {};
+    for (const row of (data ?? []) as unknown as {
+      game_id: string;
+      package_amt: string;
+      gamesdrop_offer_id: number;
+    }[]) {
+      next[`${row.game_id}|${row.package_amt}`] = row.gamesdrop_offer_id;
+    }
+    setOffers(next);
+  }
+
+  async function saveOffer(row: Row) {
+    const id = `${row.gameId}|${row.key}`;
+    const text = (offerDrafts[id] ?? "").trim();
+    const offerId = Number(text);
+    if (text && (!Number.isInteger(offerId) || offerId <= 0)) {
+      setMsg(`⚠️ ${row.key}: the GamesDrop offer ID is a whole number.`);
+      return;
+    }
+    setSaving(id);
+    setMsg(null);
+    const { error } = text
+      ? await supabase.from("supplier_offers").upsert({
+          game_id: row.gameId,
+          package_amt: row.key,
+          gamesdrop_offer_id: offerId,
+          updated_at: new Date().toISOString(),
+        })
+      : await supabase
+          .from("supplier_offers")
+          .delete()
+          .eq("game_id", row.gameId)
+          .eq("package_amt", row.key);
+    if (error) {
+      setMsg(`⚠️ ${row.key}: ${error.message}`);
+    } else {
+      setMsg(
+        text
+          ? `✅ ${row.key} delivers with GamesDrop offer ${offerId}`
+          : `✅ ${row.key}: GamesDrop offer removed`,
+      );
+      setOfferDrafts(({ [id]: _, ...rest }) => rest);
+      await load();
+    }
+    setSaving(null);
   }
 
   useEffect(() => {
@@ -76,6 +128,8 @@ export function AdminPrices() {
         away. Switch a package off to hide it from sale.
       </div>
 
+      <GamesDropOfferSearch />
+
       {loadErr && (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           Couldn't read the price table. Make sure the product_prices table exists in Supabase.
@@ -111,6 +165,7 @@ export function AdminPrices() {
                 <th className="px-4 py-3 font-semibold">Package</th>
                 <th className="px-4 py-3 font-semibold">Price (USD)</th>
                 <th className="px-4 py-3 font-semibold">On sale</th>
+                <th className="px-4 py-3 font-semibold">GamesDrop offer</th>
                 <th className="px-4 py-3 font-semibold"></th>
               </tr>
             </thead>
@@ -150,6 +205,24 @@ export function AdminPrices() {
                       >
                         {active ? "On" : current ? "Off" : "Not listed"}
                       </button>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1">
+                        <input
+                          inputMode="numeric"
+                          value={offerDrafts[id] ?? (offers[id] ? String(offers[id]) : "")}
+                          placeholder="Offer ID"
+                          onChange={(e) => setOfferDrafts((d) => ({ ...d, [id]: e.target.value }))}
+                          className="w-24 rounded-lg border border-gray-200 px-2 py-1 outline-none focus:border-[#1a0a2e]"
+                        />
+                        <button
+                          disabled={saving === id || offerDrafts[id] === undefined}
+                          onClick={() => saveOffer(row)}
+                          className="rounded-lg border border-gray-200 px-2 py-1 text-xs font-semibold disabled:opacity-30"
+                        >
+                          Set
+                        </button>
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button

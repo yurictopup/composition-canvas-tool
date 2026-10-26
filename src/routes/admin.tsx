@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteChrome } from "@/components/SiteChrome";
 import { isOwner } from "@/lib/games";
 import { AdminPrices } from "@/components/AdminPrices";
+import { DeliveryCell } from "@/components/AdminDelivery";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Yuric Topup" }] }),
@@ -21,6 +22,8 @@ type Order = {
   status: string;
   payment: string;
   created_at: string;
+  supplier_order_id?: string | null;
+  supplier_status?: string | null;
 };
 
 const STATUS_COLOR: Record<string, string> = {
@@ -346,6 +349,7 @@ function AdminPage() {
                             <th className="px-4 py-3 font-semibold">Status</th>
                             <th className="px-4 py-3 font-semibold">Date</th>
                             <th className="px-4 py-3 font-semibold">Update</th>
+                            <th className="px-4 py-3 font-semibold">Delivery</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -376,6 +380,9 @@ function AdminPage() {
                                   <option value="failed">failed</option>
                                   <option value="refunded">refunded</option>
                                 </select>
+                              </td>
+                              <td className="px-4 py-3">
+                                <DeliveryCell order={o} onChanged={loadData} />
                               </td>
                             </tr>
                           ))}
