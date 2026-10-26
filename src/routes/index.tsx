@@ -52,7 +52,7 @@ function Index() {
         <Link
           to="/"
           hash="games"
-          className="relative block aspect-[3/1] overflow-hidden rounded-lg bg-[radial-gradient(ellipse_at_center,#1e3a8a_0%,#0a1a3f_75%)] sm:aspect-[10/3]"
+          className="relative block aspect-[3/1] overflow-hidden rounded-lg bg-[radial-gradient(ellipse_at_center,#1e3a8a_0%,#0a1a3f_75%)] sm:aspect-[10/3] lg:aspect-[4/1]"
         >
           <img
             src={banner}
@@ -109,7 +109,7 @@ function Index() {
               value={tab.id}
               className="mt-1 min-h-52 rounded-lg border border-border bg-card p-4 text-card-foreground sm:p-6"
             >
-              <div className="grid grid-cols-3 gap-x-4 gap-y-6 sm:grid-cols-6 sm:gap-x-5">
+              <div className="grid grid-cols-3 gap-x-4 gap-y-6 sm:grid-cols-6 sm:gap-x-5 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12">
                 {tab.items.map((g, i) => (
                   <Link
                     key={g.id}
