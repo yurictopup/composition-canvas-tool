@@ -120,7 +120,7 @@ function Index() {
               value={tab.id}
               className="mt-1 min-h-52 rounded-lg border border-border bg-card p-4 text-card-foreground sm:p-6"
             >
-              <div className="grid grid-cols-3 gap-x-4 gap-y-6 sm:grid-cols-6 sm:gap-x-5 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12">
+              <div className="grid grid-cols-3 gap-x-4 gap-y-6 sm:grid-cols-6 sm:gap-x-5 lg:grid-cols-7 xl:grid-cols-9 2xl:grid-cols-10">
                 {tab.items.map((g, i) => (
                   <Link
                     key={g.id}
