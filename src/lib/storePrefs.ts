@@ -118,6 +118,18 @@ const KM: Record<string, string> = {
   "Check your Player ID first to order": "សូមពិនិត្យ Player ID ជាមុន ដើម្បីបញ្ជាទិញ",
   "We send Robux to this Roblox username. We never ask for your password.":
     "យើងផ្ញើ Robux ទៅឈ្មោះ Roblox នេះ។ យើងមិនសុំលេខសម្ងាត់របស់អ្នកទេ។",
+  "All rights reserved.": "រក្សាសិទ្ធិគ្រប់យ៉ាង។",
+  "Fast and safe game top-ups in Cambodia.": "បញ្ចូលពេជ្រហ្គេម រហ័ស និងមានសុវត្ថិភាព នៅកម្ពុជា។",
+  "1-5 min": "១-៥ នាទី",
+  "24 Hours": "២៤ ម៉ោង",
+  Menu: "ម៉ឺនុយ",
+  "Popular games": "ហ្គេមពេញនិយម",
+  "Need help?": "ត្រូវការជំនួយ?",
+  "Need help? Chat with us": "ត្រូវការជំនួយ? ឆាតជាមួយយើង",
+  "Message us on Telegram, we reply 24 hours.": "ផ្ញើសារមកយើងតាម Telegram យើងឆ្លើយតប ២៤ ម៉ោង។",
+  "We accept": "យើងទទួល",
+  "Made in Cambodia": "ផលិតនៅកម្ពុជា",
+  "Instant delivery": "បញ្ចូលភ្លាមៗ",
 };
 
 export function translate(l: StoreLang, s: string) {
