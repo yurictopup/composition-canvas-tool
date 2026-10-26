@@ -318,10 +318,32 @@ function GamePage({ gameId }: { gameId: string }) {
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">3</span>
             {t("Choose a payment method")}
           </h2>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {payments.map((m) => (
-              <button key={m} onClick={() => setPay(m)} data-active={pay === m}
-                className="chip-3d px-5 py-2 text-sm font-semibold">{m}</button>
+              <button
+                key={m}
+                type="button"
+                onClick={() => setPay(m)}
+                aria-pressed={pay === m}
+                className={`flex items-center gap-3 rounded-xl border-2 bg-white p-3 text-left text-[#142650] transition ${
+                  pay === m
+                    ? "border-[#2f5fe0] shadow-[0_4px_14px_rgb(47_95_224/0.25)]"
+                    : "border-[#dfe8f6] hover:border-[#2f5fe0]/50"
+                }`}
+              >
+                <KhqrMark />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-bold">{m} KHQR</span>
+                  <span className="block text-xs text-[#5b6b8c]">{t("Scan with ABA, ACLEDA, Wing or any bank app")}</span>
+                </span>
+                <span
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                    pay === m ? "border-[#2f5fe0] bg-[#2f5fe0]" : "border-[#c5d3ea]"
+                  }`}
+                >
+                  {pay === m && <span className="h-2 w-2 rounded-full bg-white" />}
+                </span>
+              </button>
             ))}
           </div>
         </section>
@@ -362,5 +384,15 @@ function GamePage({ gameId }: { gameId: string }) {
         </aside>
       </main>
     </SiteChrome>
+  );
+}
+
+// Red KHQR badge, the mark Cambodian bank apps show for Bakong QR payments.
+function KhqrMark() {
+  return (
+    <span className="flex h-11 w-14 shrink-0 flex-col items-center justify-center rounded-lg bg-[#E1232E] text-white shadow-[0_2px_6px_rgb(225_35_46/0.35)]">
+      <span className="text-[13px] font-extrabold leading-none tracking-wide">KHQR</span>
+      <span className="mt-1 h-[2px] w-8 rounded bg-white/70" />
+    </span>
   );
 }
