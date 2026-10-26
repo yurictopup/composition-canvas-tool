@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   Clock,
   LayoutDashboard,
-  LayoutGrid,
   LogOut,
   MailOpen,
   Receipt,
@@ -16,10 +15,10 @@ import {
   Truck,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { games, isOwner } from "@/lib/games";
+import { isOwner } from "@/lib/games";
 
-// Header controls for a signed-in shopper: game shortcuts, order notifications
-// and the account menu (same pattern as the admin top bar, in the store's navy).
+// Header controls for a signed-in shopper: order notifications and the
+// account menu (same pattern as the admin top bar, in the store's navy).
 
 type OrderNote = {
   id: string;
@@ -91,42 +90,6 @@ export function StoreUserMenu({ user, onSignOut }: { user: User; onSignOut: () =
 
   return (
     <div className="flex items-center gap-1">
-      {/* Game shortcuts */}
-      <DM.Root modal={false}>
-        <DM.Trigger className={iconBtn} title="Games">
-          <LayoutGrid size={20} />
-        </DM.Trigger>
-        <DM.Portal>
-          <DM.Content align="end" sideOffset={8} className={`${pop} w-80 overflow-hidden`}>
-            <div className="border-b border-brand-400/20 px-5 py-3.5 text-sm font-semibold">Shortcuts</div>
-            <div className="grid grid-cols-3">
-              {games.slice(0, 6).map((g, i) => (
-                <DM.Item key={g.id} asChild>
-                  <Link
-                    to="/game/$gameId"
-                    params={{ gameId: g.id }}
-                    className={`flex flex-col items-center gap-2 border-brand-400/20 px-2 py-4 text-center outline-none data-[highlighted]:bg-white/10 ${
-                      i % 3 !== 2 ? "border-r" : ""
-                    } ${i < 3 ? "border-b" : ""}`}
-                  >
-                    <img src={g.icon} alt="" className="h-11 w-11 rounded-xl object-cover" />
-                    <span className="text-xs font-semibold leading-tight">{g.name}</span>
-                  </Link>
-                </DM.Item>
-              ))}
-            </div>
-            {owner && (
-              <DM.Item asChild>
-                <Link to="/admin" className="flex items-center gap-3 border-t border-brand-400/20 px-5 py-3 text-sm outline-none data-[highlighted]:bg-white/10">
-                  <LayoutDashboard size={18} className="text-brand-400" />
-                  Admin dashboard
-                </Link>
-              </DM.Item>
-            )}
-          </DM.Content>
-        </DM.Portal>
-      </DM.Root>
-
       {/* Order notifications */}
       <DM.Root modal={false}>
         <DM.Trigger className={iconBtn} title="Notifications">
