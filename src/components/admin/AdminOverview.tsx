@@ -39,7 +39,7 @@ const C = {
   warning: "#FF9F43",
   danger: "#FF4C51",
   secondary: "#7A86A3",
-  grid: "#DFE8F6",
+  grid: "var(--vx-border)",
   muted: "#8E9BB8",
 };
 
@@ -211,7 +211,7 @@ export function AdminOverview({
       {/* Congratulations */}
       <Card className="relative overflow-hidden lg:col-span-4">
         <div className="p-6">
-          <h5 className="text-lg font-medium">Congratulations {ownerName}! 🎉</h5>
+          <h5 className="text-lg font-medium">Congratulations {ownerName}!</h5>
           <p className="text-[13px]">Revenue in this period</p>
           <h4 className="mt-5 text-2xl font-medium" style={{ color: C.primary }}>
             {money(revenue)}
@@ -251,7 +251,7 @@ export function AdminOverview({
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={thisWeek} barSize={8}>
               <Tooltip content={<ChartTip />} cursor={false} />
-              <Bar dataKey="Orders" radius={[4, 4, 4, 4]} fill={C.warning} background={{ fill: "#E8EFFB", radius: 4 }} />
+              <Bar dataKey="Orders" radius={[4, 4, 4, 4]} fill={C.warning} background={{ fill: "var(--vx-track)", radius: 4 }} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -392,7 +392,7 @@ export function AdminOverview({
                   stroke="none"
                 >
                   {(hasStatus ? statusData : [{ name: "none" }]).map((s) => (
-                    <Cell key={s.name} fill={STATUS_COLORS[s.name] ?? "#E8EFFB"} />
+                    <Cell key={s.name} fill={STATUS_COLORS[s.name] ?? "var(--vx-track)"} />
                   ))}
                 </Pie>
               </PieChart>
@@ -454,7 +454,7 @@ export function AdminOverview({
                     {money(g.revenue)} · {g.count} orders
                   </span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-[#E8EFFB]">
+                <div className="h-2 overflow-hidden rounded-full bg-[var(--vx-track)]">
                   <div
                     className="h-full rounded-full"
                     style={{ width: `${Math.max(4, (g.revenue / topMax) * 100)}%`, background: gameColors[i] }}

@@ -48,7 +48,7 @@ export function GamesDropOfferSearch() {
           {busy ? "Searching…" : "Search GamesDrop"}
         </button>
       </form>
-      {err && <p className="text-red-600">⚠️ {err}</p>}
+      {err && <p className="text-red-600">{err}</p>}
       {results && results.length === 0 && <p className="text-gray-400">No offers found.</p>}
       {results && results.length > 0 && (
         <div className="max-h-64 overflow-y-auto rounded-lg border border-gray-100">

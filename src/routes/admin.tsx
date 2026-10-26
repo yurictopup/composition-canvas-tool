@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
+  Gem,
+  Inbox,
   LayoutDashboard,
   Menu,
   RefreshCw,
@@ -17,6 +19,7 @@ import { isOwner } from "@/lib/games";
 import { AdminPrices } from "@/components/AdminPrices";
 import { DeliveryCell } from "@/components/AdminDelivery";
 import { AdminOverview, money } from "@/components/admin/AdminOverview";
+import { AdminTopbar, type Lang, type ThemeChoice } from "@/components/admin/AdminTopbar";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import type { AdminOrder } from "@/components/admin/types";
 
@@ -34,6 +37,43 @@ type NavItem = {
   title: string;
   section: string;
 };
+
+const KM: Record<string, string> = {
+  Overview: "ទិដ្ឋភាពទូទៅ",
+  Dashboard: "ផ្ទាំងគ្រប់គ្រង",
+  Orders: "ការកម្មង់",
+  Customers: "អតិថិជន",
+  "Cash Flow": "លំហូរសាច់ប្រាក់",
+  Prices: "តម្លៃ",
+  Store: "ហាង",
+  "Live status": "ស្ថានភាពផ្ទាល់",
+  "Paid orders": "បានបង់",
+  Pending: "រង់ចាំ",
+  Processing: "កំពុងដំណើរការ",
+  "Back to Store": "ត្រឡប់ទៅហាង",
+  Today: "ថ្ងៃនេះ",
+  "7 Days": "៧ ថ្ងៃ",
+  "30 Days": "៣០ ថ្ងៃ",
+  "All time": "ទាំងអស់",
+  Refresh: "ផ្ទុកឡើងវិញ",
+};
+
+function loadPref<T extends string>(key: string, allowed: readonly T[], fallback: T): T {
+  try {
+    const v = localStorage.getItem(key) as T | null;
+    return v && allowed.includes(v) ? v : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function savePref(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // private mode: the choice just isn't remembered
+  }
+}
 
 const NAV: NavItem[] = [
   { id: "overview",  icon: <LayoutDashboard size={22} />, label: "Overview",  title: "Dashboard", section: "Dashboard" },
@@ -59,6 +99,22 @@ function AdminPage() {
   const [timeFilter, setTimeFilter] = useState<"today" | "7d" | "30d" | "all">("all");
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [lang, setLang] = useState<Lang>("en");
+  const [theme, setTheme] = useState<ThemeChoice>("light");
+  const [systemDark, setSystemDark] = useState(false);
+
+  useEffect(() => {
+    setLang(loadPref("yt-admin-lang", ["en", "km"] as const, "en"));
+    setTheme(loadPref("yt-admin-theme", ["light", "dark", "system"] as const, "light"));
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    setSystemDark(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  const t = (s: string) => (lang === "km" ? KM[s] ?? s : s);
+  const dark = theme === "dark" || (theme === "system" && systemDark);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -139,7 +195,7 @@ function AdminPage() {
   if (!allowed) return null;
 
   return (
-    <div className="vx flex min-h-screen text-[15px]">
+    <div className={`vx ${dark ? "vx-dark" : ""} flex min-h-screen text-[15px]`}>
 
       {/* ── Mobile overlay ── */}
       {menuOpen && (
@@ -155,7 +211,7 @@ function AdminPage() {
         <div className="flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <span className="font-display text-lg font-black text-white text-glow">
-              💎 YURIC<span className="text-brand-400"> TOPUP</span>
+              <Gem size={20} className="mr-1.5 inline-block -translate-y-0.5 text-brand-400" />YURIC<span className="text-brand-400"> TOPUP</span>
             </span>
           </div>
           <button className="lg:hidden" onClick={() => setMenuOpen(false)} aria-label="Close menu">
@@ -166,7 +222,7 @@ function AdminPage() {
         <nav className="flex-1 overflow-y-auto px-4 pb-4">
           {["Dashboard", "Store"].map((section) => (
             <div key={section}>
-              <div className="px-2 pb-2 pt-5 text-[13px] uppercase tracking-wide text-[var(--vx-muted)]">{section}</div>
+              <div className="px-2 pb-2 pt-5 text-[13px] uppercase tracking-wide text-[var(--vx-muted)]">{t(section)}</div>
               {NAV.filter((n) => n.section === section).map((n) => {
                 const badge = n.id === "orders" ? pendingOrders.length + processingOrders.length : 0;
                 return (
@@ -178,7 +234,7 @@ function AdminPage() {
                     }`}
                   >
                     {n.icon}
-                    <span className="flex-1 text-left">{n.label}</span>
+                    <span className="flex-1 text-left">{t(n.label)}</span>
                     {badge > 0 && (
                       <span className="rounded-full bg-[var(--vx-danger)] px-2 text-xs font-medium leading-5 text-white">
                         {badge}
@@ -190,7 +246,7 @@ function AdminPage() {
             </div>
           ))}
 
-          <div className="px-2 pb-2 pt-5 text-[13px] uppercase tracking-wide text-[var(--vx-muted)]">Live status</div>
+          <div className="px-2 pb-2 pt-5 text-[13px] uppercase tracking-wide text-[var(--vx-muted)]">{t("Live status")}</div>
           <div className="space-y-2 px-4 text-[13px]">
             {[
               { label: "Paid orders", value: completedOrders.length, color: "var(--vx-success)" },
@@ -199,7 +255,7 @@ function AdminPage() {
             ].map((s) => (
               <div key={s.label} className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full" style={{ background: s.color }} />
-                <span className="flex-1">{s.label}</span>
+                <span className="flex-1">{t(s.label)}</span>
                 <span className="font-medium text-[var(--vx-heading)]">{s.value}</span>
               </div>
             ))}
@@ -212,7 +268,7 @@ function AdminPage() {
             className="flex items-center gap-3 rounded-md px-4 py-2 text-[15px] text-[var(--vx-muted)] hover:bg-white/10 hover:text-white"
           >
             <ArrowLeft size={20} />
-            Back to Store
+            {t("Back to Store")}
           </Link>
         </div>
       </aside>
@@ -227,39 +283,70 @@ function AdminPage() {
               <Menu size={22} className="text-[var(--vx-heading)]" />
             </button>
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-lg font-medium leading-tight">{current.title}</h1>
+              <h1 className="truncate text-lg font-medium leading-tight">{t(current.title)}</h1>
               <p className="hidden text-[13px] text-[var(--vx-muted)] sm:block">
-                Admin / {current.label}
+                Admin / {t(current.label)}
               </p>
             </div>
             <select
               value={timeFilter}
               onChange={e => setTimeFilter(e.target.value as typeof timeFilter)}
-              className="rounded-md border border-[var(--vx-border)] bg-white px-3 py-1.5 text-[13px] text-[var(--vx-heading)] outline-none focus:border-[var(--vx-primary)]"
+              className="hidden rounded-md border border-[var(--vx-border)] bg-[var(--vx-card)] px-3 py-1.5 text-[13px] sm:block text-[var(--vx-heading)] outline-none focus:border-[var(--vx-primary)]"
             >
-              <option value="today">Today</option>
-              <option value="7d">7 Days</option>
-              <option value="30d">30 Days</option>
-              <option value="all">All time</option>
+              <option value="today">{t("Today")}</option>
+              <option value="7d">{t("7 Days")}</option>
+              <option value="30d">{t("30 Days")}</option>
+              <option value="all">{t("All time")}</option>
             </select>
             <button
               onClick={loadData}
-              title="Refresh"
-              className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--vx-heading)] hover:bg-[var(--vx-hover)]"
+              title={t("Refresh")}
+              className="hidden h-9 w-9 sm:flex items-center justify-center rounded-full text-[var(--vx-heading)] hover:bg-[var(--vx-hover)]"
             >
               <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
             </button>
-            <div className="relative" title={ownerEmail}>
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--vx-primary-soft)] text-sm font-semibold uppercase text-[var(--vx-primary)]">
-                {ownerName.slice(0, 2)}
-              </span>
-              <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-[var(--vx-success)]" />
-            </div>
+            <AdminTopbar
+              orders={orders}
+              ownerEmail={ownerEmail}
+              lang={lang}
+              onLang={(l) => {
+                setLang(l);
+                savePref("yt-admin-lang", l);
+              }}
+              theme={theme}
+              onTheme={(th) => {
+                setTheme(th);
+                savePref("yt-admin-theme", th);
+              }}
+              onOpenTab={openTab}
+              onRefresh={loadData}
+            />
           </header>
         </div>
 
         {/* Content */}
         <main className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 sm:px-6">
+          {/* On phones the top bar has no room for the period filter, so it sits here. */}
+          <div className="mb-4 flex items-center gap-2 sm:hidden">
+            <select
+              value={timeFilter}
+              onChange={e => setTimeFilter(e.target.value as typeof timeFilter)}
+              className="flex-1 rounded-md border border-[var(--vx-border)] bg-[var(--vx-card)] px-3 py-2 text-[13px] text-[var(--vx-heading)] outline-none focus:border-[var(--vx-primary)]"
+            >
+              <option value="today">{t("Today")}</option>
+              <option value="7d">{t("7 Days")}</option>
+              <option value="30d">{t("30 Days")}</option>
+              <option value="all">{t("All time")}</option>
+            </select>
+            <button
+              onClick={loadData}
+              title={t("Refresh")}
+              className="vx-card flex h-9 w-9 items-center justify-center text-[var(--vx-heading)]"
+            >
+              <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+            </button>
+          </div>
+
 
           {loading && orders.length === 0 ? (
             <div className="vx-card flex h-48 items-center justify-center">
@@ -298,7 +385,7 @@ function AdminPage() {
                   </div>
                   {shownOrders.length === 0 ? (
                     <div className="p-12 text-center text-[var(--vx-muted)]">
-                      <div className="text-4xl mb-3">📭</div>
+                      <Inbox size={40} strokeWidth={1.5} className="mx-auto mb-3" />
                       <p>មិនទាន់មាន orders ទេ</p>
                     </div>
                   ) : (
@@ -366,7 +453,7 @@ function AdminPage() {
                   </div>
                   {uniqueCustomers.length === 0 ? (
                     <div className="p-12 text-center text-[var(--vx-muted)]">
-                      <div className="text-4xl mb-3">👥</div>
+                      <Users size={40} strokeWidth={1.5} className="mx-auto mb-3" />
                       <p>មិនទាន់មាន customers ទេ</p>
                     </div>
                   ) : (
