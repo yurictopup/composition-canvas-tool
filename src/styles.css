@@ -540,8 +540,7 @@ html:has(.store-light) { background: #eef4fd; }
   align-items: center;
   gap: 0.4rem;
   border-radius: 999px;
-  padding: 0.3rem 0.75rem;
-  font-size: 0.75rem;
+  padding: 0.15rem 0.75rem;
   color: var(--color-on-dark-muted);
   background: rgb(255 255 255 / 0.06);
   border: 1px solid rgb(100 169 243 / 0.2);

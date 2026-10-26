@@ -125,11 +125,10 @@ const KM: Record<string, string> = {
   Menu: "ម៉ឺនុយ",
   "Popular games": "ហ្គេមពេញនិយម",
   "Need help?": "ត្រូវការជំនួយ?",
-  "Need help? Chat with us": "ត្រូវការជំនួយ? ឆាតជាមួយយើង",
-  "Message us on Telegram, we reply 24 hours.": "ផ្ញើសារមកយើងតាម Telegram យើងឆ្លើយតប ២៤ ម៉ោង។",
+  "Message us, we reply 24 hours.": "ផ្ញើសារមកយើង យើងឆ្លើយតប ២៤ ម៉ោង។",
+  "Safe payment": "បង់ប្រាក់សុវត្ថិភាព",
   "We accept": "យើងទទួល",
   "Made in Cambodia": "ផលិតនៅកម្ពុជា",
-  "Instant delivery": "បញ្ចូលភ្លាមៗ",
 };
 
 export function translate(l: StoreLang, s: string) {
