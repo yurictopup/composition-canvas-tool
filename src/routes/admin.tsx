@@ -24,6 +24,8 @@ type Order = {
   created_at: string;
   supplier_order_id?: string | null;
   supplier_status?: string | null;
+  payment_md5?: string | null;
+  paid_at?: string | null;
 };
 
 const STATUS_COLOR: Record<string, string> = {

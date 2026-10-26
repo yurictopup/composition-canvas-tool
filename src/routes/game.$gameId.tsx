@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { findGame, getPackages, mlbbHotItems, payments, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
+import { OrderPayment } from "@/components/OrderPayment";
 import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import { lookupPlayer } from "@/lib/player-lookup.functions";
@@ -155,21 +156,26 @@ function GamePage({ gameId }: { gameId: string }) {
               Order #{orderId.slice(0, 8).toUpperCase()} — {game.name} {selected?.amt} {game.unit}
             </p>
 
-            {/* Payment Instructions */}
-            <div className="rounded-2xl bg-muted/50 p-5 text-left mb-6">
-              <h2 className="font-bold mb-3 text-base">💳 Payment Instructions</h2>
-              <div className="space-y-2 text-sm text-muted-foreground">
-                <p>1. Open <strong>Bakong</strong> app</p>
-                <p>2. Scan QR ឬ Transfer ទៅ:</p>
-                <div className="rounded-xl bg-card border px-4 py-3 mt-2">
-                  <p className="font-bold text-foreground text-base">Yuric Topup</p>
-                  <p className="text-xs mt-1">Telegram: <a href={`https://t.me/${store.telegram.replace("@","")}`} target="_blank" rel="noopener noreferrer" className="text-primary font-semibold">{store.telegram}</a></p>
+            {/* Payment: the order's own KHQR, or manual instructions when Bakong isn't set up */}
+            <OrderPayment
+              orderId={orderId}
+              fallback={
+                <div className="rounded-2xl bg-muted/50 p-5 text-left mb-6">
+                  <h2 className="font-bold mb-3 text-base">💳 Payment Instructions</h2>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p>1. Open <strong>Bakong</strong> app</p>
+                    <p>2. Scan QR ឬ Transfer ទៅ:</p>
+                    <div className="rounded-xl bg-card border px-4 py-3 mt-2">
+                      <p className="font-bold text-foreground text-base">Yuric Topup</p>
+                      <p className="text-xs mt-1">Telegram: <a href={`https://t.me/${store.telegram.replace("@","")}`} target="_blank" rel="noopener noreferrer" className="text-primary font-semibold">{store.telegram}</a></p>
+                    </div>
+                    <p className="mt-2">3. Amount: <strong className="text-accent text-base">${(paidPrice ?? selected?.price)?.toFixed(2)}</strong></p>
+                    <p>4. Note/Description: <strong className="text-foreground">{orderId.slice(0,8).toUpperCase()}</strong></p>
+                    <p className="mt-2">5. Screenshot ផ្ញើ Telegram — diamonds ចូល 1-5 នាទី ✨</p>
+                  </div>
                 </div>
-                <p className="mt-2">3. Amount: <strong className="text-accent text-base">${(paidPrice ?? selected?.price)?.toFixed(2)}</strong></p>
-                <p>4. Note/Description: <strong className="text-foreground">{orderId.slice(0,8).toUpperCase()}</strong></p>
-                <p className="mt-2">5. Screenshot ផ្ញើ Telegram — diamonds ចូល 1-5 នាទី ✨</p>
-              </div>
-            </div>
+              }
+            />
 
             <div className="grid grid-cols-2 gap-3">
               <a
