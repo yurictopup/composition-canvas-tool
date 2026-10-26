@@ -233,7 +233,10 @@ function BannerOverlay() {
           <span className="banner-title-back col-start-1 row-start-1" aria-hidden="true">{t("Welcome")}</span>
           <span className="banner-title col-start-1 row-start-1">{t("Welcome")}</span>
         </span>
-        <span className="banner-sub -mt-[0.15em] self-end pr-[14%] font-khmer text-[clamp(13px,1.7vw,26px)]">{t("to")}</span>
+        <span className="-mt-[0.15em] grid self-end pr-[14%] font-khmer text-[clamp(15px,2vw,30px)]">
+          <span className="banner-title-back col-start-1 row-start-1" aria-hidden="true">{t("to")}</span>
+          <span className="banner-title col-start-1 row-start-1">{t("to")}</span>
+        </span>
         <span className="mt-[0.15em] rounded-md border-2 border-[#fff2b0] bg-gradient-to-b from-[#ffd75e] to-[#ff9d00] px-[0.9em] py-[0.12em] font-display text-[clamp(14px,2.3vw,34px)] font-black tracking-[0.14em] text-[#0b2a7a] shadow-[0_4px_0_#b86e00,0_10px_20px_rgb(0_0_0/0.4)]">
           YURIC TOPUP
         </span>
