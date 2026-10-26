@@ -123,7 +123,7 @@ export function AdminPrices() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-2xl p-5 border border-black/8 text-sm text-gray-600">
+      <div className="vx-card p-5 text-sm text-gray-600">
         These are the prices customers see and pay. A saved price takes effect for new orders right
         away. Switch a package off to hide it from sale.
       </div>
@@ -148,7 +148,7 @@ export function AdminPrices() {
               onClick={() => setGameFilter(g.id)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
                 gameFilter === g.id
-                  ? "border-[#1a0a2e] bg-[#1a0a2e] text-white"
+                  ? "border-[#7367F0] bg-[#7367F0] text-white"
                   : "border-gray-200 bg-white hover:bg-gray-50"
               }`}
             >
@@ -157,9 +157,9 @@ export function AdminPrices() {
           ))}
       </div>
 
-      <div className="bg-white rounded-2xl border border-black/8 overflow-hidden">
+      <div className="vx-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="vx-table w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr className="text-left text-xs text-gray-500">
                 <th className="px-4 py-3 font-semibold">Package</th>
@@ -189,7 +189,7 @@ export function AdminPrices() {
                           value={value}
                           placeholder={row.fallback?.toFixed(2) ?? "0.00"}
                           onChange={(e) => setDrafts((d) => ({ ...d, [id]: e.target.value }))}
-                          className="w-24 rounded-lg border border-gray-200 px-2 py-1 outline-none focus:border-[#1a0a2e]"
+                          className="w-24 rounded-lg border border-gray-200 px-2 py-1 outline-none focus:border-[#7367F0]"
                         />
                       </div>
                     </td>
@@ -213,7 +213,7 @@ export function AdminPrices() {
                           value={offerDrafts[id] ?? (offers[id] ? String(offers[id]) : "")}
                           placeholder="Offer ID"
                           onChange={(e) => setOfferDrafts((d) => ({ ...d, [id]: e.target.value }))}
-                          className="w-24 rounded-lg border border-gray-200 px-2 py-1 outline-none focus:border-[#1a0a2e]"
+                          className="w-24 rounded-lg border border-gray-200 px-2 py-1 outline-none focus:border-[#7367F0]"
                         />
                         <button
                           disabled={saving === id || offerDrafts[id] === undefined}
@@ -228,7 +228,7 @@ export function AdminPrices() {
                       <button
                         disabled={saving === id || !prices || drafts[id] === undefined}
                         onClick={() => save(row, current ? active : true)}
-                        className="rounded-lg bg-[#1a0a2e] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-30"
+                        className="rounded-lg bg-[#7367F0] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-30"
                       >
                         {saving === id ? "Saving…" : "Save"}
                       </button>

@@ -74,7 +74,7 @@ export function DeliveryCell({
         <button
           disabled={busy}
           onClick={() => run("deliver")}
-          className="rounded-lg bg-[#1a0a2e] px-3 py-1.5 font-semibold text-white disabled:opacity-40"
+          className="rounded-lg bg-[#7367F0] px-3 py-1.5 font-semibold text-white disabled:opacity-40"
         >
           {busy ? "Sending…" : "🚀 Deliver"}
         </button>
