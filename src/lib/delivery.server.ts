@@ -57,7 +57,7 @@ export async function deliverPaidOrder(
     .is("supplier_order_id", null);
   if (!allowUnpaid) claim = claim.not("paid_at", "is", null);
   const { data: order } = await claim
-    .select("id, game_id, package_amt, player_id, player_zone")
+    .select("id, game_id, package_amt, player_id, player_zone, paid_at")
     .maybeSingle();
   if (!order) {
     return {
@@ -75,9 +75,10 @@ export async function deliverPaidOrder(
     .eq("package_amt", order.package_amt)
     .maybeSingle();
   if (!offer) {
+    // A paid order stays "processing" so the owner sees it under Paid not delivered.
     await db
       .from("orders")
-      .update({ status: "pending", supplier_status: "NO_OFFER" })
+      .update({ status: order.paid_at ? "processing" : "pending", supplier_status: "NO_OFFER" })
       .eq("id", orderId);
     return {
       ok: false,
