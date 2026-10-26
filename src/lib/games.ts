@@ -18,7 +18,7 @@ import valorant from "@/assets/valorant.jpg";
 import deltaforce from "@/assets/deltaforce.jpg";
 import arenabreakout from "@/assets/arenabreakout.jpg";
 import brawlstars from "@/assets/brawlstars.jpg";
-import clashroyale from "@/assets/clashroyale.svg";
+import clashroyale from "@/assets/clashroyale.jpg";
 import zzz from "@/assets/zzz.svg";
 
 export const games = [
