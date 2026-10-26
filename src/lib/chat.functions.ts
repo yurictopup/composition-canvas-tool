@@ -10,7 +10,9 @@ import {
   modelMessages,
   systemPrompt,
   type LivePrice,
+  type OrderContext,
 } from "@/lib/chatAi";
+import { isOrderQuestion } from "@/lib/chatBrain";
 
 type WorkersAi = {
   run: (model: string, input: Record<string, unknown>) => Promise<{ response?: unknown }>;
@@ -49,35 +51,96 @@ async function livePrices(gameIds: string[]): Promise<Record<string, LivePrice[]
   return focus;
 }
 
+/** The signed-in visitor's id from the token the site sends with server calls, or null. */
+async function signedInUser(): Promise<string | null> {
+  const { getRequest } = await import("@tanstack/react-start/server");
+  const token = getRequest()
+    ?.headers.get("authorization")
+    ?.replace(/^Bearer /, "");
+  if (!token || token.split(".").length !== 3) return null;
+  const { adminDb } = await import("@/lib/delivery.server");
+  const { data } = await adminDb().auth.getUser(token);
+  return data.user?.id ?? null;
+}
+
 /**
- * Yuric Bot's free-form answer from Workers AI, or null when the AI is not
+ * The customer's last orders. Unpaid recent ones are first checked with the
+ * bank (the same check the payment page runs), so "did my money arrive?" gets
+ * a live answer.
+ */
+async function customerOrders(): Promise<OrderContext> {
+  const userId = await signedInUser();
+  if (!userId) return null;
+  const { adminDb } = await import("@/lib/delivery.server");
+  const db = adminDb();
+  const load = () =>
+    db
+      .from("orders")
+      .select(
+        "id, game_name, package_amt, price_usd, player_id, player_zone, status, created_at, paid_at, payment_md5, payment_expires_at",
+      )
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(3);
+  let { data: rows } = await load();
+  const dayAgo = Date.now() - 24 * 3600_000;
+  const unpaid = (rows ?? []).filter(
+    (o) => !o.paid_at && o.payment_md5 && new Date(o.created_at).getTime() > dayAgo,
+  );
+  if (unpaid.length) {
+    const { checkOrderPayment } = await import("@/lib/payment.server");
+    await Promise.all(unpaid.map((o) => checkOrderPayment(db, o.id, userId).catch(() => null)));
+    ({ data: rows } = await load());
+  }
+  return (rows ?? []).map((o) => ({
+    code: o.id.slice(0, 8).toUpperCase(),
+    game: o.game_name,
+    pack: o.package_amt,
+    price: Number(o.price_usd),
+    playerId: o.player_zone ? `${o.player_id} (${o.player_zone})` : o.player_id,
+    minutesAgo: Math.max(0, Math.round((Date.now() - new Date(o.created_at).getTime()) / 60_000)),
+    paid: !!o.paid_at,
+    status: o.status,
+    qrExpired:
+      !o.paid_at && !!o.payment_expires_at && new Date(o.payment_expires_at).getTime() < Date.now(),
+  }));
+}
+
+/**
+ * Yuric Bot's free-form answer from Workers AI, or why the AI is not
  * available (no binding, daily free quota used up, too many questions); the
  * widget then falls back to the keyword answers in chatBrain.ts.
  */
 export const askBot = createServerFn({ method: "POST" })
   .validator(askInput)
-  .handler(async ({ data }): Promise<{ text: string } | null> => {
+  .handler(async ({ data }): Promise<{ text: string } | { unavailable: string }> => {
     const ai = workersAi();
-    if (!ai) return null;
+    if (!ai) return { unavailable: "no AI binding" };
     const { allowRequest } = await import("@/lib/rate-limit");
     const { clientIp } = await import("@/lib/rate-limit.server");
     // Every answer spends the shared free quota, so one visitor can't use it all.
-    if (!allowRequest(`chat:${clientIp()}`, 12, 60_000)) return null;
+    if (!allowRequest(`chat:${clientIp()}`, 12, 60_000)) return { unavailable: "rate limit" };
 
     const turns = data.turns
       .slice(-MAX_TURNS)
       .map((t) => ({ ...t, text: t.text.slice(0, MAX_TEXT) }));
     try {
-      const system = systemPrompt(await livePrices(gamesInChat(turns)));
+      // Orders are looked up only when the latest question is about paying or an order.
+      const last = turns.filter((t) => t.role === "user").at(-1)?.text ?? "";
+      const [prices, orders] = await Promise.all([
+        livePrices(gamesInChat(turns)),
+        isOrderQuestion(last) ? customerOrders().catch(() => undefined) : undefined,
+      ]);
+      const system = systemPrompt(prices, orders);
       const result = await ai.run(process.env["YURIC_BOT_MODEL"] || DEFAULT_MODEL, {
         messages: modelMessages(turns, system),
         max_tokens: 450,
         temperature: 0.3,
       });
       const text = typeof result.response === "string" ? cleanReply(result.response) : "";
-      return text ? { text } : null;
+      return text ? { text } : { unavailable: "empty answer" };
     } catch (error) {
       console.error("Yuric Bot AI failed", error);
-      return null;
+      return { unavailable: error instanceof Error ? error.message : "AI error" };
     }
   });

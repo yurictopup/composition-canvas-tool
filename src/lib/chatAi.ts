@@ -8,6 +8,65 @@ import { detectGame } from "@/lib/chatBrain";
 export type ChatTurn = { role: "user" | "bot"; text: string };
 export type LivePrice = { amt: string; price: number };
 
+/** One of the customer's own orders, as the bot is told about it. */
+export type OrderFact = {
+  code: string;
+  game: string;
+  pack: string;
+  price: number;
+  playerId: string;
+  minutesAgo: number;
+  paid: boolean;
+  status: string;
+  qrExpired: boolean;
+};
+
+/**
+ * What the bot knows about the customer's orders: undefined = not looked up
+ * (question not about an order), null = not signed in, [] = no orders.
+ */
+export type OrderContext = OrderFact[] | null | undefined;
+
+function ago(min: number) {
+  if (min < 60) return `${min} min ago`;
+  if (min < 48 * 60) return `${Math.round(min / 60)} h ago`;
+  return `${Math.round(min / 1440)} days ago`;
+}
+
+function describeOrder(o: OrderFact) {
+  const pay = o.paid
+    ? "PAYMENT RECEIVED"
+    : o.qrExpired
+      ? "NOT PAID (QR expired)"
+      : "NOT PAID YET (no money received so far)";
+  const delivery =
+    o.status === "completed"
+      ? "delivered"
+      : o.status === "failed"
+        ? "delivery failed"
+        : o.status === "refunded"
+          ? "refunded"
+          : o.paid
+            ? "paid, waiting for delivery"
+            : "waiting for payment";
+  return `- Order ${o.code}: ${o.game} ${o.pack}, $${o.price.toFixed(2)}, Player ID ${o.playerId}, ${ago(o.minutesAgo)}. Payment: ${pay}. Delivery: ${delivery}.`;
+}
+
+/** The customer's orders for the prompt, checked live against the bank. */
+export function ordersSection(orders: OrderContext): string {
+  if (orders === undefined) return "";
+  if (orders === null)
+    return `\nCUSTOMER ORDERS: the customer is not signed in, so you cannot see their orders. Ask them to sign in and ask again, or to send the receipt screenshot to the admin on Telegram ${store.telegram}.`;
+  if (!orders.length)
+    return `\nCUSTOMER ORDERS: this signed-in customer has no orders. If they paid, ask them to send the receipt screenshot to the admin on Telegram ${store.telegram}.`;
+  return `\nCUSTOMER ORDERS (just checked with the bank, newest first; this is real data, use it):
+${orders.map(describeOrder).join("\n")}
+How to use it: tell the customer clearly whether the money for their order arrived, quoting the order code.
+- Payment received and delivered: confirm it is done and ask them to check the game.
+- Payment received, waiting for delivery: say the money arrived and the admin is delivering now; if it is over 10 minutes, tell them to message the admin on Telegram ${store.telegram} with the order code.
+- Not paid yet: say no money has reached the shop for that order yet. If they already paid, ask them to send the receipt screenshot and the order code to the admin on Telegram ${store.telegram}. If the QR expired, they should make a new order instead of paying the old QR.`;
+}
+
 /** Workers AI model. Gemma 3 covers Khmer; override with the YURIC_BOT_MODEL variable. */
 export const DEFAULT_MODEL = "@cf/google/gemma-3-12b-it";
 export const MAX_TURNS = 8;
@@ -35,7 +94,7 @@ function idFields(gameId: string) {
  * The system prompt. Only games the customer mentioned get their package list
  * and live prices, which keeps each request small on the free Workers AI quota.
  */
-export function systemPrompt(focus: Record<string, LivePrice[]>): string {
+export function systemPrompt(focus: Record<string, LivePrice[]>, orders?: OrderContext): string {
   const catalogue = games.map((g) => `${g.name} (${g.unit})`).join(", ");
   const details = Object.entries(focus)
     .map(([id, prices]) => {
@@ -66,10 +125,19 @@ FACTS (never invent anything beyond these):
 - How to buy: choose the game on the home page, enter the Player ID, press Check ID, choose a package, press Buy Now, then scan the KHQR code with any Cambodian bank app (ABA, ACLEDA, Wing, Bakong and others). Payment is confirmed automatically.
 - Delivery: usually 1-5 minutes after payment is confirmed, straight to the Player ID. We never ask for the game account password.
 - A wrong Player ID cannot be refunded, because the top-up goes to that ID. Always press Check ID before paying.
-- Late order, payment problem, refund question, or anything you are not sure about: tell the customer to message the admin on Telegram ${store.telegram} with the receipt and Player ID.
+- Signed-in customers see each order and its status (pending, processing, completed) on the Profile page (My Orders).
+- A KHQR code expires after a few minutes. Never pay an expired QR: go back and make a new order.
+
+SOLVING PROBLEMS: when the customer has a problem, first show you understand and say sorry, then give the steps that fit:
+- Paid but nothing arrived: 1. wait up to 5 minutes, 2. check the order status on Profile, 3. check the Player ID on the order is correct, 4. if still nothing, message the admin on Telegram ${store.telegram} with the payment receipt screenshot, the order and the Player ID, and the admin will fix it quickly.
+- Money taken but the order still shows unpaid, paid twice, wrong amount, or refund request: send the receipt screenshot to the admin on Telegram ${store.telegram}.
+- Wrong Player ID: if not delivered yet, message the admin on Telegram ${store.telegram} right away with the correct ID; once delivered it cannot be refunded.
+- Check ID fails: check the ID and Zone/Server on the game's Profile screen and try again.
+- Anything you are not sure about: hand over to the admin on Telegram ${store.telegram}.
+Every answer about a problem must end by telling the customer they can message the admin on Telegram ${store.telegram}.
 - Open ${store.hours === "24 Hours" ? "24 hours a day" : store.hours}. Find the Player ID on the Profile screen inside the game.
 - Only quote prices listed below. If a price is not listed, say it is shown on that game's page. Do not promise discounts.
-${details ? `\nGames the customer asked about:\n${details}` : ""}`;
+${details ? `\nGames the customer asked about:\n${details}` : ""}${ordersSection(orders)}`;
 }
 
 /** Model messages: the system prompt, then the last turns, trimmed. */

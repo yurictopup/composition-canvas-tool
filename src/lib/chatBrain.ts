@@ -88,6 +88,17 @@ const TOPICS: Record<string, string[]> = {
     "មិនទាន់ទទួល",
     "អត់ទាន់",
     "បាត់",
+    "អតចូល",
+    "អត់មាន",
+    "អតមាន",
+    "មិនមាន",
+    "មិនទាន់មាន",
+    "បង់ហើយ",
+    "បង់លុយហើយ",
+    "បង់ប្រាក់ហើយ",
+    "ជោគជ័យហើយ",
+    "កាត់លុយ",
+    "paid",
     "not received",
     "didn't receive",
     "not arrive",
@@ -218,6 +229,12 @@ const gameAction = (g: Game, href: (id: string) => string): BotAction => ({
 });
 const telegramAction: BotAction = { label: `ជជែកតាម Telegram · ${TELEGRAM}`, href: TELEGRAM_URL };
 
+/** True when a message is about paying or an order that hasn't arrived. */
+export function isOrderQuestion(raw: string): boolean {
+  const topics = topScores(raw.toLowerCase().replace(/\s+/g, " ").trim());
+  return ["late", "payment", "refund", "wrongId"].some((t) => topics.includes(t));
+}
+
 export function answer(
   raw: string,
   gameHref: (id: string) => string = (id) => `/game/${id}`,
@@ -238,7 +255,7 @@ export function answer(
 
   if (has_("late") || has_("refund")) {
     return {
-      text: `សុំទោសចំពោះការរង់ចាំ! ជាធម្មតាពេជ្រចូលក្នុង 1-5 នាទី បន្ទាប់ពីការបង់ប្រាក់ត្រូវបានបញ្ជាក់។ បើលើសពីនេះ ឬចង់សួរពីការសងប្រាក់ សូមផ្ញើរូបវិក្កយបត្រ និង ID ហ្គេមរបស់អ្នក ទៅ Admin តាម Telegram ${TELEGRAM} យើងនឹងពិនិត្យភ្លាមៗ។ ចំណាំ៖ យើងមិនអាចសងប្រាក់វិញបានទេ ប្រសិនបើអ្នកបញ្ចូល Player ID ខុស ព្រោះពេជ្រត្រូវបានបញ្ចូលទៅ ID នោះផ្ទាល់។`,
+      text: `សុំទោសចំពោះការរង់ចាំ! សូមធ្វើតាមជំហាននេះ៖\n១. រង់ចាំបន្តិច ជាធម្មតាពេជ្រចូលក្នុង 1-5 នាទី បន្ទាប់ពីបង់ប្រាក់\n២. ពិនិត្យស្ថានភាពការបញ្ជាទិញនៅទំព័រ Profile\n៣. ពិនិត្យថា Player ID ក្នុងការបញ្ជាទិញត្រឹមត្រូវ\n៤. បើនៅតែមិនទាន់ចូល សូមផ្ញើរូបវិក្កយបត្របង់ប្រាក់ និង Player ID ទៅ Admin តាម Telegram ${TELEGRAM} Admin នឹងដោះស្រាយឱ្យភ្លាមៗ។`,
       actions: [telegramAction],
     };
   }
