@@ -425,13 +425,20 @@ html:has(.store-light) { background: #eef4fd; }
 
 /* Home banner overlay */
 .banner-title {
-  background: linear-gradient(180deg, #fff6c2 0%, #ffd34d 45%, #ff9d00 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #fff1a8 30%, #ffc21f 65%, #ff8a00 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  -webkit-text-stroke: 0.06em #0b2a7a;
+}
+.banner-title-back {
+  color: #0b2a7a;
+  -webkit-text-stroke: 0.14em #0b2a7a;
+  text-shadow: 0 0.08em 0 #061a55, 0 0 0.35em rgb(120 190 255 / 0.6);
+}
+.banner-sub {
+  color: #fff;
+  -webkit-text-stroke: 0.2em #0b2a7a;
   paint-order: stroke fill;
-  filter: drop-shadow(0 0.06em 0 #061a55) drop-shadow(0 0.12em 0.2em rgb(0 0 0 / 0.45));
 }
 @keyframes banner-float {
   0%, 100% { transform: translateY(0); }
