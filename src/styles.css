@@ -422,3 +422,22 @@ html:has(.store-light) { background: #eef4fd; }
 .store-pop[data-light="true"] [data-highlighted] { background: #eef4fd; }
 .store-pop-active { background: rgb(100 169 243 / 0.2); color: var(--brand-400); }
 .store-pop[data-light="true"] .store-pop-active { background: rgb(47 95 224 / 0.12); color: #2f5fe0; }
+
+/* Home banner overlay */
+.banner-title {
+  background: linear-gradient(180deg, #fff6c2 0%, #ffd34d 45%, #ff9d00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 0.06em #0b2a7a;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0.06em 0 #061a55) drop-shadow(0 0.12em 0.2em rgb(0 0 0 / 0.45));
+}
+@keyframes banner-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6%); }
+}
+.banner-float { animation: banner-float 4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .banner-float { animation: none; }
+}
