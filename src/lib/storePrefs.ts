@@ -107,6 +107,7 @@ const KM: Record<string, string> = {
   "Player ID": "Player ID",
   Package: "កញ្ចប់",
   Payment: "ការបង់ប្រាក់",
+  "Scan with ABA, ACLEDA, Wing or any bank app": "ស្កេនជាមួយ ABA, ACLEDA, Wing ឬកម្មវិធីធនាគារណាមួយ",
   Total: "សរុប",
   "Place Order": "បញ្ជាទិញ",
   "Processing…": "កំពុងដំណើរការ…",

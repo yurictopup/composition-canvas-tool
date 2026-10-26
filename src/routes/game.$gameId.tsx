@@ -318,10 +318,30 @@ function GamePage({ gameId }: { gameId: string }) {
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">3</span>
             {t("Choose a payment method")}
           </h2>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {payments.map((m) => (
-              <button key={m} onClick={() => setPay(m)} data-active={pay === m}
-                className="chip-3d px-5 py-2 text-sm font-semibold">{m}</button>
+              <button
+                key={m}
+                type="button"
+                onClick={() => setPay(m)}
+                aria-pressed={pay === m}
+                className={`relative flex aspect-square w-44 flex-col items-center justify-center gap-2.5 rounded-2xl border-2 bg-white px-4 text-center text-[#142650] transition ${
+                  pay === m
+                    ? "border-[#2f5fe0] shadow-[0_6px_18px_rgb(47_95_224/0.25)]"
+                    : "border-[#dfe8f6] hover:border-[#2f5fe0]/50"
+                }`}
+              >
+                <span
+                  className={`absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full border-2 ${
+                    pay === m ? "border-[#2f5fe0] bg-[#2f5fe0]" : "border-[#c5d3ea]"
+                  }`}
+                >
+                  {pay === m && <span className="h-2 w-2 rounded-full bg-white" />}
+                </span>
+                <KhqrMark />
+                <span className="block text-base font-bold">{m} KHQR</span>
+                <span className="block text-[11px] leading-snug text-[#5b6b8c]">{t("Scan with ABA, ACLEDA, Wing or any bank app")}</span>
+              </button>
             ))}
           </div>
         </section>
@@ -362,5 +382,15 @@ function GamePage({ gameId }: { gameId: string }) {
         </aside>
       </main>
     </SiteChrome>
+  );
+}
+
+// Red KHQR badge, the mark Cambodian bank apps show for Bakong QR payments.
+function KhqrMark() {
+  return (
+    <span className="flex h-16 w-24 shrink-0 flex-col items-center justify-center rounded-[3px] bg-[#E1232E] text-white shadow-[0_3px_10px_rgb(225_35_46/0.35)]">
+      <span className="text-xl font-extrabold leading-none tracking-wide">KHQR</span>
+      <span className="mt-1.5 h-[3px] w-12 rounded bg-white/70" />
+    </span>
   );
 }
