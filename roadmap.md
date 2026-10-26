@@ -31,5 +31,7 @@
 - [ ] Real prices per package — owner to enter them on /admin → Prices (current values are public store prices, not the owner's)
 - [x] Configure game-specific ID fields and honest Check ID unavailable states for all ten games; purchases require real verification
 - [ ] Real account-name Check ID — needs supported providers and credentials; do not treat format checks as verified accounts
+- [x] Check ID now asks GamesDrop for the in-game name (server-side). Turns on per game once GAMESDROP_API_TOKEN and GAMESDROP_OFFER_IDS secrets are set; games without an offer keep showing "not available"
+- [ ] Re-check the player name on the server when an order is placed and store it on the order (after the order-security change lands)
 - [ ] Avatar picture for the profile — user has none yet, "YT" placeholder in place
 - [x] Yuric Bot chat widget: iron-bot avatar, sky-blue/white style, FAQ threads (no persistence), Telegram @Yuricccc button; verified in preview
