@@ -346,7 +346,7 @@ export function answer(
       };
     case "safety":
       return {
-        text: `ការបង់ប្រាក់ធ្វើតាមធនាគារ និងសេវាដែលអ្នកស្គាល់ (${payments.join(", ")}) យើងមិនដែលសុំពាក្យសម្ងាត់គណនីហ្គេមរបស់អ្នកទេ ត្រូវការតែ Player ID ប៉ុណ្ណោះ មានចម្ងល់ សួរ Admin តាម Telegram ${TELEGRAM}`,
+        text: `Yuric Topup អាចទុកចិត្តបាន អ្នកបង់ប្រាក់តាម KHQR ផ្ទាល់ពីកម្មវិធីធនាគាររបស់អ្នក (${payments.join(", ")}) យើងមិនដែលសុំពាក្យសម្ងាត់គណនីហ្គេមទេ ត្រូវការតែ Player ID ប៉ុណ្ណោះ ហើយការបញ្ជាទិញនីមួយៗអាចពិនិត្យបាន បើមានបញ្ហាអ្វី សូមទាក់ទង Admin តាម Telegram ${TELEGRAM}`,
         actions: [telegramAction],
       };
     case "games":

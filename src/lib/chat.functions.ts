@@ -2,20 +2,22 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { games } from "@/lib/games";
 import {
+  answerText,
+  botModels,
   cleanReply,
-  DEFAULT_MODEL,
   gamesInChat,
   MAX_TEXT,
   MAX_TURNS,
   modelMessages,
+  orderReply,
   systemPrompt,
   type LivePrice,
   type OrderContext,
 } from "@/lib/chatAi";
 import { isOrderQuestion } from "@/lib/chatBrain";
 
-type WorkersAi = {
-  run: (model: string, input: Record<string, unknown>) => Promise<{ response?: unknown }>;
+export type WorkersAi = {
+  run: (model: string, input: Record<string, unknown>) => Promise<unknown>;
 };
 
 const askInput = z.object({
@@ -26,7 +28,7 @@ const askInput = z.object({
 });
 
 /** The Workers AI binding ("AI" in the Wrangler config); missing outside Cloudflare. */
-function workersAi(): WorkersAi | undefined {
+export function workersAi(): WorkersAi | undefined {
   const env = (globalThis as { __env__?: { AI?: WorkersAi } }).__env__;
   return env?.AI;
 }
@@ -113,34 +115,47 @@ async function customerOrders(): Promise<OrderContext> {
  */
 export const askBot = createServerFn({ method: "POST" })
   .validator(askInput)
-  .handler(async ({ data }): Promise<{ text: string } | { unavailable: string }> => {
-    const ai = workersAi();
-    if (!ai) return { unavailable: "no AI binding" };
-    const { allowRequest } = await import("@/lib/rate-limit");
-    const { clientIp } = await import("@/lib/rate-limit.server");
-    // Every answer spends the shared free quota, so one visitor can't use it all.
-    if (!allowRequest(`chat:${clientIp()}`, 12, 60_000)) return { unavailable: "rate limit" };
+  .handler(
+    async ({
+      data,
+    }): Promise<{ text: string; source: "ai" | "orders" } | { unavailable: string }> => {
+      const { allowRequest } = await import("@/lib/rate-limit");
+      const { clientIp } = await import("@/lib/rate-limit.server");
+      // Every answer spends the shared free quota, so one visitor can't use it all.
+      if (!allowRequest(`chat:${clientIp()}`, 12, 60_000)) return { unavailable: "rate limit" };
 
-    const turns = data.turns
-      .slice(-MAX_TURNS)
-      .map((t) => ({ ...t, text: t.text.slice(0, MAX_TEXT) }));
-    try {
+      const turns = data.turns
+        .slice(-MAX_TURNS)
+        .map((t) => ({ ...t, text: t.text.slice(0, MAX_TEXT) }));
       // Orders are looked up only when the latest question is about paying or an order.
       const last = turns.filter((t) => t.role === "user").at(-1)?.text ?? "";
+      const orderQuestion = isOrderQuestion(last);
       const [prices, orders] = await Promise.all([
-        livePrices(gamesInChat(turns)),
-        isOrderQuestion(last) ? customerOrders().catch(() => undefined) : undefined,
+        livePrices(gamesInChat(turns)).catch(() => ({})),
+        orderQuestion ? customerOrders().catch(() => undefined) : undefined,
       ]);
-      const system = systemPrompt(prices, orders);
-      const result = await ai.run(process.env["YURIC_BOT_MODEL"] || DEFAULT_MODEL, {
-        messages: modelMessages(turns, system),
-        max_tokens: 450,
-        temperature: 0.3,
-      });
-      const text = typeof result.response === "string" ? cleanReply(result.response) : "";
-      return text ? { text } : { unavailable: "empty answer" };
-    } catch (error) {
-      console.error("Yuric Bot AI failed", error);
-      return { unavailable: error instanceof Error ? error.message : "AI error" };
-    }
-  });
+
+      const errors: string[] = [];
+      const ai = workersAi();
+      if (!ai) errors.push("no AI binding");
+      else {
+        const messages = modelMessages(turns, systemPrompt(prices, orders));
+        // If one model is missing or busy, the next one answers.
+        for (const model of botModels()) {
+          try {
+            const result = await ai.run(model, { messages, max_tokens: 450, temperature: 0.3 });
+            const text = cleanReply(answerText(result));
+            if (text) return { text, source: "ai" };
+            errors.push(`${model}: empty answer`);
+          } catch (error) {
+            errors.push(`${model}: ${error instanceof Error ? error.message : String(error)}`);
+          }
+        }
+        console.error("Yuric Bot AI failed", errors);
+      }
+      // Without the AI, a payment question still gets the real order check.
+      if (orderQuestion && orders !== undefined)
+        return { text: orderReply(orders), source: "orders" };
+      return { unavailable: errors.join(" | ") };
+    },
+  );

@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  answerText,
+  botModels,
   cleanReply,
   gamesInChat,
   modelMessages,
   MAX_TURNS,
+  orderReply,
   ordersSection,
   systemPrompt,
 } from "@/lib/chatAi";
@@ -85,5 +88,48 @@ describe("order questions", () => {
     expect(text).toMatch(/BBBB2222.*NOT PAID YET/);
     expect(ordersSection(null)).toContain("not signed in");
     expect(ordersSection(undefined)).toBe("");
+  });
+});
+
+describe("model answers", () => {
+  it("reads Workers AI and OpenAI-style answers", () => {
+    expect(answerText({ response: "hi" })).toBe("hi");
+    expect(answerText({ choices: [{ message: { content: "hey" } }] })).toBe("hey");
+    expect(answerText({})).toBe("");
+  });
+
+  it("tries the override first, then the default models, without repeats", () => {
+    expect(botModels("@cf/x")[0]).toBe("@cf/x");
+    expect(botModels("")).toHaveLength(2);
+  });
+});
+
+describe("orderReply (no AI)", () => {
+  const base = {
+    code: "AB12CD34",
+    game: "Mobile Legends",
+    pack: "86 Diamonds",
+    price: 1.25,
+    playerId: "123 (4567)",
+    minutesAgo: 3,
+    status: "pending",
+    qrExpired: false,
+  };
+
+  it("says the money arrived and delivery is on its way", () => {
+    const text = orderReply([{ ...base, paid: true }]);
+    expect(text).toContain("AB12CD34");
+    expect(text).toContain("ប្រាក់របស់អ្នកបានចូលហើយ");
+    expect(text).not.toContain("។");
+  });
+
+  it("says no money yet and points to the admin", () => {
+    const text = orderReply([{ ...base, paid: false }]);
+    expect(text).toContain("មិនទាន់ឃើញប្រាក់ចូល");
+    expect(text).toContain("@Yuricccc");
+  });
+
+  it("asks guests to sign in", () => {
+    expect(orderReply(null)).toContain("Sign In");
   });
 });

@@ -52,6 +52,28 @@ function describeOrder(o: OrderFact) {
   return `- Order ${o.code}: ${o.game} ${o.pack}, $${o.price.toFixed(2)}, Player ID ${o.playerId}, ${ago(o.minutesAgo)}. Payment: ${pay}. Delivery: ${delivery}.`;
 }
 
+const TG = store.telegram;
+
+/**
+ * A Khmer answer about the customer's orders, written from the data alone,
+ * for when the AI can't answer. No full stop sign, as on the rest of the site.
+ */
+export function orderReply(orders: OrderFact[] | null): string {
+  if (orders === null)
+    return `ដើម្បីឱ្យខ្ញុំពិនិត្យលុយ និងការបញ្ជាទិញរបស់អ្នក សូម Sign In ជាមុនសិន ហើយសួរម្តងទៀត ឬផ្ញើរូបវិក្កយបត្របង់ប្រាក់ និង Player ID ទៅ Admin តាម Telegram ${TG} Admin នឹងជួយដោះស្រាយភ្លាមៗ`;
+  if (!orders.length)
+    return `ខ្ញុំរកមិនឃើញការបញ្ជាទិញក្នុងគណនីរបស់អ្នកទេ បើអ្នកបានបង់ប្រាក់រួចហើយ សូមផ្ញើរូបវិក្កយបត្រ និង Player ID ទៅ Admin តាម Telegram ${TG}`;
+  const o = orders[0]!;
+  const head = `ខ្ញុំបានពិនិត្យក្នុងប្រព័ន្ធរួចហើយ ការបញ្ជាទិញ ${o.code} (${o.game} ${o.pack} $${o.price.toFixed(2)} Player ID ${o.playerId})`;
+  if (o.paid && o.status === "completed")
+    return `${head} ប្រាក់បានចូលហើយ ហើយបានបញ្ចូលរួចរាល់ សូមបើកហ្គេមពិនិត្យ បើនៅមិនឃើញ សូមទាក់ទង Admin តាម Telegram ${TG}`;
+  if (o.paid)
+    return `${head} ប្រាក់របស់អ្នកបានចូលហើយ Admin កំពុងបញ្ចូលឱ្យ ជាធម្មតាក្នុង 1-5 នាទី បើលើស 10 នាទីហើយនៅមិនទាន់ចូល សូមផ្ញើលេខកូដ ${o.code} ទៅ Admin តាម Telegram ${TG}`;
+  if (o.qrExpired)
+    return `${head} ប្រព័ន្ធមិនទាន់ឃើញប្រាក់ចូលទេ ហើយ QR នោះផុតកំណត់ហើយ សូមកុំបង់ QR ចាស់ សូមធ្វើការបញ្ជាទិញថ្មី បើអ្នកបានបង់រួចហើយ សូមផ្ញើរូបវិក្កយបត្រ និងលេខកូដ ${o.code} ទៅ Admin តាម Telegram ${TG}`;
+  return `${head} ប្រព័ន្ធមិនទាន់ឃើញប្រាក់ចូលនៅឡើយទេ បើអ្នកទើបតែបង់ សូមរង់ចាំ 1-2 នាទី ហើយសួរម្តងទៀត បើអ្នកបានបង់រួចហើយ សូមផ្ញើរូបវិក្កយបត្រ និងលេខកូដ ${o.code} ទៅ Admin តាម Telegram ${TG} Admin នឹងពិនិត្យឱ្យភ្លាមៗ`;
+}
+
 /** The customer's orders for the prompt, checked live against the bank. */
 export function ordersSection(orders: OrderContext): string {
   if (orders === undefined) return "";
@@ -69,6 +91,28 @@ How to use it: tell the customer clearly whether the money for their order arriv
 
 /** Workers AI model. Gemma 3 covers Khmer; override with the YURIC_BOT_MODEL variable. */
 export const DEFAULT_MODEL = "@cf/google/gemma-3-12b-it";
+/** Tried in order: the YURIC_BOT_MODEL override, Gemma 3, then Llama 3.3 as a backup. */
+export function botModels(
+  override = typeof process !== "undefined" ? process.env["YURIC_BOT_MODEL"] : "",
+) {
+  return [...new Set([override, DEFAULT_MODEL, "@cf/meta/llama-3.3-70b-instruct-fp8-fast"])].filter(
+    (m): m is string => !!m,
+  );
+}
+
+/** The reply text, whichever shape the model answers in (Workers AI or OpenAI style). */
+export function answerText(result: unknown): string {
+  const r = result as {
+    response?: unknown;
+    choices?: { message?: { content?: unknown }; text?: unknown }[];
+  } | null;
+  if (typeof r?.response === "string") return r.response;
+  const choice = r?.choices?.[0];
+  if (typeof choice?.message?.content === "string") return choice.message.content;
+  if (typeof choice?.text === "string") return choice.text;
+  return typeof result === "string" ? result : "";
+}
+
 export const MAX_TURNS = 8;
 export const MAX_TEXT = 500;
 
@@ -127,6 +171,8 @@ FACTS (never invent anything beyond these):
 - A wrong Player ID cannot be refunded, because the top-up goes to that ID. Always press Check ID before paying.
 - Signed-in customers see each order and its status (pending, processing, completed) on the Profile page (My Orders).
 - A KHQR code expires after a few minutes. Never pay an expired QR: go back and make a new order.
+
+TRUST: if the customer asks whether the shop is a scam or can be trusted, reassure them clearly that ${store.name} is trustworthy: payment goes through KHQR at their own Cambodian bank, we never ask for game passwords, only the Player ID, and every order can be checked; then tell them they can message the admin on Telegram https://t.me/${store.telegram.replace(/^@/, "")} for any problem.
 
 SOLVING PROBLEMS: when the customer has a problem, first show you understand and say sorry, then give the steps that fit:
 - Paid but nothing arrived: 1. wait up to 5 minutes, 2. check the order status on Profile, 3. check the Player ID on the order is correct, 4. if still nothing, message the admin on Telegram ${store.telegram} with the payment receipt screenshot, the order and the Player ID, and the admin will fix it quickly.
