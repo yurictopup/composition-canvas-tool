@@ -6,6 +6,7 @@ import { store } from "@/lib/games";
 import { StoreGuestMenu, StoreSettingsMenu, StoreUserMenu } from "@/components/StoreUserMenu";
 import { useStorePrefs } from "@/lib/storePrefs";
 import { ChatWidget } from "@/components/ChatWidget";
+import { StoreFooter } from "@/components/StoreFooter";
 import { BadgeDollarSign, Headphones, ShieldCheck, Zap } from "lucide-react";
 
 const tickerItems = [
@@ -77,21 +78,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
 
       <div className="flex flex-1 flex-col">{children}</div>
 
-      <footer id="help" className="border-t border-brand-400/20 mt-8">
-        <div className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-6">
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-            <Link to="/" className="font-display text-lg font-black text-glow">
-              💎 YURIC<span className="text-brand-400"> TOPUP</span>
-            </Link>
-            <div className="flex items-center gap-5 text-sm text-on-dark-muted">
-              <Link to="/" className="hover:text-on-dark transition-colors">{t("Home")}</Link>
-              <Link to="/profile" className="hover:text-on-dark transition-colors">{t("Orders")}</Link>
-              <a href={`https://t.me/${store.telegram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className="hover:text-on-dark transition-colors">Telegram</a>
-            </div>
-            <p className="text-xs text-on-dark-muted">© 2026 {store.name}</p>
-          </div>
-        </div>
-      </footer>
+      <StoreFooter />
 
       <ChatWidget />
     </div>
