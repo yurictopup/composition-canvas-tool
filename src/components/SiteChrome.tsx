@@ -3,12 +3,14 @@ import { useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { store } from "@/lib/games";
-import { StoreUserMenu } from "@/components/StoreUserMenu";
+import { StoreSettingsMenu, StoreUserMenu } from "@/components/StoreUserMenu";
+import { useStorePrefs } from "@/lib/storePrefs";
 import { ChatWidget } from "@/components/ChatWidget";
 
 export function SiteChrome({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
+  const { light, t } = useStorePrefs();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
@@ -24,21 +26,22 @@ export function SiteChrome({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="page-gradient flex min-h-screen flex-col">
-      <header className="sticky top-0 z-20 border-b border-brand-400/20 bg-brand-950/70 backdrop-blur">
+    <div className={`page-gradient flex min-h-screen flex-col ${light ? "store-light" : ""}`}>
+      <header className="store-header sticky top-0 z-20 border-b backdrop-blur">
         <div className="mx-auto flex w-full max-w-[1500px] items-center justify-between px-4 py-3 sm:px-6">
           <Link to="/" className="font-display text-xl font-black text-glow">
             💎 YURIC<span className="text-brand-400"> TOPUP</span>
           </Link>
-          <nav className="flex items-center gap-4 text-sm">
+          <nav className="flex items-center gap-1 text-sm">
+            <StoreSettingsMenu />
             {user ? (
               <StoreUserMenu user={user} onSignOut={signOut} />
             ) : (
               <Link
                 to="/auth"
-                className="rounded-lg bg-primary px-4 py-1.5 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                className="ml-2 rounded-lg bg-primary px-4 py-1.5 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
               >
-                Sign In
+                {t("Sign In")}
               </Link>
             )}
           </nav>
@@ -50,10 +53,10 @@ export function SiteChrome({ children }: { children: ReactNode }) {
           <div className="marquee-track">
             {[0, 1].map((k) => (
               <span key={k} className="flex shrink-0 items-center gap-10 pr-10">
-                <span>⚡ Instant delivery in 1-5 minutes</span>
-                <span>💎 Best prices</span>
-                <span>🔒 Secure payment</span>
-                <span>🎧 Support {store.hours}</span>
+                <span>⚡ {t("Instant delivery in 1-5 minutes")}</span>
+                <span>💎 {t("Best prices")}</span>
+                <span>🔒 {t("Secure payment")}</span>
+                <span>🎧 {t("Support")} {store.hours}</span>
               </span>
             ))}
           </div>
@@ -69,8 +72,8 @@ export function SiteChrome({ children }: { children: ReactNode }) {
               💎 YURIC<span className="text-brand-400"> TOPUP</span>
             </Link>
             <div className="flex items-center gap-5 text-sm text-on-dark-muted">
-              <Link to="/" className="hover:text-on-dark transition-colors">Home</Link>
-              <Link to="/profile" className="hover:text-on-dark transition-colors">Orders</Link>
+              <Link to="/" className="hover:text-on-dark transition-colors">{t("Home")}</Link>
+              <Link to="/profile" className="hover:text-on-dark transition-colors">{t("Orders")}</Link>
               <a href={`https://t.me/${store.telegram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className="hover:text-on-dark transition-colors">Telegram</a>
             </div>
             <p className="text-xs text-on-dark-muted">© 2026 {store.name}</p>

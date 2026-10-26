@@ -4,6 +4,7 @@ import banner from "@/assets/banner-angkor.png";
 import mascot from "@/assets/mascot-cut.png";
 import { games } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
+import { useStorePrefs } from "@/lib/storePrefs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const gameTabs = [
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const { t } = useStorePrefs();
   return (
     <SiteChrome>
       <section className="mx-auto w-full max-w-[1500px] px-4 pt-4 sm:px-6">
@@ -96,7 +98,7 @@ function Index() {
                   value={tab.id}
                   className="min-h-9 rounded-full border border-border/60 bg-secondary/60 px-4 py-1.5 text-sm font-semibold text-secondary-foreground backdrop-blur-sm transition-all hover:border-brand-400/50 hover:bg-card hover:text-foreground data-[state=active]:border-transparent data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_2px_12px_oklch(0.55_0.18_264/0.4)]"
                 >
-                  {tab.label}
+                  {t(tab.label)}
                 </TabsTrigger>
               ))}
             </TabsList>
