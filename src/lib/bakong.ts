@@ -138,10 +138,15 @@ export async function checkBakongPayment(cfg: BakongConfig, qrMd5: string): Prom
 /** A paid answer only counts when it is for our account, in USD, for the full amount. */
 export function paymentMatches(
   check: Extract<PaymentCheck, { status: "paid" }>,
-  expected: { amount: number; accountId: string },
+  expected: { amount: number; accountId: string | null },
 ): boolean {
   if (check.amount === null || Math.abs(check.amount - expected.amount) > 0.005) return false;
   if (check.currency !== null && check.currency.toUpperCase() !== "USD") return false;
-  if (check.toAccountId !== null && check.toAccountId !== expected.accountId) return false;
+  if (
+    expected.accountId !== null &&
+    check.toAccountId !== null &&
+    check.toAccountId !== expected.accountId
+  )
+    return false;
   return true;
 }

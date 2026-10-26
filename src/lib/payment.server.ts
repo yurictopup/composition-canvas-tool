@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   checkBakongPayment,
   createPaymentQr,
+  isRelayToken,
   paymentMatches,
   type BakongConfig,
 } from "@/lib/bakong";
@@ -122,7 +123,10 @@ export async function checkOrderPayment(
   if (check.status === "unpaid") return { available: true, paid: false };
 
   const amount = Number(order.price_usd);
-  if (!paymentMatches(check, { amount, accountId: cfg.accountId })) {
+  // With a KHQR.dev token the QR is made by KHQR.dev for the account linked
+  // there (e.g. an ABA merchant), so only the amount is compared.
+  const accountId = isRelayToken(cfg.token) ? null : cfg.accountId;
+  if (!paymentMatches(check, { amount, accountId })) {
     return {
       available: true,
       paid: false,
