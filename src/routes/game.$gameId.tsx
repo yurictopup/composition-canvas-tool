@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import { lookupPlayer } from "@/lib/player-lookup.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowUp, CircleAlert, CircleCheck, Flame, Receipt, Send, ShoppingCart, Wallet } from "lucide-react";
+import { ArrowUp, CircleAlert, CircleCheck, Flame, Receipt, ShoppingCart, Wallet } from "lucide-react";
 import { livePrice, packageKey, useLivePrices } from "@/lib/prices";
 
 export const Route = createFileRoute("/game/$gameId")({
@@ -190,24 +190,13 @@ function GamePage({ gameId }: { gameId: string }) {
               }
             />
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <a
-                href={`https://t.me/${store.telegram.replace("@","")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-3d inline-flex items-center justify-center gap-2 rounded-xl py-3 font-sans text-sm font-bold"
-              >
-                <Send className="h-4 w-4" />
-                {t("Contact us")}
-              </a>
-              <Link
-                to="/profile"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border py-3 font-sans text-sm font-semibold transition-colors hover:bg-muted"
-              >
-                <Receipt className="h-4 w-4" />
-                {t("My orders")}
-              </Link>
-            </div>
+            <Link
+              to="/profile"
+              className="mt-6 flex items-center justify-center gap-2 rounded-xl border border-border py-3 font-sans text-sm font-semibold transition-colors hover:bg-muted"
+            >
+              <Receipt className="h-4 w-4" />
+              {t("My orders")}
+            </Link>
 
             <p className="mt-5 text-center text-[11px] text-muted-foreground/80">
               Order ID: {orderId}
