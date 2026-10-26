@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
+import { QrCode } from "lucide-react";
 import banner from "@/assets/banner-angkor.png";
 import mascot from "@/assets/mascot-cut.png";
 import { games } from "@/lib/games";
@@ -64,11 +65,20 @@ function Index() {
           <BannerOverlay />
           <span className="pointer-events-none absolute bottom-0 right-[5%] z-[2] block h-[92%] w-auto">
             <span className="mascot-backdrop" aria-hidden="true" />
+            <HairWindFilter />
+            {/* Hair layer: the whole image with a wind ripple; the face and body
+                are covered by the still copy below, so only the hair moves. */}
             <img
               src={mascot}
               alt="តួអង្គ Yuric ពេជ្រភ្លឺភ្លឹប"
               aria-hidden="true"
-              className="relative block h-full w-auto object-contain drop-shadow-[0_0_18px_rgba(96,165,250,0.55)]"
+              className="mascot-hair relative block h-full w-auto object-contain drop-shadow-[0_0_18px_rgba(96,165,250,0.55)]"
+            />
+            <img
+              src={mascot}
+              alt=""
+              aria-hidden="true"
+              className="mascot-still absolute inset-0 block h-full w-auto object-contain"
             />
             <span
               className="mascot-shine absolute inset-0"
@@ -179,7 +189,6 @@ function Diamond({ className, style }: { className?: string; style?: CSSProperti
 // Welcome headline, payment badge, game icons, waves and gems drawn over the
 // Angkor banner (HTML/SVG, so it stays sharp and follows the store language).
 function BannerOverlay() {
-  const { t } = useStorePrefs();
   return (
     <span className="pointer-events-none absolute inset-0 z-[1] block">
       <span className="absolute inset-0 block bg-[radial-gradient(ellipse_42%_75%_at_50%_48%,rgb(6_20_70/0.6),transparent_72%)]" />
@@ -220,27 +229,37 @@ function BannerOverlay() {
       </span>
 
       {/* "Pay with" card */}
-      <span className="absolute left-[21%] top-[9%] hidden flex-col items-center gap-1.5 rounded-xl bg-white px-4 py-2.5 shadow-[0_6px_0_#c9d6ee,0_12px_24px_rgb(0_0_0/0.3)] md:flex">
-        <span className="font-khmer text-[clamp(11px,1vw,15px)] text-[#0b2a7a]">{t("Pay with")}:</span>
-        <span className="rounded-[3px] bg-[#E1232E] px-4 py-1 text-[clamp(13px,1.3vw,20px)] font-extrabold tracking-wider text-white shadow-[0_3px_0_#9c1219]">
-          KHQR
+      <span className="pay-card absolute left-[20%] top-[8%] hidden -rotate-3 rounded-2xl bg-[linear-gradient(135deg,#fff6c2,#ffc21f_45%,#ff8a00)] p-[3px] shadow-[0_8px_0_#0b2a7a,0_16px_30px_rgb(0_0_0/0.35)] md:block">
+        <span className="relative flex flex-col items-center gap-1.5 overflow-hidden rounded-[13px] bg-[linear-gradient(180deg,#ffffff,#e9f0ff)] px-4 pb-2.5 pt-2">
+          <span className="pay-card-shine" aria-hidden="true" />
+          <span className="flex items-center gap-1.5 font-khmer text-[clamp(11px,1vw,15px)] font-bold text-[#0b2a7a]">
+            <span className="size-1.5 rounded-full bg-[#22c55e] shadow-[0_0_0_3px_rgb(34_197_94/0.25)]" />
+            {"ទូទាត់តាមរយៈ"}
+          </span>
+          <span className="flex items-center gap-2 rounded-lg bg-[#E1232E] py-1 pl-1.5 pr-3 shadow-[0_3px_0_#9c1219,0_0_16px_rgb(225_35_46/0.45)]">
+            <span className="grid size-[clamp(20px,1.9vw,30px)] place-items-center rounded-md bg-white">
+              <QrCode className="size-[75%] text-[#E1232E]" strokeWidth={2.5} />
+            </span>
+            <span className="text-[clamp(14px,1.4vw,22px)] font-black tracking-wider text-white">KHQR</span>
+          </span>
+          <span className="text-[clamp(9px,0.7vw,11px)] font-khmer font-semibold text-[#5b6b8c]">ស្កេនបង់ប្រាក់ភ្លាមៗ</span>
         </span>
       </span>
 
       {/* headline */}
       <span className="absolute left-[40%] top-[46%] flex w-[70%] -translate-x-1/2 -translate-y-1/2 flex-col items-center text-center sm:left-[50%] sm:w-[48%]">
         <span className="grid font-khmer text-[clamp(34px,6.2vw,96px)] leading-[1.1]">
-          <span className="banner-title-back col-start-1 row-start-1" aria-hidden="true">{t("Welcome")}</span>
-          <span className="banner-title col-start-1 row-start-1">{t("Welcome")}</span>
+          <span className="banner-title-back col-start-1 row-start-1" aria-hidden="true">សូមស្វាគមន៍</span>
+          <span className="banner-title col-start-1 row-start-1">សូមស្វាគមន៍</span>
         </span>
         <span className="-mt-[0.15em] grid self-end pr-[14%] font-khmer text-[clamp(15px,2vw,30px)]">
-          <span className="banner-title-back col-start-1 row-start-1" aria-hidden="true">{t("to")}</span>
-          <span className="banner-title col-start-1 row-start-1">{t("to")}</span>
+          <span className="banner-title-back col-start-1 row-start-1" aria-hidden="true">មកកាន់</span>
+          <span className="banner-title col-start-1 row-start-1">មកកាន់</span>
         </span>
         <span className="mt-[0.15em] rounded-md border-2 border-[#fff2b0] bg-gradient-to-b from-[#ffd75e] to-[#ff9d00] px-[0.9em] py-[0.12em] font-display text-[clamp(14px,2.3vw,34px)] font-black tracking-[0.14em] text-[#0b2a7a] shadow-[0_4px_0_#b86e00,0_10px_20px_rgb(0_0_0/0.4)]">
           YURIC TOPUP
         </span>
-        <span className="banner-sub mt-[0.55em] font-khmer text-[clamp(13px,1.7vw,26px)]">{t("Instant top-up - safe and secure")}</span>
+        <span className="banner-sub mt-[0.55em] font-khmer text-[clamp(13px,1.7vw,26px)]">បញ្ចូលពេជ្របានភ្លាមៗ - ដោយសុវត្ថិភាព</span>
       </span>
 
       {gems.map((g, i) => (
@@ -251,5 +270,21 @@ function BannerOverlay() {
         />
       ))}
     </span>
+  );
+}
+
+// Scrolling noise pushed through a displacement map reads as wind in the hair.
+function HairWindFilter() {
+  return (
+    <svg width="0" height="0" className="absolute" aria-hidden="true">
+      <filter id="hair-wind" x="-20%" y="-20%" width="140%" height="140%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.018 0.045" numOctaves="2" seed="7" result="noise" />
+        <feOffset in="noise" dx="0" dy="0" result="flow">
+          <animate attributeName="dx" values="0;36;0" dur="3.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" />
+          <animate attributeName="dy" values="0;-10;0" dur="3.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" />
+        </feOffset>
+        <feDisplacementMap in="SourceGraphic" in2="flow" scale="9" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
   );
 }
