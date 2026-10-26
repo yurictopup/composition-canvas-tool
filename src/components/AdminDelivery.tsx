@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { deliverOrder, refreshDelivery } from "@/lib/delivery.functions";
+import { checkPayment } from "@/lib/payment.functions";
 
 // One order's GamesDrop delivery controls on the admin Orders tab.
 export function DeliveryCell({
@@ -11,6 +12,8 @@ export function DeliveryCell({
     status: string;
     supplier_order_id?: string | null;
     supplier_status?: string | null;
+    payment_md5?: string | null;
+    paid_at?: string | null;
   };
   onChanged: () => void;
 }) {
@@ -20,6 +23,20 @@ export function DeliveryCell({
   const canDeliver =
     (order.status === "pending" || order.status === "processing") && !order.supplier_order_id;
   const canRefresh = order.status === "processing" && !!order.supplier_order_id;
+  const canCheckPayment = order.status === "pending" && !!order.payment_md5 && !order.paid_at;
+
+  async function runPaymentCheck() {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await checkPayment({ data: { orderId: order.id } });
+      setMsg(res.paid ? "Paid ✅" : (res.message ?? "Not paid yet."));
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Something went wrong.");
+    }
+    setBusy(false);
+    onChanged();
+  }
 
   async function run(action: "deliver" | "refresh") {
     if (
@@ -43,6 +60,16 @@ export function DeliveryCell({
 
   return (
     <div className="grid gap-1 text-xs">
+      {order.paid_at && <span className="font-semibold text-green-700">💰 Paid by Bakong</span>}
+      {canCheckPayment && (
+        <button
+          disabled={busy}
+          onClick={runPaymentCheck}
+          className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-semibold disabled:opacity-40"
+        >
+          {busy ? "Checking…" : "💳 Check payment"}
+        </button>
+      )}
       {canDeliver && (
         <button
           disabled={busy}

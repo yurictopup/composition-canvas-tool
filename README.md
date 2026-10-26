@@ -37,3 +37,14 @@ Games missing from `GAMESDROP_OFFER_IDS` keep saying the lookup is not available
 ## Automatic delivery (GamesDrop)
 
 Each package can be linked to a GamesDrop offer in **/admin → Prices** (use "Search GamesDrop" to find offer IDs). Paid orders for linked packages get a **🚀 Deliver** button in **/admin → Orders**, which buys the package from your GamesDrop balance and tops up the player. The order id is sent as GamesDrop's `transactionId`, so the same order is never bought twice. Linked offers also turn on the name check, so `GAMESDROP_OFFER_IDS` is optional. Run `supabase/migrations/20261026100000_gamesdrop_delivery.sql` after the secure-order migration.
+
+## Bakong KHQR payment
+
+After placing an order, the customer sees a KHQR for the exact amount. The page checks Bakong every 5 seconds; once the payment matches (same amount, USD, your account), the order is marked paid and GamesDrop delivery starts automatically. The owner can also press **💳 Check payment** in **/admin → Orders**. Without these secrets the old manual payment instructions are shown. Set them as server environment variables:
+
+- `BAKONG_TOKEN`: an NBC Bakong Open API token (`eyJ…`, renew every 90 days) or a KHQR.dev token (`rbk…`).
+- `BAKONG_ACCOUNT_ID`: the Bakong account that receives payments, e.g. `name@bank`.
+- `BAKONG_MERCHANT_NAME` (optional): name shown in the banking app, default `Yuric Topup`.
+- `BAKONG_API_URL` (optional): the NBC API only answers Cambodian IP addresses, so with an NBC token point this at a proxy hosted in Cambodia. KHQR.dev tokens work from anywhere.
+
+Run `supabase/migrations/20261026120000_bakong_payment.sql` after the GamesDrop delivery migration.
