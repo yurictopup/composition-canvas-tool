@@ -39,17 +39,24 @@ export function DeliveryCell({
   }
 
   async function run(action: "deliver" | "refresh") {
+    const unpaid = !order.paid_at;
     if (
       action === "deliver" &&
-      !window.confirm("Buy this package from GamesDrop now? It uses your GamesDrop balance.")
+      !window.confirm(
+        unpaid
+          ? "Bakong has NOT confirmed this order is paid. Only continue if the customer paid you another way. Buy from GamesDrop now?"
+          : "Buy this package from GamesDrop now? It uses your GamesDrop balance.",
+      )
     ) {
       return;
     }
     setBusy(true);
     setMsg(null);
     try {
-      const fn = action === "deliver" ? deliverOrder : refreshDelivery;
-      const res = await fn({ data: { orderId: order.id } });
+      const res =
+        action === "deliver"
+          ? await deliverOrder({ data: { orderId: order.id, allowUnpaid: unpaid } })
+          : await refreshDelivery({ data: { orderId: order.id } });
       setMsg(res.message);
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Something went wrong.");

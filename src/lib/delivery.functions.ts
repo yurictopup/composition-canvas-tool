@@ -13,14 +13,15 @@ function requireOwner(claims: Record<string, unknown>) {
 
 const orderInput = z.object({ orderId: z.string().uuid() });
 
-// Owner-only: buy this paid order's package from GamesDrop now.
+// Owner-only: buy this order's package from GamesDrop now. Orders Bakong has
+// not confirmed need allowUnpaid (the owner confirmed they were paid another way).
 export const deliverOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator(orderInput)
+  .validator(orderInput.extend({ allowUnpaid: z.boolean().optional() }))
   .handler(async ({ data, context }): Promise<DeliveryResponse> => {
     requireOwner(context.claims);
     const { adminDb, deliverPaidOrder } = await import("@/lib/delivery.server");
-    return deliverPaidOrder(adminDb(), data.orderId);
+    return deliverPaidOrder(adminDb(), data.orderId, { allowUnpaid: data.allowUnpaid === true });
   });
 
 export const refreshDelivery = createServerFn({ method: "POST" })

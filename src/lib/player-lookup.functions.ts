@@ -20,6 +20,10 @@ export const lookupPlayer = createServerFn({ method: "POST" })
     // Malformed IDs never reach the supplier.
     if (validatePlayerId(data.gameId, data.primary, data.secondary ?? ""))
       return { status: "not_found" };
+    const { allowRequest } = await import("@/lib/rate-limit");
+    const { clientIp } = await import("@/lib/rate-limit.server");
+    // Each check may call GamesDrop; too many from one visitor reads as busy.
+    if (!allowRequest(`lookup:${clientIp()}`, 20, 60_000)) return { status: "unavailable" };
     const usesServerPicker = !!getIdConfig(data.gameId).secondary?.options;
     return cachedLookup(data, async () => {
       const offerIds = parseOfferIds(process.env["GAMESDROP_OFFER_IDS"]);
