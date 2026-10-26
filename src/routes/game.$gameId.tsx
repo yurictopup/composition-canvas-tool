@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import { lookupPlayer } from "@/lib/player-lookup.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { ArrowUp, CircleAlert, CircleCheck, Flame, Receipt, Send, ShoppingCart, Wallet } from "lucide-react";
 import { livePrice, packageKey, useLivePrices } from "@/lib/prices";
 
 export const Route = createFileRoute("/game/$gameId")({
@@ -41,7 +42,7 @@ function GamePage({ gameId }: { gameId: string }) {
   const game = findGame(gameId);
   const [uid, setUid] = useState("");
   const [zone, setZone] = useState("");
-  const [check, setCheck] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [check, setCheck] = useState<{ ok: boolean; msg: string; name?: string } | null>(null);
   const [checking, setChecking] = useState(false);
   const checkSeq = useRef(0);
   const [pkg, setPkg] = useState<number | null>(null);
@@ -89,20 +90,20 @@ function GamePage({ gameId }: { gameId: string }) {
     const error = validatePlayerId(gameId, uid, zone);
     if (error) { setCheck({ ok: false, msg: error }); return; }
     if (!idConfig.requiresLookup) {
-      setCheck({ ok: true, msg: `ID ${uid.trim()} valid — ready to order!` });
+      setCheck({ ok: true, msg: "ID is valid, ready to order" });
       return;
     }
     const seq = ++checkSeq.current;
     setChecking(true);
     setCheck(null);
-    let next: { ok: boolean; msg: string };
+    let next: { ok: boolean; msg: string; name?: string };
     try {
       const result = await lookupPlayer({ data: { gameId, primary: uid, secondary: zone || undefined } });
-      if (result.status === "found") next = { ok: true, msg: `Nickname: ${result.name}` };
-      else if (result.status === "not_found") next = { ok: false, msg: "Player not found. Please check your ID." };
+      if (result.status === "found") next = { ok: true, msg: "User verified:", name: result.name };
+      else if (result.status === "not_found") next = { ok: false, msg: "User ID not found" };
       // No supplier name check for this game yet: a well-formed ID may still
       // order, and the owner delivers it by hand from /admin.
-      else if (result.status === "unsupported") next = { ok: true, msg: `ID ${uid.trim()} — please double-check it before paying.` };
+      else if (result.status === "unsupported") next = { ok: true, msg: "ID format is correct, please double-check it before paying" };
       else next = { ok: false, msg: "Name check is busy right now. Please try again." };
     } catch {
       next = { ok: false, msg: "Name check is busy right now. Please try again." };
@@ -155,19 +156,25 @@ function GamePage({ gameId }: { gameId: string }) {
     return (
       <SiteChrome>
         <main className="mx-auto w-full max-w-[600px] px-4 py-10 sm:px-6">
-          <div className="card-3d rounded-3xl p-8 text-center">
-            <div className="text-5xl mb-4">✅</div>
-            <h1 className="font-display text-2xl font-black mb-2">Order Placed!</h1>
-            <p className="text-muted-foreground text-sm mb-6">
-              Order #{orderId.slice(0, 8).toUpperCase()} — {game.name} {selected?.amt} {game.unit}
-            </p>
-
+          <div className="card-3d rounded-3xl p-6 sm:p-8">
             {/* Payment: the order's own KHQR, or manual instructions when Bakong isn't set up */}
             <OrderPayment
               orderId={orderId}
+              summary={{
+                code: orderId.slice(0, 8).toUpperCase(),
+                game: game.name,
+                item: `${selected?.amt ?? ""} ${game.unit}`.trim(),
+                amount: paidPrice ?? selected?.price ?? undefined,
+              }}
               fallback={
-                <div className="rounded-2xl bg-muted/50 p-5 text-left mb-6">
-                  <h2 className="font-bold mb-3 text-base">💳 Payment Instructions</h2>
+                <div className="rounded-2xl bg-muted/50 p-5 text-left">
+                  <p className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    {t("Order")} #{orderId.slice(0, 8).toUpperCase()} · {game.name} {selected?.amt} {game.unit}
+                  </p>
+                  <h2 className="mb-3 flex items-center gap-2 text-base font-bold">
+                    <Wallet className="h-4 w-4 text-primary" />
+                    Payment Instructions
+                  </h2>
                   <div className="space-y-2 text-sm text-muted-foreground">
                     <p>1. Open <strong>Bakong</strong> app</p>
                     <p>2. Scan QR ឬ Transfer ទៅ:</p>
@@ -177,27 +184,32 @@ function GamePage({ gameId }: { gameId: string }) {
                     </div>
                     <p className="mt-2">3. Amount: <strong className="text-accent text-base">${(paidPrice ?? selected?.price)?.toFixed(2)}</strong></p>
                     <p>4. Note/Description: <strong className="text-foreground">{orderId.slice(0,8).toUpperCase()}</strong></p>
-                    <p className="mt-2">5. Screenshot ផ្ញើ Telegram — diamonds ចូល 1-5 នាទី ✨</p>
+                    <p className="mt-2">5. Screenshot ផ្ញើ Telegram — diamonds ចូល 1-5 នាទី</p>
                   </div>
                 </div>
               }
             />
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="mt-6 grid grid-cols-2 gap-3">
               <a
                 href={`https://t.me/${store.telegram.replace("@","")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-3d rounded-xl py-3 font-bold text-center text-sm"
+                className="btn-3d inline-flex items-center justify-center gap-2 rounded-xl py-3 font-sans text-sm font-bold"
               >
-                📱 Contact Telegram
+                <Send className="h-4 w-4" />
+                {t("Contact us")}
               </a>
-              <Link to="/profile" className="rounded-xl border border-border py-3 font-semibold text-center text-sm hover:bg-muted transition-colors">
-                📦 My Orders
+              <Link
+                to="/profile"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border py-3 font-sans text-sm font-semibold transition-colors hover:bg-muted"
+              >
+                <Receipt className="h-4 w-4" />
+                {t("My orders")}
               </Link>
             </div>
 
-            <p className="mt-5 text-xs text-muted-foreground">
+            <p className="mt-5 text-center text-[11px] text-muted-foreground/80">
               Order ID: {orderId}
             </p>
           </div>
@@ -236,14 +248,14 @@ function GamePage({ gameId }: { gameId: string }) {
                 placeholder={idConfig.primary.placeholder}
                 inputMode={idConfig.primary.numeric ? "numeric" : "text"}
                 autoComplete="off" spellCheck={false}
-                className="min-w-0 rounded-lg border bg-input px-4 py-3 font-normal outline-none focus:border-primary" />
+                className={`min-w-0 rounded-lg border bg-input px-4 py-3 font-normal outline-none focus:border-primary ${check && !check.ok ? "border-red-500" : ""}`} />
             </label>
             {idConfig.secondary && (
               <label className="grid min-w-0 gap-2 text-sm font-semibold">
                 {idConfig.secondary.label}
                 {idConfig.secondary.options ? (
                   <select value={zone} onChange={(e) => { setZone(e.target.value); resetCheck(); }}
-                    className="h-12 min-w-0 rounded-lg border bg-input px-4 font-normal outline-none focus:border-primary">
+                    className={`h-12 min-w-0 rounded-lg border bg-input px-4 font-normal outline-none focus:border-primary ${check && !check.ok ? "border-red-500" : ""}`}>
                     <option value="">{idConfig.secondary.placeholder}</option>
                     {idConfig.secondary.options.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
@@ -252,15 +264,26 @@ function GamePage({ gameId }: { gameId: string }) {
                     placeholder={idConfig.secondary.placeholder}
                     inputMode={idConfig.secondary.numeric ? "numeric" : "text"}
                     autoComplete="off" spellCheck={false}
-                    className="min-w-0 rounded-lg border bg-input px-4 py-3 font-normal outline-none focus:border-primary" />
+                    className={`min-w-0 rounded-lg border bg-input px-4 py-3 font-normal outline-none focus:border-primary ${check && !check.ok ? "border-red-500" : ""}`} />
                 )}
               </label>
             )}
             <Button type="submit" disabled={checking} className="h-12 px-6 font-bold">{checking ? t("Checking…") : t("Check ID")}</Button>
           </form>
           {check && (
-            <p role="status" className={`mt-3 text-sm font-semibold ${check.ok ? "text-primary" : "text-destructive"}`}>
-              {check.ok ? "✅" : "⚠️"} {check.msg}
+            <p
+              role="status"
+              className={`mt-3 flex items-start gap-2 font-sans text-sm leading-relaxed ${check.ok ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"}`}
+            >
+              {check.ok ? (
+                <CircleCheck className="mt-0.5 h-4 w-4 shrink-0" />
+              ) : (
+                <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+              )}
+              <span>
+                {t(check.msg)}
+                {check.name && <strong className="ml-1 font-bold">{check.name}</strong>}
+              </span>
             </p>
           )}
           {gameId === "roblox" && (
@@ -277,7 +300,7 @@ function GamePage({ gameId }: { gameId: string }) {
 
           {hotItems.length > 0 && (
             <div className="mb-5">
-              <p className="mb-3 flex items-center gap-2 text-sm font-bold text-rose-500">🔥 {t("Hot Items")}</p>
+              <p className="mb-3 flex items-center gap-2 text-sm font-bold text-rose-500"><Flame className="h-4 w-4" /> {t("Hot Items")}</p>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {hotItems.map((item, i) => (
                   <button key={item.label} onClick={() => selectHot(i)}
@@ -366,7 +389,7 @@ function GamePage({ gameId }: { gameId: string }) {
           </div>
 
           {orderErr && (
-            <p className="mt-3 text-center text-sm text-destructive font-semibold">⚠️ {orderErr}</p>
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-sm font-semibold text-destructive"><CircleAlert className="h-4 w-4 shrink-0" />{orderErr}</p>
           )}
 
           <button
@@ -374,12 +397,12 @@ function GamePage({ gameId }: { gameId: string }) {
             onClick={handleBuy}
             className="btn-3d glow-pulse mt-5 w-full rounded-xl py-4 font-display font-bold disabled:opacity-40"
           >
-            {busy ? t("Processing…") : `🛒 ${t("Place Order")}`}
+            {busy ? t("Processing…") : <span className="inline-flex items-center gap-2"><ShoppingCart className="h-4 w-4" />{t("Place Order")}</span>}
           </button>
 
           {!check?.ok && (
-            <p className="mt-2 text-center text-xs text-muted-foreground">
-              ⬆️ {t("Check your Player ID first to order")}
+            <p className="mt-2 flex items-center justify-center gap-1 text-xs text-muted-foreground">
+              <ArrowUp className="h-3.5 w-3.5" /> {t("Check your Player ID first to order")}
             </p>
           )}
         </aside>
