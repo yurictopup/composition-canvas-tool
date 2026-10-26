@@ -140,11 +140,17 @@ Every answer about a problem must end by telling the customer they can message t
 ${details ? `\nGames the customer asked about:\n${details}` : ""}${ordersSection(orders)}`;
 }
 
+function dropLeadingBot(turns: ChatTurn[]) {
+  const first = turns.findIndex((t) => t.role === "user");
+  return first < 0 ? [] : turns.slice(first);
+}
+
 /** Model messages: the system prompt, then the last turns, trimmed. */
 export function modelMessages(turns: ChatTurn[], system: string) {
   return [
     { role: "system", content: system },
-    ...turns.slice(-MAX_TURNS).map((t) => ({
+    // Chat models expect the customer to speak first, so a greeting from the bot is dropped.
+    ...dropLeadingBot(turns.slice(-MAX_TURNS)).map((t) => ({
       role: t.role === "bot" ? "assistant" : "user",
       content: t.text.slice(0, MAX_TEXT),
     })),

@@ -78,6 +78,8 @@ export type ChatWidgetProps = {
 };
 
 let nextThreadId = 1;
+const NEW_CHAT = "ការសន្ទនាថ្មី";
+const shortTitle = (text: string) => (text.length > 40 ? text.slice(0, 40) + "…" : text);
 
 export function ChatWidget({
   faqs = defaultFaqs,
@@ -133,6 +135,23 @@ export function ChatWidget({
     setActiveId(thread.id);
   }
 
+  // The composer only shows inside a conversation; this opens an empty one.
+  function startChat() {
+    const thread: Thread = {
+      id: nextThreadId++,
+      title: NEW_CHAT,
+      messages: [
+        {
+          role: "bot",
+          text: "សួស្តី! ខ្ញុំជា Yuric Bot ជំនួយការ AI។ តើខ្ញុំអាចជួយអ្វីបាន? សួរអំពីហ្គេម តម្លៃ ការបង់ប្រាក់ ឬបញ្ហាការបញ្ជាទិញបាន។",
+          suggestions: DEFAULT_SUGGESTIONS,
+        },
+      ],
+    };
+    setThreads((prev) => [thread, ...prev]);
+    setActiveId(thread.id);
+  }
+
   function ask(raw: string) {
     const text = raw.trim();
     if (!text || typing) return;
@@ -141,7 +160,7 @@ export function ChatWidget({
       id = nextThreadId++;
       const thread: Thread = {
         id,
-        title: text.length > 40 ? text.slice(0, 40) + "…" : text,
+        title: shortTitle(text),
         messages: [{ role: "user", text }],
       };
       setThreads((prev) => [thread, ...prev]);
@@ -149,7 +168,14 @@ export function ChatWidget({
     } else {
       setThreads((prev) =>
         prev.map((t) =>
-          t.id === id ? { ...t, messages: [...t.messages, { role: "user", text }] } : t,
+          t.id === id
+            ? {
+                ...t,
+                // A chat started from "ask AI" is named after its first question.
+                title: t.title === NEW_CHAT ? shortTitle(text) : t.title,
+                messages: [...t.messages, { role: "user", text }],
+              }
+            : t,
         ),
       );
     }
@@ -312,7 +338,7 @@ export function ChatWidget({
                   type="button"
                   aria-label="ការសន្ទនាថ្មី"
                   title="ការសន្ទនាថ្មី"
-                  onClick={() => setActiveId(null)}
+                  onClick={startChat}
                   className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-white/80 transition hover:text-white ${glass}`}
                 >
                   <SquarePen className="h-4 w-4" />
@@ -342,7 +368,7 @@ export function ChatWidget({
                     return (
                       <div
                         key={i}
-                        className={`flex items-end gap-2 animate-in fade-in slide-in-from-bottom-1 duration-300 ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                        className={`flex items-start gap-2 animate-in fade-in slide-in-from-bottom-1 duration-300 ${m.role === "user" ? "justify-end" : "justify-start"}`}
                       >
                         {m.role === "bot" && botAvatar}
                         <div
@@ -503,7 +529,16 @@ export function ChatWidget({
                     <Send className="h-4 w-4 shrink-0 text-[oklch(0.8_0.12_230)]" />
                   </a>
                 </div>
-                {footer}
+                <div className="relative px-3 pb-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={startChat}
+                    className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(120deg,oklch(0.68_0.15_250),oklch(0.55_0.24_290))] text-sm font-bold text-white shadow-[0_0_28px_oklch(0.6_0.22_280/0.45)] transition hover:brightness-110"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    ចាប់ផ្តើមជជែកជាមួយ Yuric AI
+                  </button>
+                </div>
               </>
             )}
           </div>
