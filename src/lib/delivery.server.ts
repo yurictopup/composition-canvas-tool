@@ -45,18 +45,28 @@ function describe(result: DeliveryResult): DeliveryResponse {
 export async function deliverPaidOrder(
   db: SupabaseClient,
   orderId: string,
+  { allowUnpaid = false }: { allowUnpaid?: boolean } = {},
 ): Promise<DeliveryResponse> {
   // Claim the order so two clicks don't race; GamesDrop's transactionId is the
-  // real guard against buying twice.
-  const { data: order } = await db
+  // real guard against buying twice. Unpaid orders are never bought by mistake.
+  let claim = db
     .from("orders")
     .update({ status: "processing", supplier_status: "PLACING" })
     .eq("id", orderId)
     .in("status", ["pending", "processing"])
-    .is("supplier_order_id", null)
+    .is("supplier_order_id", null);
+  if (!allowUnpaid) claim = claim.not("paid_at", "is", null);
+  const { data: order } = await claim
     .select("id, game_id, package_amt, player_id, player_zone")
     .maybeSingle();
-  if (!order) return { ok: false, message: "This order is not waiting for delivery." };
+  if (!order) {
+    return {
+      ok: false,
+      message: allowUnpaid
+        ? "This order is not waiting for delivery."
+        : "This order is not paid by Bakong yet (or is not waiting for delivery).",
+    };
+  }
 
   const { data: offer } = await db
     .from("supplier_offers")
