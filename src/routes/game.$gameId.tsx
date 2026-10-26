@@ -325,7 +325,7 @@ function GamePage({ gameId }: { gameId: string }) {
                 type="button"
                 onClick={() => setPay(m)}
                 aria-pressed={pay === m}
-                className={`relative flex aspect-square w-44 flex-col items-center justify-center gap-2.5 rounded-[4px] border-2 bg-white px-4 text-center text-[#142650] transition ${
+                className={`relative flex aspect-square w-44 flex-col items-center justify-center gap-2.5 rounded-2xl border-2 bg-white px-4 text-center text-[#142650] transition ${
                   pay === m
                     ? "border-[#2f5fe0] shadow-[0_6px_18px_rgb(47_95_224/0.25)]"
                     : "border-[#dfe8f6] hover:border-[#2f5fe0]/50"
