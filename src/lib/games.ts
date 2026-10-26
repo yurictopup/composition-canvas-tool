@@ -15,11 +15,11 @@ import coc from "@/assets/coc.jpg";
 import genshin from "@/assets/genshin.jpg";
 import starrail from "@/assets/starrail.jpg";
 import valorant from "@/assets/valorant.jpg";
-import deltaforce from "@/assets/deltaforce.svg";
-import arenabreakout from "@/assets/arenabreakout.svg";
-import brawlstars from "@/assets/brawlstars.svg";
-import clashroyale from "@/assets/clashroyale.svg";
-import zzz from "@/assets/zzz.svg";
+import deltaforce from "@/assets/deltaforce.jpg";
+import arenabreakout from "@/assets/arenabreakout.jpg";
+import brawlstars from "@/assets/brawlstars.jpg";
+import clashroyale from "@/assets/clashroyale.jpg";
+import zzz from "@/assets/zzz.jpg";
 
 export const games = [
   { id: "mlbb", name: "Mobile Legends", icon: mlbb, unit: "Diamonds", blurb: "Instant MLBB diamond delivery" },
