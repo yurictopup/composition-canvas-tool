@@ -59,7 +59,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
               <span key={k} aria-hidden={k === 1} className="flex shrink-0 items-center gap-3 pr-3">
                 {tickerItems.map(({ Icon, label, tone }) => (
                   <span key={label} className="flex items-center gap-3">
-                    <span className="flex items-center gap-2 rounded-full border border-white/15 bg-white/10 py-1 pl-1 pr-4 font-sans text-sm font-semibold leading-[1.7] backdrop-blur-sm">
+                    <span className="flex items-center gap-2 rounded-full border border-white/15 bg-white/10 py-1 pl-1 pr-4 font-khmer text-[15px] font-normal leading-[1.9] tracking-wide backdrop-blur-sm">
                       <span className={`grid h-7 w-7 place-items-center rounded-full ${tone}`}>
                         <Icon size={15} strokeWidth={2.5} />
                       </span>
