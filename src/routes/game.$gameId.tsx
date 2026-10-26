@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { findGame, getPackages, mlbbHotItems, payments, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
+import { lookupPlayer } from "@/lib/player-lookup.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/game/$gameId")({
@@ -36,6 +37,8 @@ function GamePage({ gameId }: { gameId: string }) {
   const [uid, setUid] = useState("");
   const [zone, setZone] = useState("");
   const [check, setCheck] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [checking, setChecking] = useState(false);
+  const checkSeq = useRef(0);
   const [pkg, setPkg] = useState<number | null>(null);
   const [hotPkg, setHotPkg] = useState<number | null>(null);
   const [pay, setPay] = useState(payments[0] ?? "Bakong");
@@ -67,14 +70,32 @@ function GamePage({ gameId }: { gameId: string }) {
   function selectPkg(i: number) { setPkg(i); setHotPkg(null); }
   function selectHot(i: number) { setHotPkg(i); setPkg(null); }
 
-  function runCheck() {
+  function resetCheck() { checkSeq.current++; setCheck(null); setChecking(false); }
+
+  async function runCheck() {
     const error = validatePlayerId(gameId, uid, zone);
     if (error) { setCheck({ ok: false, msg: error }); return; }
-    if (idConfig.requiresLookup) {
-      setCheck({ ok: false, msg: "Account name lookup is not available yet." });
+    if (!idConfig.requiresLookup) {
+      setCheck({ ok: true, msg: `ID ${uid.trim()} valid — ready to order!` });
       return;
     }
-    setCheck({ ok: true, msg: `✅ ID ${uid.trim()} valid — ready to order!` });
+    const seq = ++checkSeq.current;
+    setChecking(true);
+    setCheck(null);
+    let next: { ok: boolean; msg: string };
+    try {
+      const result = await lookupPlayer({ data: { gameId, primary: uid, secondary: zone || undefined } });
+      if (result.status === "found") next = { ok: true, msg: `Nickname: ${result.name}` };
+      else if (result.status === "not_found") next = { ok: false, msg: "Player not found. Please check your ID." };
+      else if (result.status === "unsupported") next = { ok: false, msg: "Account name lookup is not available yet." };
+      else next = { ok: false, msg: "Name check is busy right now. Please try again." };
+    } catch {
+      next = { ok: false, msg: "Name check is busy right now. Please try again." };
+    }
+    // Ignore answers for an ID the player has since changed.
+    if (seq !== checkSeq.current) return;
+    setCheck(next);
+    setChecking(false);
   }
 
   async function handleBuy() {
@@ -184,11 +205,11 @@ function GamePage({ gameId }: { gameId: string }) {
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">1</span>
             បញ្ចូល Player ID
           </h2>
-          <form onSubmit={(e) => { e.preventDefault(); runCheck(); }}
+          <form onSubmit={(e) => { e.preventDefault(); void runCheck(); }}
             className={`grid items-end gap-3 ${idConfig.secondary ? "sm:grid-cols-[1fr_1fr_auto]" : "sm:grid-cols-[1fr_auto]"}`}>
             <label className="grid min-w-0 gap-2 text-sm font-semibold">
               {idConfig.primary.label}
-              <input value={uid} onChange={(e) => { setUid(e.target.value); setCheck(null); }}
+              <input value={uid} onChange={(e) => { setUid(e.target.value); resetCheck(); }}
                 placeholder={idConfig.primary.placeholder}
                 inputMode={idConfig.primary.numeric ? "numeric" : "text"}
                 autoComplete="off" spellCheck={false}
@@ -198,13 +219,13 @@ function GamePage({ gameId }: { gameId: string }) {
               <label className="grid min-w-0 gap-2 text-sm font-semibold">
                 {idConfig.secondary.label}
                 {idConfig.secondary.options ? (
-                  <select value={zone} onChange={(e) => { setZone(e.target.value); setCheck(null); }}
+                  <select value={zone} onChange={(e) => { setZone(e.target.value); resetCheck(); }}
                     className="h-12 min-w-0 rounded-lg border bg-input px-4 font-normal outline-none focus:border-primary">
                     <option value="">{idConfig.secondary.placeholder}</option>
                     {idConfig.secondary.options.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
                 ) : (
-                  <input value={zone} onChange={(e) => { setZone(e.target.value); setCheck(null); }}
+                  <input value={zone} onChange={(e) => { setZone(e.target.value); resetCheck(); }}
                     placeholder={idConfig.secondary.placeholder}
                     inputMode={idConfig.secondary.numeric ? "numeric" : "text"}
                     autoComplete="off" spellCheck={false}
@@ -212,7 +233,7 @@ function GamePage({ gameId }: { gameId: string }) {
                 )}
               </label>
             )}
-            <Button type="submit" className="h-12 px-6 font-bold">Check ID</Button>
+            <Button type="submit" disabled={checking} className="h-12 px-6 font-bold">{checking ? "Checking…" : "Check ID"}</Button>
           </form>
           {check && (
             <p role="status" className={`mt-3 text-sm font-semibold ${check.ok ? "text-primary" : "text-destructive"}`}>

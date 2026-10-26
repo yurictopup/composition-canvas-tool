@@ -13,3 +13,4 @@
 - Render selector-based identifier fields from the options in the player ID configuration; this keeps server choices and validation in one place.
 - Games awaiting provider lookup and package data must not inherit another game's packages or enable purchases; this avoids false verification and invented offers.
 - Home game categories use the shared Tabs controls and existing game catalog; this keeps filtering accessible without changing game offers.
+- Account-name lookups run only on the server (`src/lib/player-lookup.functions.ts`) with the supplier token in a secret; supplier errors or empty answers must never count as a verified account.
