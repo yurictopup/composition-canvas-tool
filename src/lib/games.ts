@@ -19,7 +19,7 @@ import deltaforce from "@/assets/deltaforce.jpg";
 import arenabreakout from "@/assets/arenabreakout.jpg";
 import brawlstars from "@/assets/brawlstars.jpg";
 import clashroyale from "@/assets/clashroyale.jpg";
-import zzz from "@/assets/zzz.svg";
+import zzz from "@/assets/zzz.jpg";
 
 export const games = [
   { id: "mlbb", name: "Mobile Legends", icon: mlbb, unit: "Diamonds", blurb: "Instant MLBB diamond delivery" },
