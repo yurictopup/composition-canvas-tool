@@ -422,3 +422,70 @@ html:has(.store-light) { background: #eef4fd; }
 .store-pop[data-light="true"] [data-highlighted] { background: #eef4fd; }
 .store-pop-active { background: rgb(100 169 243 / 0.2); color: var(--brand-400); }
 .store-pop[data-light="true"] .store-pop-active { background: rgb(47 95 224 / 0.12); color: #2f5fe0; }
+
+/* Home banner overlay */
+/* Padding keeps Khmer marks above and below the line (៍, ូ, ្វ) inside the gradient box. */
+.banner-title,
+.banner-title-back {
+  padding-block: 0.35em;
+  margin-block: -0.35em;
+}
+.banner-title {
+  background: linear-gradient(180deg, #ffffff 0%, #fff1a8 38%, #ffc21f 70%, #ff8a00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.banner-title-back {
+  color: #0b2a7a;
+  -webkit-text-stroke: 0.14em #0b2a7a;
+  text-shadow: 0 0.08em 0 #061a55, 0 0 0.35em rgb(120 190 255 / 0.6);
+}
+.banner-sub {
+  color: #fff;
+  -webkit-text-stroke: 0.2em #0b2a7a;
+  paint-order: stroke fill;
+}
+@keyframes banner-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6%); }
+}
+.banner-float { animation: banner-float 4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .banner-float { animation: none; }
+}
+
+/* Mascot hair wind: filtered full image under a still copy masked to face + body */
+.mascot-hair { filter: url(#hair-wind) drop-shadow(0 0 18px rgba(96, 165, 250, 0.55)); }
+.mascot-still {
+  -webkit-mask-image: radial-gradient(ellipse 27% 22% at 46% 46%, #000 72%, transparent 100%),
+    linear-gradient(to bottom, transparent 54%, #000 62%);
+  mask-image: radial-gradient(ellipse 27% 22% at 46% 46%, #000 72%, transparent 100%),
+    linear-gradient(to bottom, transparent 54%, #000 62%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mascot-hair { filter: drop-shadow(0 0 18px rgba(96, 165, 250, 0.55)); }
+}
+
+.pay-card {
+  animation: pay-card-bob 3.2s ease-in-out infinite;
+}
+.pay-card-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.85) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: pay-card-shine 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes pay-card-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -5px; }
+}
+@keyframes pay-card-shine {
+  0%, 55% { transform: translateX(-120%); }
+  85%, 100% { transform: translateX(120%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pay-card, .pay-card-shine { animation: none; }
+}
