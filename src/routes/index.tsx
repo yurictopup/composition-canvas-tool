@@ -232,7 +232,7 @@ function BannerOverlay() {
       <span className="pay-card absolute left-[20%] top-[8%] hidden -rotate-3 rounded-2xl bg-[linear-gradient(135deg,#fff6c2,#ffc21f_45%,#ff8a00)] p-[3px] shadow-[0_8px_0_#0b2a7a,0_16px_30px_rgb(0_0_0/0.35)] md:block">
         <span className="relative flex flex-col items-center gap-1.5 overflow-hidden rounded-[13px] bg-[linear-gradient(180deg,#ffffff,#e9f0ff)] px-4 pb-2.5 pt-2">
           <span className="pay-card-shine" aria-hidden="true" />
-          <span className="flex items-center gap-1.5 font-khmer text-[clamp(11px,1vw,15px)] font-bold text-[#0b2a7a]">
+          <span className="flex items-center gap-1.5 font-sans text-[clamp(12px,1.05vw,16px)] font-bold leading-[1.7] text-[#0b2a7a]">
             <span className="size-1.5 rounded-full bg-[#22c55e] shadow-[0_0_0_3px_rgb(34_197_94/0.25)]" />
             {"ទូទាត់តាមរយៈ"}
           </span>
@@ -242,7 +242,7 @@ function BannerOverlay() {
             </span>
             <span className="text-[clamp(14px,1.4vw,22px)] font-black tracking-wider text-white">KHQR</span>
           </span>
-          <span className="text-[clamp(9px,0.7vw,11px)] font-khmer font-semibold text-[#5b6b8c]">ស្កេនបង់ប្រាក់ភ្លាមៗ</span>
+          <span className="font-sans text-[clamp(10px,0.8vw,12px)] font-semibold leading-[1.7] text-[#5b6b8c]">ស្កេនបង់ប្រាក់ភ្លាមៗ</span>
         </span>
       </span>
 
