@@ -192,10 +192,15 @@ export function ChatWidget({
       });
   }
 
+  // Dark "AI app" look on every site theme: deep navy glass, aurora glow, blue-violet accents.
+  const glass = "border border-white/10 bg-white/[0.06] backdrop-blur-md";
+  const scroll = "[scrollbar-width:thin] [scrollbar-color:oklch(1_0_0/0.15)_transparent]";
+  const hint = "AI អាចមានកំហុស · តម្លៃពិតប្រាកដនៅទំព័រហ្គេម";
+
   const composer = (
-    <div className="rounded-[22px] bg-gradient-to-r from-brand-400 via-brand-500 to-brand-700 p-[1.5px] shadow-[0_8px_24px_oklch(0.42_0.19_266/0.18)]">
-      <div className="flex items-center gap-2 rounded-[21px] bg-card py-1.5 pl-3.5 pr-1.5">
-        <Sparkles className="h-4 w-4 shrink-0 text-brand-500" aria-hidden="true" />
+    <div className="rounded-[22px] bg-[linear-gradient(120deg,oklch(0.72_0.13_252),oklch(0.6_0.22_290),oklch(0.78_0.12_210))] p-px shadow-[0_0_28px_oklch(0.6_0.2_270/0.35)]">
+      <div className="flex items-center gap-2 rounded-[21px] bg-[oklch(0.17_0.05_268)] py-1.5 pl-3.5 pr-1.5">
+        <Sparkles className="h-4 w-4 shrink-0 text-[oklch(0.8_0.12_230)]" aria-hidden="true" />
         <input
           id="yt-chat-input"
           value={draft}
@@ -204,14 +209,14 @@ export function ChatWidget({
           placeholder="សួរ Yuric AI អ្វីក៏បាន…"
           aria-label="សរសេរសំណួររបស់អ្នក"
           maxLength={500}
-          className="h-10 min-w-0 flex-1 bg-transparent text-sm text-card-foreground outline-none placeholder:text-muted-foreground"
+          className="h-10 min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40"
         />
         <button
           type="button"
           aria-label="ផ្ញើសារ"
           onClick={() => ask(draft)}
           disabled={typing || !draft.trim()}
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-primary-foreground shadow-[0_4px_12px_oklch(0.42_0.19_266/0.4)] transition hover:scale-105 disabled:scale-100 disabled:opacity-40"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))] text-white shadow-[0_0_16px_oklch(0.6_0.22_280/0.6)] transition hover:scale-105 disabled:scale-100 disabled:opacity-30 disabled:shadow-none"
         >
           <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
         </button>
@@ -220,13 +225,17 @@ export function ChatWidget({
   );
 
   const botAvatar = (
-    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[radial-gradient(circle_at_50%_40%,var(--brand-700),var(--brand-950)_80%)] shadow-[0_0_0_2px_var(--color-card),0_0_0_3.5px_var(--brand-400)]">
+    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[radial-gradient(circle_at_50%_35%,oklch(0.5_0.2_268),oklch(0.2_0.08_268)_80%)] shadow-[0_0_14px_oklch(0.6_0.2_270/0.5)] ring-1 ring-white/20">
       <BotLogo size={24} animated={false} stars={false} title="" />
     </span>
   );
 
-  const scroll = "[scrollbar-width:thin] [scrollbar-color:var(--color-brand-100)_transparent]";
-  const hint = "AI អាចមានកំហុស · តម្លៃពិតប្រាកដនៅទំព័រហ្គេម";
+  const footer = (
+    <div className="relative px-3 pb-2.5 pt-2">
+      {composer}
+      <p className="mt-1.5 text-center text-[11px] leading-5 text-white/40">{hint}</p>
+    </div>
+  );
 
   return (
     <>
@@ -235,9 +244,9 @@ export function ChatWidget({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="fixed bottom-8 right-24 z-40 hidden items-center gap-2 rounded-full border border-brand-100 bg-card py-2 pl-3 pr-4 text-sm font-semibold leading-6 text-card-foreground shadow-[0_10px_30px_oklch(0.25_0.09_264/0.3)] transition hover:-translate-y-0.5 animate-in fade-in slide-in-from-right-2 duration-500 sm:flex"
+          className="fixed bottom-8 right-24 z-40 hidden items-center gap-2 rounded-full border border-white/15 bg-[oklch(0.17_0.05_268/0.92)] py-2 pl-2 pr-4 text-sm font-semibold leading-6 text-white shadow-[0_10px_30px_oklch(0.15_0.08_268/0.5),0_0_24px_oklch(0.6_0.2_280/0.3)] backdrop-blur transition hover:-translate-y-0.5 animate-in fade-in slide-in-from-right-2 duration-500 sm:flex"
         >
-          <span className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-brand-400 to-brand-700 text-primary-foreground">
+          <span className="grid h-7 w-7 place-items-center rounded-full bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))]">
             <Sparkles className="h-3.5 w-3.5" />
           </span>
           មានសំណួរ? សួរ Yuric AI
@@ -251,12 +260,12 @@ export function ChatWidget({
         className="fixed bottom-4 right-4 z-40 grid h-16 w-16 place-items-center transition-transform hover:scale-105 drop-shadow-[0_8px_22px_oklch(0.25_0.09_264/0.55)]"
       >
         {open ? (
-          <span className="grid h-12 w-12 place-items-center rounded-full bg-[radial-gradient(circle_at_50%_40%,var(--brand-700),var(--brand-950)_80%)] shadow-lg ring-2 ring-brand-100/60">
+          <span className="grid h-12 w-12 place-items-center rounded-full bg-[linear-gradient(135deg,oklch(0.55_0.2_264),oklch(0.45_0.24_290))] shadow-[0_0_24px_oklch(0.6_0.22_280/0.6)] ring-1 ring-white/30">
             <X className="h-5 w-5 text-white" />
           </span>
         ) : (
           <>
-            <span className="absolute inset-1 animate-ping rounded-full bg-brand-400/25 [animation-duration:2.4s]" />
+            <span className="absolute inset-1 animate-ping rounded-full bg-[oklch(0.65_0.2_280/0.3)] [animation-duration:2.4s]" />
             <BotLogo size={60} stars animated title="Yuric Bot" />
             <span className="absolute right-1 top-1 h-3 w-3 rounded-full border-2 border-white/40 bg-emerald-400 shadow-[0_0_8px_oklch(0.8_0.18_155/0.9)]" />
           </>
@@ -264,37 +273,39 @@ export function ChatWidget({
       </button>
 
       {open && (
-        <div className="fixed inset-x-2 bottom-24 top-16 z-40 flex flex-col overflow-hidden rounded-[28px] border border-brand-100 bg-card font-sans text-card-foreground shadow-[0_30px_80px_oklch(0.25_0.09_264/0.5)] animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-200 sm:inset-x-auto sm:right-5 sm:top-auto sm:h-[min(640px,calc(100vh-8rem))] sm:w-[400px]">
-          {/* header */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-brand-500 via-brand-700 to-brand-950 px-4 py-3.5">
-            <span className="pointer-events-none absolute -right-10 -top-16 h-40 w-40 rounded-full bg-brand-400/30 blur-3xl" />
-            <span className="sparkle right-28 top-3" aria-hidden="true" />
-            <span className="sparkle right-20 top-9 [animation-delay:1.2s]" aria-hidden="true" />
-            <div className="relative flex items-center gap-3">
+        <div className="fixed inset-x-2 bottom-24 top-16 z-40 rounded-[30px] bg-[linear-gradient(150deg,oklch(0.75_0.13_240/0.9),oklch(0.5_0.24_290/0.6)_45%,oklch(0.3_0.1_268/0.4)_70%,oklch(0.75_0.12_210/0.8))] p-px shadow-[0_30px_90px_oklch(0.12_0.08_268/0.7),0_0_60px_oklch(0.55_0.22_280/0.3)] animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-200 sm:inset-x-auto sm:right-5 sm:top-auto sm:h-[min(640px,calc(100vh-8rem))] sm:w-[400px]">
+          <div className="relative flex h-full flex-col overflow-hidden rounded-[29px] bg-[oklch(0.14_0.045_268)] font-sans text-white">
+            {/* aurora glow behind everything */}
+            <span className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-[oklch(0.55_0.2_255/0.45)] blur-3xl yt-aurora" />
+            <span className="pointer-events-none absolute -right-20 top-24 h-56 w-56 rounded-full bg-[oklch(0.5_0.24_295/0.35)] blur-3xl yt-aurora [animation-delay:-4s]" />
+            <span className="pointer-events-none absolute -bottom-24 left-10 h-56 w-56 rounded-full bg-[oklch(0.6_0.14_210/0.25)] blur-3xl yt-aurora [animation-delay:-8s]" />
+
+            {/* header */}
+            <div className="relative flex items-center gap-3 border-b border-white/10 px-4 py-3.5">
               {active && (
                 <button
                   type="button"
                   aria-label="ត្រឡប់ក្រោយ"
                   onClick={() => setActiveId(null)}
-                  className="-ml-1 grid h-8 w-8 shrink-0 place-items-center rounded-full text-primary-foreground transition-colors hover:bg-white/15"
+                  className="-ml-1 grid h-8 w-8 shrink-0 place-items-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
               )}
               <span className="relative shrink-0">
-                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[radial-gradient(circle_at_50%_40%,var(--brand-700),var(--brand-950)_80%)] ring-1 ring-white/30">
+                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[radial-gradient(circle_at_50%_35%,oklch(0.5_0.2_268),oklch(0.2_0.08_268)_85%)] shadow-[0_0_20px_oklch(0.6_0.2_270/0.45)] ring-1 ring-white/20">
                   <BotLogo size={36} stars={false} title="" className="-mt-0.5" />
                 </span>
-                <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-brand-700 bg-emerald-400" />
+                <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-[oklch(0.14_0.045_268)] bg-emerald-400 shadow-[0_0_8px_oklch(0.8_0.18_155/0.9)]" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-1.5 font-display text-[15px] font-bold leading-5 text-primary-foreground">
+                <p className="flex items-center gap-1.5 font-display text-[15px] font-bold leading-5">
                   Yuric Bot
-                  <span className="inline-flex items-center gap-0.5 rounded-full bg-white/20 px-1.5 text-[10px] font-bold uppercase leading-4 tracking-wide text-white ring-1 ring-white/30">
+                  <span className="inline-flex items-center gap-0.5 rounded-full bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))] px-1.5 text-[10px] font-bold uppercase leading-4 tracking-wide">
                     <Sparkles className="h-2.5 w-2.5" /> AI
                   </span>
                 </p>
-                <p className="text-xs leading-5 text-brand-100">អនឡាញ · ឆ្លើយភ្លាមៗ 24 ម៉ោង</p>
+                <p className="text-xs leading-5 text-white/55">អនឡាញ · ឆ្លើយភ្លាមៗ 24 ម៉ោង</p>
               </div>
               {active && (
                 <button
@@ -302,7 +313,7 @@ export function ChatWidget({
                   aria-label="ការសន្ទនាថ្មី"
                   title="ការសន្ទនាថ្មី"
                   onClick={() => setActiveId(null)}
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/10 text-primary-foreground transition-colors hover:bg-white/20"
+                  className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-white/80 transition hover:text-white ${glass}`}
                 >
                   <SquarePen className="h-4 w-4" />
                 </button>
@@ -311,202 +322,191 @@ export function ChatWidget({
                 type="button"
                 aria-label="បិទការជជែក"
                 onClick={() => setOpen(false)}
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/10 text-primary-foreground transition-colors hover:bg-white/20"
+                className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-white/80 transition hover:text-white ${glass}`}
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
-          </div>
 
-          {active ? (
-            <>
-              {/* conversation */}
-              <div
-                ref={listRef}
-                aria-live="polite"
-                className={`flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-brand-100/40 to-card px-4 py-4 ${scroll}`}
-              >
-                {active.messages.map((m, i) => {
-                  const last = i === active.messages.length - 1;
-                  const key = `${active.id}-${i}`;
-                  return (
-                    <div
-                      key={i}
-                      className={`flex items-end gap-2 animate-in fade-in slide-in-from-bottom-1 duration-300 ${m.role === "user" ? "justify-end" : "justify-start"}`}
-                    >
-                      {m.role === "bot" && botAvatar}
-                      <div
-                        className={`flex max-w-[84%] flex-col gap-2 ${m.role === "user" ? "items-end" : "items-start"}`}
-                      >
-                        <p
-                          className={`whitespace-pre-line rounded-[20px] px-4 py-2.5 text-sm leading-7 ${
-                            m.role === "user"
-                              ? "rounded-br-md bg-gradient-to-br from-brand-500 to-brand-700 text-primary-foreground shadow-[0_6px_16px_oklch(0.42_0.19_266/0.3)]"
-                              : "rounded-bl-md border border-brand-100 bg-card text-card-foreground shadow-[0_4px_14px_oklch(0.25_0.09_264/0.07)]"
-                          }`}
-                        >
-                          {m.role === "bot" && !seen.current.has(key) ? (
-                            <TypeText text={m.text} onDone={() => seen.current.add(key)} />
-                          ) : (
-                            m.text
-                          )}
-                        </p>
-                        {m.ai && (
-                          <span className="-mt-1 inline-flex items-center gap-1 pl-1 text-[10.5px] font-semibold leading-4 text-brand-500">
-                            <Sparkles className="h-3 w-3" /> Yuric AI
-                          </span>
-                        )}
-                        {m.actions?.map((a) => (
-                          <a
-                            key={a.href}
-                            href={a.href}
-                            target={a.href.startsWith("http") ? "_blank" : undefined}
-                            rel="noreferrer"
-                            onClick={() => {
-                              if (!a.href.startsWith("http")) setOpen(false);
-                            }}
-                            className="inline-flex items-center gap-2 rounded-full border border-brand-400/60 bg-card px-3.5 py-1.5 text-[13px] font-bold leading-6 text-brand-700 shadow-[0_2px_8px_oklch(0.25_0.09_264/0.08)] transition hover:border-brand-500 hover:bg-brand-100/60"
-                          >
-                            {a.href.startsWith("http") ? (
-                              <Send className="h-3.5 w-3.5" />
-                            ) : (
-                              <Gamepad2 className="h-3.5 w-3.5" />
-                            )}
-                            {a.label}
-                          </a>
-                        ))}
-                        {last && !typing && m.suggestions && (
-                          <div className="flex flex-wrap gap-1.5 pt-1">
-                            {m.suggestions.map((q) => (
-                              <button
-                                key={q}
-                                type="button"
-                                onClick={() => ask(q)}
-                                className="rounded-full border border-brand-100 bg-card px-3 py-1 text-xs font-semibold leading-6 text-brand-700 transition-colors hover:border-brand-400 hover:bg-brand-100/60"
-                              >
-                                {q}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-                {typing && (
-                  <div className="flex items-end gap-2" aria-label="Yuric Bot កំពុងសរសេរ">
-                    {botAvatar}
-                    <span className="flex items-center gap-2 rounded-[20px] rounded-bl-md border border-brand-100 bg-card px-4 py-2.5 text-xs leading-6 text-muted-foreground">
-                      <span className="flex gap-1">
-                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand-400" />
-                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand-500 [animation-delay:.15s]" />
-                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand-700 [animation-delay:.3s]" />
-                      </span>
-                      កំពុងគិត…
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* composer */}
-              <div className="bg-card px-3 pb-2.5 pt-2">
-                {composer}
-                <p className="mt-1.5 text-center text-[11px] leading-5 text-muted-foreground">
-                  {hint}
-                </p>
-              </div>
-            </>
-          ) : (
-            <>
-              {/* home */}
-              <div
-                className={`flex-1 overflow-y-auto bg-gradient-to-b from-brand-100/50 via-card to-card px-4 pb-4 pt-5 ${scroll}`}
-              >
-                <div className="flex flex-col items-center text-center">
-                  <span className="relative grid h-20 w-20 place-items-center rounded-[26px] bg-[radial-gradient(circle_at_50%_35%,var(--brand-500),var(--brand-950)_85%)] shadow-[0_14px_34px_oklch(0.42_0.19_266/0.45)] ring-4 ring-brand-100">
-                    <BotLogo size={62} stars={false} title="" />
-                  </span>
-                  <p className="mt-3 font-khmer text-xl leading-9 text-brand-700">
-                    សួស្តី! ខ្ញុំជា Yuric Bot
-                  </p>
-                  <p className="mt-0.5 max-w-[290px] text-[13px] leading-6 text-muted-foreground">
-                    ជំនួយការ AI របស់ Yuric Topup។ សួរខ្ញុំអំពីហ្គេម កញ្ចប់ តម្លៃ ការបង់ប្រាក់ ឬ
-                    Player ID បានគ្រប់ពេល។
-                  </p>
-                </div>
-
-                <div className="mt-5 grid grid-cols-2 gap-2">
-                  {faqs.map((f) => {
-                    const FaqIcon = f.icon ?? MessageCircle;
+            {active ? (
+              <>
+                {/* conversation */}
+                <div
+                  ref={listRef}
+                  aria-live="polite"
+                  className={`relative flex-1 space-y-4 overflow-y-auto px-4 py-4 ${scroll}`}
+                >
+                  {active.messages.map((m, i) => {
+                    const last = i === active.messages.length - 1;
+                    const key = `${active.id}-${i}`;
                     return (
-                      <button
-                        key={f.q}
-                        type="button"
-                        onClick={() => openFaq(f)}
-                        className="group flex flex-col gap-2 rounded-2xl border border-brand-100 bg-card p-3 text-left shadow-[0_2px_10px_oklch(0.25_0.09_264/0.06)] transition hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-[0_10px_22px_oklch(0.25_0.09_264/0.14)]"
+                      <div
+                        key={i}
+                        className={`flex items-end gap-2 animate-in fade-in slide-in-from-bottom-1 duration-300 ${m.role === "user" ? "justify-end" : "justify-start"}`}
                       >
-                        <span className="grid h-8 w-8 place-items-center rounded-xl bg-brand-100 text-brand-700 transition-colors group-hover:bg-brand-700 group-hover:text-primary-foreground">
-                          <FaqIcon className="h-4 w-4" />
-                        </span>
-                        <span className="line-clamp-2 text-[12.5px] font-medium leading-[1.7] text-card-foreground">
-                          {f.q}
-                        </span>
-                      </button>
+                        {m.role === "bot" && botAvatar}
+                        <div
+                          className={`flex max-w-[84%] flex-col gap-2 ${m.role === "user" ? "items-end" : "items-start"}`}
+                        >
+                          <p
+                            className={`whitespace-pre-line rounded-[20px] px-4 py-2.5 text-sm leading-7 ${
+                              m.role === "user"
+                                ? "rounded-br-md bg-[linear-gradient(135deg,oklch(0.6_0.18_258),oklch(0.5_0.24_290))] text-white shadow-[0_8px_22px_oklch(0.5_0.22_280/0.35)]"
+                                : `rounded-bl-md text-white/90 ${glass}`
+                            }`}
+                          >
+                            {m.role === "bot" && !seen.current.has(key) ? (
+                              <TypeText text={m.text} onDone={() => seen.current.add(key)} />
+                            ) : (
+                              m.text
+                            )}
+                          </p>
+                          {m.ai && (
+                            <span className="-mt-1 inline-flex items-center gap-1 pl-1 text-[10.5px] font-semibold leading-4 text-[oklch(0.8_0.12_230)]">
+                              <Sparkles className="h-3 w-3" /> Yuric AI
+                            </span>
+                          )}
+                          {m.actions?.map((a) => (
+                            <a
+                              key={a.href}
+                              href={a.href}
+                              target={a.href.startsWith("http") ? "_blank" : undefined}
+                              rel="noreferrer"
+                              onClick={() => {
+                                if (!a.href.startsWith("http")) setOpen(false);
+                              }}
+                              className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))] px-3.5 py-1.5 text-[13px] font-bold leading-6 text-white shadow-[0_0_16px_oklch(0.6_0.22_280/0.4)] transition hover:brightness-110"
+                            >
+                              {a.href.startsWith("http") ? (
+                                <Send className="h-3.5 w-3.5" />
+                              ) : (
+                                <Gamepad2 className="h-3.5 w-3.5" />
+                              )}
+                              {a.label}
+                            </a>
+                          ))}
+                          {last && !typing && m.suggestions && (
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                              {m.suggestions.map((q) => (
+                                <button
+                                  key={q}
+                                  type="button"
+                                  onClick={() => ask(q)}
+                                  className={`rounded-full px-3 py-1 text-xs font-semibold leading-6 text-white/85 transition hover:border-white/30 hover:bg-white/10 ${glass}`}
+                                >
+                                  {q}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     );
                   })}
+                  {typing && (
+                    <div className="flex items-end gap-2" aria-label="Yuric Bot កំពុងសរសេរ">
+                      {botAvatar}
+                      <span
+                        className={`flex items-center gap-2 rounded-[20px] rounded-bl-md px-4 py-2.5 text-xs leading-6 text-white/60 ${glass}`}
+                      >
+                        <span className="flex gap-1">
+                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[oklch(0.78_0.12_220)]" />
+                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[oklch(0.7_0.16_260)] [animation-delay:.15s]" />
+                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[oklch(0.62_0.22_290)] [animation-delay:.3s]" />
+                        </span>
+                        កំពុងគិត…
+                      </span>
+                    </div>
+                  )}
                 </div>
-
-                {threads.length > 0 && (
-                  <div className="mt-5">
-                    <p className="mb-2 text-xs font-semibold leading-6 text-muted-foreground">
-                      ការសន្ទនាថ្មីៗ
-                    </p>
-                    <ul className="space-y-1.5">
-                      {threads.map((t) => (
-                        <li key={t.id}>
-                          <button
-                            type="button"
-                            onClick={() => setActiveId(t.id)}
-                            className="group flex w-full items-center gap-3 rounded-xl px-2.5 py-1.5 text-left text-sm leading-6 text-card-foreground transition hover:bg-brand-100/60"
-                          >
-                            <MessageCircle className="h-4 w-4 shrink-0 text-brand-500" />
-                            <span className="flex-1 truncate">{t.title}</span>
-                            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                <a
-                  href={`https://t.me/${telegram}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-5 flex items-center gap-3 rounded-2xl border border-brand-100 bg-card px-3 py-2.5 transition hover:border-brand-400"
-                >
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-400 to-brand-700 text-primary-foreground">
-                    <Headphones className="h-4 w-4" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-bold leading-6">ជជែកជាមួយ Admin</span>
-                    <span className="block text-xs leading-5 text-muted-foreground">
-                      Telegram · @{telegram}
+                {footer}
+              </>
+            ) : (
+              <>
+                {/* home */}
+                <div className={`relative flex-1 overflow-y-auto px-4 pb-4 pt-6 ${scroll}`}>
+                  <div className="flex flex-col items-center text-center">
+                    <span className="relative grid h-20 w-20 place-items-center">
+                      <span className="absolute inset-0 rounded-[26px] bg-[conic-gradient(from_180deg,oklch(0.75_0.13_240),oklch(0.55_0.24_290),oklch(0.78_0.12_210),oklch(0.75_0.13_240))] opacity-80 blur-md" />
+                      <span className="relative grid h-20 w-20 place-items-center rounded-[26px] bg-[radial-gradient(circle_at_50%_35%,oklch(0.45_0.2_268),oklch(0.17_0.06_268)_85%)] ring-1 ring-white/25">
+                        <BotLogo size={62} stars={false} title="" />
+                      </span>
                     </span>
-                  </span>
-                  <Send className="h-4 w-4 shrink-0 text-brand-500" />
-                </a>
-              </div>
+                    <p className="mt-4 bg-[linear-gradient(90deg,oklch(0.85_0.1_230),oklch(0.8_0.14_290))] bg-clip-text font-khmer text-xl leading-9 text-transparent">
+                      សួស្តី! ខ្ញុំជា Yuric Bot
+                    </p>
+                    <p className="mt-0.5 max-w-[290px] text-[13px] leading-6 text-white/60">
+                      ជំនួយការ AI របស់ Yuric Topup។ សួរខ្ញុំអំពីហ្គេម កញ្ចប់ តម្លៃ ការបង់ប្រាក់ ឬ
+                      បញ្ហាការបញ្ជាទិញ បានគ្រប់ពេល។
+                    </p>
+                  </div>
 
-              {/* ask anything */}
-              <div className="bg-card px-3 pb-2.5 pt-2">
-                {composer}
-                <p className="mt-1.5 text-center text-[11px] leading-5 text-muted-foreground">
-                  {hint}
-                </p>
-              </div>
-            </>
-          )}
+                  <div className="mt-6 grid grid-cols-2 gap-2">
+                    {faqs.map((f) => {
+                      const FaqIcon = f.icon ?? MessageCircle;
+                      return (
+                        <button
+                          key={f.q}
+                          type="button"
+                          onClick={() => openFaq(f)}
+                          className={`group flex flex-col gap-2 rounded-2xl p-3 text-left transition hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/10 ${glass}`}
+                        >
+                          <span className="grid h-8 w-8 place-items-center rounded-xl bg-[linear-gradient(135deg,oklch(0.72_0.13_252/0.3),oklch(0.55_0.24_290/0.3))] text-[oklch(0.85_0.1_235)] ring-1 ring-white/10 transition group-hover:bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))] group-hover:text-white">
+                            <FaqIcon className="h-4 w-4" />
+                          </span>
+                          <span className="line-clamp-2 text-[12.5px] font-medium leading-[1.7] text-white/85">
+                            {f.q}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {threads.length > 0 && (
+                    <div className="mt-5">
+                      <p className="mb-2 text-xs font-semibold leading-6 text-white/45">
+                        ការសន្ទនាថ្មីៗ
+                      </p>
+                      <ul className="space-y-1">
+                        {threads.map((t) => (
+                          <li key={t.id}>
+                            <button
+                              type="button"
+                              onClick={() => setActiveId(t.id)}
+                              className="group flex w-full items-center gap-3 rounded-xl px-2.5 py-1.5 text-left text-sm leading-6 text-white/80 transition hover:bg-white/10"
+                            >
+                              <MessageCircle className="h-4 w-4 shrink-0 text-[oklch(0.78_0.12_230)]" />
+                              <span className="flex-1 truncate">{t.title}</span>
+                              <ChevronRight className="h-4 w-4 shrink-0 text-white/40 transition-transform group-hover:translate-x-0.5" />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <a
+                    href={`https://t.me/${telegram}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`mt-5 flex items-center gap-3 rounded-2xl px-3 py-2.5 transition hover:border-white/25 hover:bg-white/10 ${glass}`}
+                  >
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))] shadow-[0_0_14px_oklch(0.6_0.22_280/0.5)]">
+                      <Headphones className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-bold leading-6">ជជែកជាមួយ Admin</span>
+                      <span className="block text-xs leading-5 text-white/50">
+                        Telegram · @{telegram}
+                      </span>
+                    </span>
+                    <Send className="h-4 w-4 shrink-0 text-[oklch(0.8_0.12_230)]" />
+                  </a>
+                </div>
+                {footer}
+              </>
+            )}
+          </div>
         </div>
       )}
     </>
