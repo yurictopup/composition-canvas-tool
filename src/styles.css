@@ -424,11 +424,11 @@ html:has(.store-light) { background: #eef4fd; }
 .store-pop[data-light="true"] .store-pop-active { background: rgb(47 95 224 / 0.12); color: #2f5fe0; }
 
 /* Home banner overlay */
-/* Padding keeps Khmer marks above the line (e.g. ៍) inside the gradient box. */
+/* Padding keeps Khmer marks above and below the line (៍, ូ, ្វ) inside the gradient box. */
 .banner-title,
 .banner-title-back {
-  padding-top: 0.35em;
-  margin-top: -0.35em;
+  padding-block: 0.35em;
+  margin-block: -0.35em;
 }
 .banner-title {
   background: linear-gradient(180deg, #ffffff 0%, #fff1a8 38%, #ffc21f 70%, #ff8a00 100%);
