@@ -129,6 +129,28 @@ const KM: Record<string, string> = {
   "Safe payment": "បង់ប្រាក់សុវត្ថិភាព",
   "We accept": "យើងទទួល",
   "Made in Cambodia": "ផលិតនៅកម្ពុជា",
+  Order: "ការកម្មង់",
+  "Scan to pay": "ស្កេនដើម្បីបង់ប្រាក់",
+  "Preparing KHQR…": "កំពុងរៀបចំ KHQR…",
+  "KHQR is not available for this order.": "KHQR មិនអាចប្រើបានសម្រាប់ការកម្មង់នេះទេ។",
+  "min left": "នាទីទៀត",
+  "Scan with ABA, ACLEDA, Wing or any bank app. This page updates by itself once you pay.":
+    "ស្កេនជាមួយ ABA, ACLEDA, Wing ឬកម្មវិធីធនាគារណាមួយ។ ពេលបង់រួច ទំព័រនេះនឹងប្តូរដោយស្វ័យប្រវត្តិ។",
+  "Secure payment through Bakong, National Bank of Cambodia":
+    "បង់ប្រាក់សុវត្ថិភាពតាម Bakong ធនាគារជាតិនៃកម្ពុជា",
+  "This QR has expired": "QR នេះផុតកំណត់ហើយ",
+  "Get a new QR": "យក QR ថ្មី",
+  "Payment received": "បានទទួលការបង់ប្រាក់",
+  "Delivered to your account": "បានបញ្ចូលទៅគណនីរបស់អ្នករួចហើយ",
+  "Topping up your account now (1-5 minutes)": "កំពុងបញ្ចូលទៅគណនីរបស់អ្នក (១-៥ នាទី)",
+  "Contact us": "ទាក់ទងយើង",
+  "User verified:": "បានផ្ទៀងផ្ទាត់អ្នកលេង:",
+  "UID must be numeric.": "UID ត្រូវតែជាលេខ។",
+  "User ID must be numeric.": "User ID ត្រូវតែជាលេខ។",
+  "User ID not found": "រកមិនឃើញ User ID នេះទេ",
+  "ID is valid, ready to order": "ID ត្រឹមត្រូវ អាចបញ្ជាទិញបាន",
+  "ID format is correct, please double-check it before paying": "ទម្រង់ ID ត្រឹមត្រូវ សូមពិនិត្យម្តងទៀតមុនបង់ប្រាក់",
+  "Name check is busy right now. Please try again.": "ការពិនិត្យឈ្មោះរវល់បន្តិច សូមព្យាយាមម្តងទៀត។",
 };
 
 export function translate(l: StoreLang, s: string) {
