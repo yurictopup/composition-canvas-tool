@@ -547,3 +547,11 @@ html:has(.store-light) { background: #eef4fd; }
   transition: color 0.15s, border-color 0.15s;
 }
 .store-light .store-footer-chip { background: #f5f9ff; border-color: #dfe8f6; }
+
+/* Yuric Bot chat: slow drifting aurora glow */
+@keyframes yt-aurora {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(24px, 18px) scale(1.15); }
+}
+.yt-aurora { animation: yt-aurora 12s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .yt-aurora { animation: none; } }

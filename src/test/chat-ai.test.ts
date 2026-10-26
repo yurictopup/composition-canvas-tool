@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { cleanReply, gamesInChat, modelMessages, MAX_TURNS, systemPrompt } from "@/lib/chatAi";
+import {
+  cleanReply,
+  gamesInChat,
+  modelMessages,
+  MAX_TURNS,
+  ordersSection,
+  systemPrompt,
+} from "@/lib/chatAi";
+import { answer, isOrderQuestion } from "@/lib/chatBrain";
 
 describe("gamesInChat", () => {
   it("finds games in Khmer and English, newest first", () => {
@@ -40,7 +48,42 @@ describe("modelMessages", () => {
 });
 
 describe("cleanReply", () => {
+  it("drops the Khmer full stop sign", () => {
+    expect(cleanReply("សួស្តី។ ខ្ញុំជា Yuric Bot។")).toBe("សួស្តី ខ្ញុំជា Yuric Bot");
+  });
+
   it("removes markdown, emoji and hidden reasoning", () => {
     expect(cleanReply("<think>x</think>**សួស្តី!** 👋\n* ជំហាន ១")).toBe("សួស្តី!\n- ជំហាន ១");
+  });
+});
+
+describe("order questions", () => {
+  it("treats 'paid but no diamonds' as an order problem with admin steps", () => {
+    const q = "ហេតុអ្វីបង់លុយជោគជ័យហើយអតមាន ពេជ្រចូល";
+    expect(isOrderQuestion(q)).toBe(true);
+    const reply = answer(q);
+    expect(reply.text).toContain("Profile");
+    expect(reply.actions?.[0]?.href).toContain("t.me");
+  });
+
+  it("tells the AI whether the money arrived for each order", () => {
+    const base = {
+      game: "Mobile Legends",
+      pack: "86 Diamonds",
+      price: 1.25,
+      playerId: "123 (4567)",
+      minutesAgo: 3,
+      status: "pending",
+      qrExpired: false,
+    };
+    const text = ordersSection([
+      { ...base, code: "AAAA1111", paid: true },
+      { ...base, code: "BBBB2222", paid: false },
+    ]);
+    expect(text).toContain("Order AAAA1111");
+    expect(text).toMatch(/AAAA1111.*PAYMENT RECEIVED.*paid, waiting for delivery/);
+    expect(text).toMatch(/BBBB2222.*NOT PAID YET/);
+    expect(ordersSection(null)).toContain("not signed in");
+    expect(ordersSection(undefined)).toBe("");
   });
 });

@@ -46,11 +46,11 @@ function AuthPage() {
     e.preventDefault();
     setMsg(null);
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
-      setMsg({ ok: false, text: "សូមបញ្ចូល email ត្រឹមត្រូវ។" });
+      setMsg({ ok: false, text: "សូមបញ្ចូល email ត្រឹមត្រូវ" });
       return;
     }
     if (password.length < 8) {
-      setMsg({ ok: false, text: "Password ត្រូវការយ៉ាងតិច 8 តួអក្សរ។" });
+      setMsg({ ok: false, text: "Password ត្រូវការយ៉ាងតិច 8 តួអក្សរ" });
       return;
     }
     setBusy(true);
@@ -59,9 +59,9 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) {
           if (error.message.includes("rate") || error.message.includes("limit")) {
-            setMsg({ ok: false, text: "ព្យាយាមច្រើនពេក។ សូមរង់ចាំ 1 នាទីទៀត។" });
+            setMsg({ ok: false, text: "ព្យាយាមច្រើនពេក សូមរង់ចាំ 1 នាទីទៀត" });
           } else {
-            setMsg({ ok: false, text: "Email ឬ Password មិនត្រឹមត្រូវ។" });
+            setMsg({ ok: false, text: "Email ឬ Password មិនត្រឹមត្រូវ" });
           }
           return;
         }
@@ -77,7 +77,7 @@ function AuthPage() {
           return;
         }
         if (!data.session) {
-          setMsg({ ok: true, text: "បង្កើតគណនីបានរួច! សូមពិនិត្យ email ដើម្បី confirm គណនី។" });
+          setMsg({ ok: true, text: "បង្កើតគណនីបានរួច! សូមពិនិត្យ email ដើម្បី confirm គណនី" });
           return;
         }
         navigate({ to: "/" });
