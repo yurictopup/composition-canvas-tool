@@ -48,6 +48,10 @@ describe("modelMessages", () => {
 });
 
 describe("cleanReply", () => {
+  it("drops the Khmer full stop sign", () => {
+    expect(cleanReply("សួស្តី។ ខ្ញុំជា Yuric Bot។")).toBe("សួស្តី ខ្ញុំជា Yuric Bot");
+  });
+
   it("removes markdown, emoji and hidden reasoning", () => {
     expect(cleanReply("<think>x</think>**សួស្តី!** 👋\n* ជំហាន ១")).toBe("សួស្តី!\n- ជំហាន ១");
   });
