@@ -16,8 +16,9 @@ export default defineConfig({
     cloudflare: {
       // Cloudflare Workers Builds runs `wrangler preview` for non-main branches,
       // which requires a `previews` block in the generated wrangler.json.
+      // `ai` binds Workers AI (free daily quota) for Yuric Bot, see src/lib/chat.functions.ts.
       // @ts-expect-error nitro reads `wrangler` at build time, but its types don't list it yet.
-      wrangler: { previews: {} },
+      wrangler: { previews: {}, ai: { binding: "AI" } },
     },
   },
 });

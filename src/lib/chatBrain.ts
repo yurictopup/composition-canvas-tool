@@ -174,7 +174,8 @@ function has(text: string, word: string) {
   return new RegExp(`(^|[^a-z0-9])${escaped}($|[^a-z0-9])`).test(text);
 }
 
-function findGame(text: string): Game | undefined {
+/** The game a (lowercased) message names, preferring the longest alias. */
+export function detectGame(text: string): Game | undefined {
   let best: { g: Game; len: number } | undefined;
   for (const g of games) {
     for (const alias of [g.name.toLowerCase(), ...(GAME_ALIASES[g.id] ?? [])]) {
@@ -222,7 +223,7 @@ export function answer(
   gameHref: (id: string) => string = (id) => `/game/${id}`,
 ): BotReply {
   const text = raw.toLowerCase().replace(/\s+/g, " ").trim();
-  const game = findGame(text);
+  const game = detectGame(text);
   const topics = topScores(text);
   const has_ = (t: string) => topics.includes(t);
 
@@ -283,12 +284,12 @@ export function answer(
   switch (first) {
     case "greet":
       return {
-        text: "សួស្តី! 👋 ខ្ញុំជា Yuric Bot។ អ្នកចង់បញ្ចូលពេជ្រហ្គេមអ្វី? ខ្ញុំអាចប្រាប់អំពីកញ្ចប់ ការបង់ប្រាក់ Player ID និងពេលវេលាដែលពេជ្រចូល។",
+        text: "សួស្តី! ខ្ញុំជា Yuric Bot។ អ្នកចង់បញ្ចូលពេជ្រហ្គេមអ្វី? ខ្ញុំអាចប្រាប់អំពីកញ្ចប់ ការបង់ប្រាក់ Player ID និងពេលវេលាដែលពេជ្រចូល។",
         suggestions: DEFAULT_SUGGESTIONS,
       };
     case "thanks":
       return {
-        text: "រីករាយបានជួយ! 💎 បើមានសំណួរទៀត សួរខ្ញុំបានគ្រប់ពេល។",
+        text: "រីករាយបានជួយ! បើមានសំណួរទៀត សួរខ្ញុំបានគ្រប់ពេល។",
         suggestions: ["របៀបបញ្ចូលពេជ្រ", "ហ្គេមអ្វីខ្លះ?"],
       };
     case "topup":
@@ -351,7 +352,7 @@ export function answer(
   }
 
   return {
-    text: `សុំទោស ខ្ញុំមិនទាន់យល់សំណួរនេះច្បាស់ទេ 🙏 សាកសួរម្តងទៀតដោយប្រើពាក្យដូចជា "តម្លៃ", "បង់ប្រាក់", "Player ID" ឬឈ្មោះហ្គេម។ ឬជជែកជាមួយ Admin ដោយផ្ទាល់តាម Telegram ${TELEGRAM}។`,
+    text: `សុំទោស ខ្ញុំមិនទាន់យល់សំណួរនេះច្បាស់ទេ។ សាកសួរម្តងទៀតដោយប្រើពាក្យដូចជា "តម្លៃ", "បង់ប្រាក់", "Player ID" ឬឈ្មោះហ្គេម។ ឬជជែកជាមួយ Admin ដោយផ្ទាល់តាម Telegram ${TELEGRAM}។`,
     actions: [telegramAction],
     suggestions: DEFAULT_SUGGESTIONS,
   };
