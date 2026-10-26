@@ -34,10 +34,10 @@ describe("Per-game packages", () => {
     }
   });
 
-  it("every listed package is unpriced until the shop sets real prices", () => {
+  it("fallback prices are positive or unset (live prices come from Supabase)", () => {
     for (const list of Object.values(gamePackages)) {
       for (const p of list) {
-        expect(p.price).toBeNull();
+        if (p.price !== null) expect(p.price).toBeGreaterThan(0);
       }
     }
   });

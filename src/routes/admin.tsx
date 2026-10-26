@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteChrome } from "@/components/SiteChrome";
 import { isOwner } from "@/lib/games";
+import { AdminPrices } from "@/components/AdminPrices";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Yuric Topup" }] }),
@@ -41,6 +42,7 @@ const NAV: NavItem[] = [
   { id: "orders",      icon: "📦", label: "Orders" },
   { id: "customers",   icon: "👥", label: "Customers" },
   { id: "cashflow",    icon: "💵", label: "Cash Flow" },
+  { id: "prices",      icon: "🏷️", label: "Prices" },
 ];
 
 function fmtDate(iso: string) {
@@ -201,6 +203,7 @@ function AdminPage() {
               {tab === "orders" && "📦 Orders"}
               {tab === "customers" && "👥 Customers"}
               {tab === "cashflow" && "💵 Cash Flow"}
+              {tab === "prices" && "🏷️ Prices"}
             </h1>
             {tab === "overview" && <p className="text-xs text-gray-400 mt-0.5">Executive Overview</p>}
           </div>
@@ -473,6 +476,9 @@ function AdminPage() {
                   </div>
                 </div>
               )}
+
+              {/* ══════════════ PRICES TAB ══════════════ */}
+              {tab === "prices" && <AdminPrices />}
             </>
           )}
         </main>

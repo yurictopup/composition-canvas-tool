@@ -24,10 +24,11 @@
 - [x] Home banner resized to the latest reference: compact, centered, 3:1 artwork with side margins
 - [x] Latest banner adjustment: span the game section width following the red-box reference, with games moved below
 - [x] Real Telegram handle confirmed: @Yuricccc (updated in footer + chat widget)
-- [ ] User to confirm: real prices, the "1–3 minutes" claim, and the chat bot's FAQ answers (currently placeholders I wrote)
+- [x] Delivery claim set to 1-5 minutes and no-refund-for-wrong-ID policy (owner's answers); FAQ payment answer now Bakong only
+- [x] Owner edits prices on /admin → Prices; the shop reads them from Supabase product_prices, the same table the database charges from
 - [x] Add CODM, Wild Rift, Blood Strike, Clash of Clans with game-specific ID fields and artwork
 - [x] Per-game real denominations for all games (MLBB/FF/PUBG/HoK/Magic Chess/CODM/Wild Rift/Blood Strike/COC/Genshin/Star Rail); Roblox stays package-less
-- [ ] Real prices per package — user will supply them; packages show "—" and buying stays disabled until priced
+- [ ] Real prices per package — owner to enter them on /admin → Prices (current values are public store prices, not the owner's)
 - [x] Configure game-specific ID fields and honest Check ID unavailable states for all ten games; purchases require real verification
 - [ ] Real account-name Check ID — needs supported providers and credentials; do not treat format checks as verified accounts
 - [ ] Avatar picture for the profile — user has none yet, "YT" placeholder in place

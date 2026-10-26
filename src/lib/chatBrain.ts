@@ -1,6 +1,6 @@
 // Yuric Bot's answers: matches a customer's question (Khmer or English) to a topic and a game,
 // and answers from the shop's real catalogue (src/lib/games.ts) and ID rules (src/lib/player-id.ts).
-// Never invents prices or offers: prices are still unset on the site, so the bot says so.
+// Never quotes prices: the live prices are in Supabase (src/lib/prices.ts), so the bot points to the game page.
 import { games, getPackages, payments, store } from "@/lib/games";
 import { getIdConfig } from "@/lib/player-id";
 
@@ -237,14 +237,14 @@ export function answer(
 
   if (has_("late") || has_("refund")) {
     return {
-      text: `សុំទោសចំពោះការរង់ចាំ! ជាធម្មតាពេជ្រចូលក្នុង 1-3 នាទី បន្ទាប់ពីការបង់ប្រាក់ត្រូវបានបញ្ជាក់។ បើលើសពីនេះ ឬចង់សួរពីការសងប្រាក់ សូមផ្ញើរូបវិក្កយបត្រ និង ID ហ្គេមរបស់អ្នក ទៅ Admin តាម Telegram ${TELEGRAM} យើងនឹងពិនិត្យភ្លាមៗ។`,
+      text: `សុំទោសចំពោះការរង់ចាំ! ជាធម្មតាពេជ្រចូលក្នុង 1-5 នាទី បន្ទាប់ពីការបង់ប្រាក់ត្រូវបានបញ្ជាក់។ បើលើសពីនេះ ឬចង់សួរពីការសងប្រាក់ សូមផ្ញើរូបវិក្កយបត្រ និង ID ហ្គេមរបស់អ្នក ទៅ Admin តាម Telegram ${TELEGRAM} យើងនឹងពិនិត្យភ្លាមៗ។ ចំណាំ៖ យើងមិនអាចសងប្រាក់វិញបានទេ ប្រសិនបើអ្នកបញ្ចូល Player ID ខុស ព្រោះពេជ្រត្រូវបានបញ្ចូលទៅ ID នោះផ្ទាល់។`,
       actions: [telegramAction],
     };
   }
 
   if (has_("wrongId") && (has_("playerId") || text.includes("ខុស") || text.includes("wrong"))) {
     return {
-      text: `បើអ្នកបានបញ្ចូល ID ខុស សូមទាក់ទង Admin តាម Telegram ${TELEGRAM} ឱ្យបានឆាប់ ដោយភ្ជាប់វិក្កយបត្រ និង ID ដែលត្រឹមត្រូវ។ មុនពេលបង់លើកក្រោយ សូមចុច Check ID ដើម្បីពិនិត្យទម្រង់ ID ម្តងទៀត។`,
+      text: `យើងមិនអាចសងប្រាក់វិញបានទេ ប្រសិនបើអ្នកបញ្ចូល Player ID ខុស ព្រោះពេជ្រត្រូវបានបញ្ចូលទៅ ID នោះផ្ទាល់។ បើការបញ្ជាទិញមិនទាន់ដំណើរការ សូមទាក់ទង Admin តាម Telegram ${TELEGRAM} ភ្លាមៗ ដោយភ្ជាប់វិក្កយបត្រ និង ID ដែលត្រឹមត្រូវ។ មុនពេលបង់លើកក្រោយ សូមចុច Check ID ដើម្បីពិនិត្យ ID ម្តងទៀត។`,
       actions: [telegramAction],
     };
   }
@@ -252,12 +252,12 @@ export function answer(
   if (has_("price")) {
     if (game) {
       return {
-        text: `តម្លៃ ${g(game)} នៅមិនទាន់កំណត់នៅលើវេបសាយនៅឡើយទេ (បង្ហាញជា "—")។ ${packagesLine(game)} សូមសួរតម្លៃថ្មីបំផុតពី Admin តាម Telegram ${TELEGRAM}។`,
+        text: `${packagesLine(game)} តម្លៃថ្មីបំផុតនៃកញ្ចប់នីមួយៗ បង្ហាញនៅទំព័រ ${g(game)}។ ចុចប៊ូតុងខាងក្រោមដើម្បីមើល។`,
         actions: [gameAction(game, gameHref), telegramAction],
       };
     }
     return {
-      text: `តម្លៃនៅមិនទាន់កំណត់នៅលើវេបសាយនៅឡើយទេ ដូច្នេះប៊ូតុង Buy Now នៅបិទ។ សូមប្រាប់ឈ្មោះហ្គេម ខ្ញុំនឹងប្រាប់កញ្ចប់ដែលមាន ឬសួរតម្លៃពី Admin តាម Telegram ${TELEGRAM}។`,
+      text: `តម្លៃនៃកញ្ចប់នីមួយៗ បង្ហាញនៅទំព័រហ្គេមនីមួយៗ។ សូមប្រាប់ឈ្មោះហ្គេម ខ្ញុំនឹងប្រាប់កញ្ចប់ដែលមាន ហើយភ្ជាប់ទៅទំព័រនោះ។`,
       actions: [telegramAction],
       suggestions: ["តម្លៃ MLBB", "តម្លៃ Free Fire", "តម្លៃ PUBG UC"],
     };
@@ -298,7 +298,7 @@ export function answer(
       };
     case "delivery":
       return {
-        text: "ជាធម្មតាពេជ្រចូលក្នុងរយៈពេល 1-3 នាទី បន្ទាប់ពីការបង់ប្រាក់ត្រូវបានបញ្ជាក់។ បើយូរជាងនេះ សូមទាក់ទង Admin តាម Telegram យើងនឹងពិនិត្យភ្លាមៗ។",
+        text: "ពេជ្រចូលភ្លាមៗក្នុងរយៈពេល 1-5 នាទី បន្ទាប់ពីការបង់ប្រាក់ត្រូវបានបញ្ជាក់ ដោយបញ្ចូលផ្ទាល់ទៅ Player ID របស់អ្នក (មិនត្រូវការពាក្យសម្ងាត់គណនីទេ)។ បើយូរជាងនេះ សូមទាក់ទង Admin តាម Telegram យើងនឹងពិនិត្យភ្លាមៗ។",
         actions: [telegramAction],
       };
     case "payment":
@@ -313,7 +313,7 @@ export function answer(
       };
     case "wrongId":
       return {
-        text: `បើបញ្ចូល ID ខុស សូមទាក់ទង Admin តាម Telegram ${TELEGRAM} ឱ្យបានឆាប់ ជាមួយវិក្កយបត្រ និង ID ដែលត្រឹមត្រូវ។`,
+        text: `យើងមិនអាចសងប្រាក់វិញបានទេ ប្រសិនបើអ្នកបញ្ចូល Player ID ខុស ព្រោះពេជ្រត្រូវបានបញ្ចូលទៅ ID នោះផ្ទាល់។ បើការបញ្ជាទិញមិនទាន់ដំណើរការ សូមទាក់ទង Admin តាម Telegram ${TELEGRAM} ភ្លាមៗ ជាមួយវិក្កយបត្រ និង ID ដែលត្រឹមត្រូវ។`,
         actions: [telegramAction],
       };
     case "contact":
@@ -338,7 +338,7 @@ export function answer(
       };
     case "refund":
       return {
-        text: `ចំពោះការសងប្រាក់ ឬបោះបង់ការបញ្ជាទិញ សូមទាក់ទង Admin តាម Telegram ${TELEGRAM} ជាមួយវិក្កយបត្ររបស់អ្នក។`,
+        text: `ចំពោះការសងប្រាក់ ឬបោះបង់ការបញ្ជាទិញ សូមទាក់ទង Admin តាម Telegram ${TELEGRAM} ជាមួយវិក្កយបត្ររបស់អ្នក។ ចំណាំ៖ យើងមិនអាចសងប្រាក់វិញបានទេ ប្រសិនបើអ្នកបញ្ចូល Player ID ខុស ព្រោះពេជ្រត្រូវបានបញ្ចូលទៅ ID នោះផ្ទាល់។`,
         actions: [telegramAction],
       };
   }
