@@ -1,10 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
-import { LogIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { store } from "@/lib/games";
-import { StoreSettingsMenu, StoreUserMenu } from "@/components/StoreUserMenu";
+import { StoreGuestMenu, StoreSettingsMenu, StoreUserMenu } from "@/components/StoreUserMenu";
 import { useStorePrefs } from "@/lib/storePrefs";
 import { ChatWidget } from "@/components/ChatWidget";
 
@@ -38,13 +37,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
             {user ? (
               <StoreUserMenu user={user} onSignOut={signOut} />
             ) : (
-              <Link
-                to="/auth"
-                className="ml-2 inline-flex h-9 items-center gap-2 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 px-4 text-sm font-medium text-white shadow-[0_2px_8px_rgb(47_95_224/0.45)] ring-1 ring-white/10 transition hover:brightness-110"
-              >
-                <LogIn size={17} />
-                {t("Sign In")}
-              </Link>
+              <StoreGuestMenu />
             )}
           </nav>
         </div>
