@@ -10,6 +10,7 @@ import {
   Clock,
   Languages,
   LayoutDashboard,
+  LogIn,
   LogOut,
   MailOpen,
   Monitor,
@@ -18,6 +19,7 @@ import {
   RotateCcw,
   Sun,
   Truck,
+  UserRound,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isOwner } from "@/lib/games";
@@ -106,6 +108,47 @@ export function StoreSettingsMenu() {
         </DM.Portal>
       </DM.Root>
     </>
+  );
+}
+
+const avatarCls =
+  "flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-white ring-2 ring-brand-400/40";
+
+export function StoreGuestMenu() {
+  const { light, t } = useStorePrefs();
+  return (
+    <DM.Root modal={false}>
+      <DM.Trigger className="ml-1 rounded-full outline-none transition hover:brightness-110" title={t("Sign In")}>
+        <span className={avatarCls}>
+          <UserRound size={19} />
+        </span>
+      </DM.Trigger>
+      <DM.Portal>
+        <DM.Content align="end" sideOffset={8} data-light={light} className={`${pop} w-64 p-1.5`}>
+          <div className="flex items-center gap-3 px-3 py-2.5">
+            <span className={`${avatarCls} h-10 w-10 shrink-0 ring-0`}>
+              <UserRound size={20} />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold">{t("Guest")}</span>
+              <span className="block text-xs text-on-dark-muted">{t("Sign in to track your orders")}</span>
+            </span>
+          </div>
+          <DM.Separator className="my-1 h-px bg-brand-400/20" />
+          <div className="px-1.5 pb-1 pt-1.5">
+            <DM.Item asChild>
+              <Link
+                to="/auth"
+                className="flex items-center justify-center gap-2 rounded-md bg-gradient-to-br from-brand-500 to-brand-700 py-2 text-sm font-medium text-white outline-none transition data-[highlighted]:brightness-110"
+              >
+                {t("Sign In")}
+                <LogIn size={16} />
+              </Link>
+            </DM.Item>
+          </div>
+        </DM.Content>
+      </DM.Portal>
+    </DM.Root>
   );
 }
 
@@ -246,10 +289,15 @@ export function StoreUserMenu({ user, onSignOut }: { user: User; onSignOut: () =
               </Link>
             </DM.Item>
             <DM.Separator className="my-1 h-px bg-brand-400/20" />
-            <DM.Item onSelect={onSignOut} className={`${itemCls} !text-[#FF6B6F]`}>
-              <LogOut size={18} />
-              {t("Sign Out")}
-            </DM.Item>
+            <div className="px-1.5 pb-1 pt-1.5">
+              <DM.Item
+                onSelect={onSignOut}
+                className="flex cursor-pointer select-none items-center justify-center gap-2 rounded-md bg-[#FF4C51] py-2 text-sm font-medium text-white outline-none transition data-[highlighted]:!bg-[#e6444a]"
+              >
+                {t("Sign Out")}
+                <LogOut size={16} />
+              </DM.Item>
+            </div>
           </DM.Content>
         </DM.Portal>
       </DM.Root>

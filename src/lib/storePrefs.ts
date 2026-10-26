@@ -66,6 +66,8 @@ const KM: Record<string, string> = {
   Support: "ជំនួយ",
   "Sign In": "ចូលគណនី",
   "Sign Out": "ចាកចេញ",
+  Guest: "ភ្ញៀវ",
+  "Sign in to track your orders": "ចូលគណនីដើម្បីតាមដានការកម្មង់",
   Home: "ទំព័រដើម",
   Orders: "ការកម្មង់",
   "My orders": "ការកម្មង់របស់ខ្ញុំ",
