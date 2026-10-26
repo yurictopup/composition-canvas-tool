@@ -265,7 +265,19 @@ export function ChatWidget({
 
   return (
     <>
-      {/* launcher — bot head floats freely */}
+      {/* launcher — bot head floats freely, with an "ask AI" pill on wide screens */}
+      {!open && (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="fixed bottom-8 right-24 z-40 hidden items-center gap-2 rounded-full border border-white/15 bg-[oklch(0.17_0.05_268/0.92)] py-2 pl-2 pr-4 text-sm font-semibold leading-6 text-white shadow-[0_10px_30px_oklch(0.15_0.08_268/0.5),0_0_24px_oklch(0.6_0.2_280/0.3)] backdrop-blur transition hover:-translate-y-0.5 animate-in fade-in slide-in-from-right-2 duration-500 sm:flex"
+        >
+          <span className="grid h-7 w-7 place-items-center rounded-full bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))]">
+            <Sparkles className="h-3.5 w-3.5" />
+          </span>
+          មានសំណួរ? សួរ Yuric AI
+        </button>
+      )}
       <button
         type="button"
         data-chat-launcher=""
@@ -319,7 +331,7 @@ export function ChatWidget({
                     <Sparkles className="h-2.5 w-2.5" /> AI
                   </span>
                 </p>
-                <p className="text-xs leading-5 text-white/55">អនឡាញ · ឆ្លើយភ្លាមៗ</p>
+                <p className="text-xs leading-5 text-white/55">អនឡាញ · ឆ្លើយភ្លាមៗ 24 ម៉ោង</p>
               </div>
               {active && (
                 <button
