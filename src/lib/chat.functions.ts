@@ -159,3 +159,19 @@ export const askBot = createServerFn({ method: "POST" })
       return { unavailable: errors.join(" | ") };
     },
   );
+
+/**
+ * The quick bot's payment check, without the AI: the signed-in customer's
+ * latest orders, checked with the bank, as a short Khmer reply.
+ */
+export const checkMyOrders = createServerFn({ method: "POST" }).handler(
+  async (): Promise<{ text: string } | { unavailable: string }> => {
+    const { allowRequest } = await import("@/lib/rate-limit");
+    const { clientIp } = await import("@/lib/rate-limit.server");
+    if (!allowRequest(`chat-orders:${clientIp()}`, 12, 60_000))
+      return { unavailable: "rate limit" };
+    const orders = await customerOrders().catch(() => undefined);
+    if (orders === undefined) return { unavailable: "order lookup failed" };
+    return { text: orderReply(orders) };
+  },
+);
