@@ -23,7 +23,7 @@ export function GamesDropOfferSearch() {
   }
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-black/8 text-sm space-y-3">
+    <div className="vx-card p-5 text-sm space-y-3">
       <p className="text-gray-600">
         Find GamesDrop offer IDs, then put each one next to its package in the "GamesDrop offer"
         column. Packages with an offer can be delivered automatically.
@@ -39,11 +39,11 @@ export function GamesDropOfferSearch() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="e.g. Mobile Legends"
-          className="flex-1 rounded-lg border border-gray-200 px-3 py-2 outline-none focus:border-[#1a0a2e]"
+          className="flex-1 rounded-lg border border-gray-200 px-3 py-2 outline-none focus:border-[#7367F0]"
         />
         <button
           disabled={busy || search.trim().length < 2}
-          className="rounded-lg bg-[#1a0a2e] px-4 py-2 text-xs font-semibold text-white disabled:opacity-30"
+          className="rounded-lg bg-[#7367F0] px-4 py-2 text-xs font-semibold text-white disabled:opacity-30"
         >
           {busy ? "Searching…" : "Search GamesDrop"}
         </button>

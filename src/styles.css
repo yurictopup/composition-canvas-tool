@@ -289,3 +289,50 @@
 @media (prefers-reduced-motion: reduce){.yt-bot *{animation:none!important}}
 .yt-bot[data-stars="false"] .yt-bot-s1,.yt-bot[data-stars="false"] .yt-bot-s2,.yt-bot[data-stars="false"] .yt-bot-s3{display:none}
 
+
+/* Admin dashboard: clean light admin look (soft grey canvas, white cards, violet primary) */
+.vx {
+  --vx-primary: #7367f0;
+  --vx-primary-soft: rgb(115 103 240 / 0.16);
+  --vx-success: #28c76f;
+  --vx-info: #00bad1;
+  --vx-warning: #ff9f43;
+  --vx-danger: #ff4c51;
+  --vx-secondary: #808390;
+  --vx-bg: #f8f7fa;
+  --vx-card: #ffffff;
+  --vx-heading: #444050;
+  --vx-body: #6d6b77;
+  --vx-muted: #acaab1;
+  --vx-border: #e6e6e8;
+  --vx-shadow: 0 3px 12px rgb(47 43 61 / 0.14);
+  font-family: "Public Sans", "Kantumruy Pro", ui-sans-serif, system-ui, sans-serif;
+  background: var(--vx-bg);
+  color: var(--vx-body);
+}
+.vx h1, .vx h2, .vx h3, .vx h4, .vx h5 { color: var(--vx-heading); font-family: inherit; }
+.vx-card {
+  background: var(--vx-card);
+  border-radius: 0.375rem;
+  box-shadow: var(--vx-shadow);
+}
+.vx-nav-active {
+  background: linear-gradient(270deg, rgb(115 103 240 / 0.7) 0%, #7367f0 100%);
+  color: #fff;
+  box-shadow: 0 2px 6px rgb(115 103 240 / 0.3);
+}
+.vx-btn {
+  background: var(--vx-primary);
+  color: #fff;
+  border-radius: 0.375rem;
+  box-shadow: 0 2px 6px rgb(115 103 240 / 0.3);
+  transition: background 0.15s;
+}
+.vx-btn:hover { background: #685dd8; }
+.vx-table thead th {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  color: var(--vx-heading);
+}
