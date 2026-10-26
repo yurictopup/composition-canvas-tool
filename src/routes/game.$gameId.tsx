@@ -325,7 +325,7 @@ function GamePage({ gameId }: { gameId: string }) {
                 type="button"
                 onClick={() => setPay(m)}
                 aria-pressed={pay === m}
-                className={`relative flex w-44 flex-col items-center gap-2.5 rounded-2xl border-2 bg-white px-4 pb-4 pt-5 text-center text-[#142650] transition ${
+                className={`relative flex aspect-square w-44 flex-col items-center justify-center gap-2.5 rounded-[4px] border-2 bg-white px-4 text-center text-[#142650] transition ${
                   pay === m
                     ? "border-[#2f5fe0] shadow-[0_6px_18px_rgb(47_95_224/0.25)]"
                     : "border-[#dfe8f6] hover:border-[#2f5fe0]/50"
@@ -388,7 +388,7 @@ function GamePage({ gameId }: { gameId: string }) {
 // Red KHQR badge, the mark Cambodian bank apps show for Bakong QR payments.
 function KhqrMark() {
   return (
-    <span className="flex h-16 w-24 shrink-0 flex-col items-center justify-center rounded-xl bg-[#E1232E] text-white shadow-[0_3px_10px_rgb(225_35_46/0.35)]">
+    <span className="flex h-16 w-24 shrink-0 flex-col items-center justify-center rounded-[3px] bg-[#E1232E] text-white shadow-[0_3px_10px_rgb(225_35_46/0.35)]">
       <span className="text-xl font-extrabold leading-none tracking-wide">KHQR</span>
       <span className="mt-1.5 h-[3px] w-12 rounded bg-white/70" />
     </span>
