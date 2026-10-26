@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { findGame, getPackages, mlbbHotItems, payments, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
+import { useStorePrefs } from "@/lib/storePrefs";
 import { OrderPayment } from "@/components/OrderPayment";
 import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
@@ -34,6 +35,7 @@ function GameRoute() {
 }
 
 function GamePage({ gameId }: { gameId: string }) {
+  const { t } = useStorePrefs();
   const navigate = useNavigate();
   const game = findGame(gameId);
   const [uid, setUid] = useState("");
@@ -205,7 +207,7 @@ function GamePage({ gameId }: { gameId: string }) {
   return (
     <SiteChrome>
       <main className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6">
-        <Link to="/" hash="games" className="text-sm text-on-dark-muted transition-colors hover:text-on-dark">← Back to games</Link>
+        <Link to="/" hash="games" className="text-sm text-on-dark-muted transition-colors hover:text-on-dark">← {t("Back to games")}</Link>
 
         <div className="card-3d mt-3 flex items-center gap-4 rounded-3xl p-5">
           <span className="tile-clean block w-20 shrink-0 rounded-[26%] sm:w-24">
@@ -213,7 +215,7 @@ function GamePage({ gameId }: { gameId: string }) {
           </span>
           <div>
             <h1 className="font-display text-2xl font-black">{game.name}</h1>
-            <p className="text-sm text-muted-foreground">{game.blurb} · Delivered in 1-5 minutes</p>
+            <p className="text-sm text-muted-foreground">{game.blurb} · {t("Delivered in 1-5 minutes")}</p>
           </div>
         </div>
 
@@ -221,7 +223,7 @@ function GamePage({ gameId }: { gameId: string }) {
         <section className="card-3d mt-5 rounded-3xl p-5">
           <h2 className="mb-4 flex items-center gap-3 font-khmer text-lg">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">1</span>
-            បញ្ចូល Player ID
+            {t("Enter Player ID")}
           </h2>
           <form onSubmit={(e) => { e.preventDefault(); void runCheck(); }}
             className={`grid items-end gap-3 ${idConfig.secondary ? "sm:grid-cols-[1fr_1fr_auto]" : "sm:grid-cols-[1fr_auto]"}`}>
@@ -251,7 +253,7 @@ function GamePage({ gameId }: { gameId: string }) {
                 )}
               </label>
             )}
-            <Button type="submit" disabled={checking} className="h-12 px-6 font-bold">{checking ? "Checking…" : "Check ID"}</Button>
+            <Button type="submit" disabled={checking} className="h-12 px-6 font-bold">{checking ? t("Checking…") : t("Check ID")}</Button>
           </form>
           {check && (
             <p role="status" className={`mt-3 text-sm font-semibold ${check.ok ? "text-primary" : "text-destructive"}`}>
@@ -259,7 +261,7 @@ function GamePage({ gameId }: { gameId: string }) {
             </p>
           )}
           {gameId === "roblox" && (
-            <p className="mt-3 text-sm text-muted-foreground">Roblox uses Gift Cards — Robux cannot be topped up directly by User ID.</p>
+            <p className="mt-3 text-sm text-muted-foreground">{t("Roblox uses Gift Cards — Robux cannot be topped up directly by User ID.")}</p>
           )}
         </section>
 
@@ -267,12 +269,12 @@ function GamePage({ gameId }: { gameId: string }) {
         <section className="card-3d mt-5 rounded-3xl p-5">
           <h2 className="mb-4 flex items-center gap-3 font-khmer text-lg">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">2</span>
-            ជ្រើសរើសកញ្ចប់ពេជ្រ
+            {t("Choose a package")}
           </h2>
 
           {hotItems.length > 0 && (
             <div className="mb-5">
-              <p className="mb-3 flex items-center gap-2 text-sm font-bold text-rose-500">🔥 Hot Items</p>
+              <p className="mb-3 flex items-center gap-2 text-sm font-bold text-rose-500">🔥 {t("Hot Items")}</p>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {hotItems.map((item, i) => (
                   <button key={item.label} onClick={() => selectHot(i)}
@@ -306,7 +308,7 @@ function GamePage({ gameId }: { gameId: string }) {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No packages available yet.</p>
+            <p className="text-sm text-muted-foreground">{t("No packages available yet.")}</p>
           )}
         </section>
 
@@ -314,7 +316,7 @@ function GamePage({ gameId }: { gameId: string }) {
         <section className="card-3d mt-5 rounded-3xl p-5">
           <h2 className="mb-4 flex items-center gap-3 font-khmer text-lg">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">3</span>
-            ជ្រើសរើសវិធីបង់ប្រាក់
+            {t("Choose a payment method")}
           </h2>
           <div className="flex flex-wrap gap-2">
             {payments.map((m) => (
@@ -326,15 +328,15 @@ function GamePage({ gameId }: { gameId: string }) {
 
         {/* Summary */}
         <aside className="card-3d mt-5 rounded-3xl p-5">
-          <h3 className="font-khmer text-lg">សង្ខេបការបញ្ជាទិញ</h3>
+          <h3 className="font-khmer text-lg">{t("Order summary")}</h3>
           <dl className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between"><dt className="text-muted-foreground">Game</dt><dd>{game.name}</dd></div>
-            <div className="flex justify-between"><dt className="text-muted-foreground">Player ID</dt><dd>{uid || "—"}{zone && ` (${zone})`}</dd></div>
-            <div className="flex justify-between"><dt className="text-muted-foreground">Package</dt><dd>{selected ? `${selected.amt} ${game.unit}` : "—"}</dd></div>
-            <div className="flex justify-between"><dt className="text-muted-foreground">Payment</dt><dd>{pay}</dd></div>
+            <div className="flex justify-between"><dt className="text-muted-foreground">{t("Game")}</dt><dd>{game.name}</dd></div>
+            <div className="flex justify-between"><dt className="text-muted-foreground">{t("Player ID")}</dt><dd>{uid || "—"}{zone && ` (${zone})`}</dd></div>
+            <div className="flex justify-between"><dt className="text-muted-foreground">{t("Package")}</dt><dd>{selected ? `${selected.amt} ${game.unit}` : "—"}</dd></div>
+            <div className="flex justify-between"><dt className="text-muted-foreground">{t("Payment")}</dt><dd>{pay}</dd></div>
           </dl>
           <div className="mt-4 flex items-end justify-between border-t pt-4">
-            <span className="text-muted-foreground">Total</span>
+            <span className="text-muted-foreground">{t("Total")}</span>
             <span className="font-display text-3xl font-black text-accent">
               {selected?.price != null ? `$${selected.price.toFixed(2)}` : "—"}
             </span>
@@ -349,12 +351,12 @@ function GamePage({ gameId }: { gameId: string }) {
             onClick={handleBuy}
             className="btn-3d glow-pulse mt-5 w-full rounded-xl py-4 font-display font-bold disabled:opacity-40"
           >
-            {busy ? "Processing…" : "🛒 Place Order"}
+            {busy ? t("Processing…") : `🛒 ${t("Place Order")}`}
           </button>
 
           {!check?.ok && (
             <p className="mt-2 text-center text-xs text-muted-foreground">
-              ⬆️ Check Player ID ជាមុន ដើម្បី order
+              ⬆️ {t("Check your Player ID first to order")}
             </p>
           )}
         </aside>
