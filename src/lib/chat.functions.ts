@@ -2,8 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { games } from "@/lib/games";
 import {
+  answerText,
+  botModels,
   cleanReply,
-  DEFAULT_MODEL,
   gamesInChat,
   MAX_TEXT,
   MAX_TURNS,
@@ -14,8 +15,8 @@ import {
 } from "@/lib/chatAi";
 import { isOrderQuestion } from "@/lib/chatBrain";
 
-type WorkersAi = {
-  run: (model: string, input: Record<string, unknown>) => Promise<{ response?: unknown }>;
+export type WorkersAi = {
+  run: (model: string, input: Record<string, unknown>) => Promise<unknown>;
 };
 
 const askInput = z.object({
@@ -26,7 +27,7 @@ const askInput = z.object({
 });
 
 /** The Workers AI binding ("AI" in the Wrangler config); missing outside Cloudflare. */
-function workersAi(): WorkersAi | undefined {
+export function workersAi(): WorkersAi | undefined {
   const env = (globalThis as { __env__?: { AI?: WorkersAi } }).__env__;
   return env?.AI;
 }
@@ -132,13 +133,21 @@ export const askBot = createServerFn({ method: "POST" })
         isOrderQuestion(last) ? customerOrders().catch(() => undefined) : undefined,
       ]);
       const system = systemPrompt(prices, orders);
-      const result = await ai.run(process.env["YURIC_BOT_MODEL"] || DEFAULT_MODEL, {
-        messages: modelMessages(turns, system),
-        max_tokens: 450,
-        temperature: 0.3,
-      });
-      const text = typeof result.response === "string" ? cleanReply(result.response) : "";
-      return text ? { text } : { unavailable: "empty answer" };
+      const messages = modelMessages(turns, system);
+      const errors: string[] = [];
+      // If one model is missing or busy, the next one answers.
+      for (const model of botModels()) {
+        try {
+          const result = await ai.run(model, { messages, max_tokens: 450, temperature: 0.3 });
+          const text = cleanReply(answerText(result));
+          if (text) return { text };
+          errors.push(`${model}: empty answer`);
+        } catch (error) {
+          errors.push(`${model}: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+      console.error("Yuric Bot AI failed", errors);
+      return { unavailable: errors.join(" | ") };
     } catch (error) {
       console.error("Yuric Bot AI failed", error);
       return { unavailable: error instanceof Error ? error.message : "AI error" };

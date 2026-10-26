@@ -66,6 +66,14 @@ function withSecurityHeaders(response: Response): Response {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      // Bindings (Workers AI) for server functions, in case the host didn't share them already.
+      const g = globalThis as { __env__?: unknown };
+      if (!g.__env__ && env && typeof env === "object") g.__env__ = env;
+      // Yuric Bot health check: says whether Workers AI is connected and which model answers.
+      if (new URL(request.url).pathname === "/api/bot-status") {
+        const { botStatus } = await import("./lib/bot-status.server");
+        return withSecurityHeaders(await botStatus(request, env));
+      }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return withSecurityHeaders(await normalizeCatastrophicSsrResponse(response));

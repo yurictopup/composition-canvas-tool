@@ -69,6 +69,28 @@ How to use it: tell the customer clearly whether the money for their order arriv
 
 /** Workers AI model. Gemma 3 covers Khmer; override with the YURIC_BOT_MODEL variable. */
 export const DEFAULT_MODEL = "@cf/google/gemma-3-12b-it";
+/** Tried in order: the YURIC_BOT_MODEL override, Gemma 3, then Llama 3.3 as a backup. */
+export function botModels(
+  override = typeof process !== "undefined" ? process.env["YURIC_BOT_MODEL"] : "",
+) {
+  return [...new Set([override, DEFAULT_MODEL, "@cf/meta/llama-3.3-70b-instruct-fp8-fast"])].filter(
+    (m): m is string => !!m,
+  );
+}
+
+/** The reply text, whichever shape the model answers in (Workers AI or OpenAI style). */
+export function answerText(result: unknown): string {
+  const r = result as {
+    response?: unknown;
+    choices?: { message?: { content?: unknown }; text?: unknown }[];
+  } | null;
+  if (typeof r?.response === "string") return r.response;
+  const choice = r?.choices?.[0];
+  if (typeof choice?.message?.content === "string") return choice.message.content;
+  if (typeof choice?.text === "string") return choice.text;
+  return typeof result === "string" ? result : "";
+}
+
 export const MAX_TURNS = 8;
 export const MAX_TEXT = 500;
 

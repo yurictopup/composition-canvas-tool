@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  answerText,
+  botModels,
   cleanReply,
   gamesInChat,
   modelMessages,
@@ -85,5 +87,18 @@ describe("order questions", () => {
     expect(text).toMatch(/BBBB2222.*NOT PAID YET/);
     expect(ordersSection(null)).toContain("not signed in");
     expect(ordersSection(undefined)).toBe("");
+  });
+});
+
+describe("model answers", () => {
+  it("reads Workers AI and OpenAI-style answers", () => {
+    expect(answerText({ response: "hi" })).toBe("hi");
+    expect(answerText({ choices: [{ message: { content: "hey" } }] })).toBe("hey");
+    expect(answerText({})).toBe("");
+  });
+
+  it("tries the override first, then the default models, without repeats", () => {
+    expect(botModels("@cf/x")[0]).toBe("@cf/x");
+    expect(botModels("")).toHaveLength(2);
   });
 });
