@@ -318,31 +318,29 @@ function GamePage({ gameId }: { gameId: string }) {
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">3</span>
             {t("Choose a payment method")}
           </h2>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="flex flex-wrap gap-3">
             {payments.map((m) => (
               <button
                 key={m}
                 type="button"
                 onClick={() => setPay(m)}
                 aria-pressed={pay === m}
-                className={`flex items-center gap-3 rounded-xl border-2 bg-white p-3 text-left text-[#142650] transition ${
+                className={`relative flex w-44 flex-col items-center gap-2.5 rounded-2xl border-2 bg-white px-4 pb-4 pt-5 text-center text-[#142650] transition ${
                   pay === m
-                    ? "border-[#2f5fe0] shadow-[0_4px_14px_rgb(47_95_224/0.25)]"
+                    ? "border-[#2f5fe0] shadow-[0_6px_18px_rgb(47_95_224/0.25)]"
                     : "border-[#dfe8f6] hover:border-[#2f5fe0]/50"
                 }`}
               >
-                <KhqrMark />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-bold">{m} KHQR</span>
-                  <span className="block text-xs text-[#5b6b8c]">{t("Scan with ABA, ACLEDA, Wing or any bank app")}</span>
-                </span>
                 <span
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                  className={`absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full border-2 ${
                     pay === m ? "border-[#2f5fe0] bg-[#2f5fe0]" : "border-[#c5d3ea]"
                   }`}
                 >
                   {pay === m && <span className="h-2 w-2 rounded-full bg-white" />}
                 </span>
+                <KhqrMark />
+                <span className="block text-base font-bold">{m} KHQR</span>
+                <span className="block text-[11px] leading-snug text-[#5b6b8c]">{t("Scan with ABA, ACLEDA, Wing or any bank app")}</span>
               </button>
             ))}
           </div>
@@ -390,9 +388,9 @@ function GamePage({ gameId }: { gameId: string }) {
 // Red KHQR badge, the mark Cambodian bank apps show for Bakong QR payments.
 function KhqrMark() {
   return (
-    <span className="flex h-11 w-14 shrink-0 flex-col items-center justify-center rounded-lg bg-[#E1232E] text-white shadow-[0_2px_6px_rgb(225_35_46/0.35)]">
-      <span className="text-[13px] font-extrabold leading-none tracking-wide">KHQR</span>
-      <span className="mt-1 h-[2px] w-8 rounded bg-white/70" />
+    <span className="flex h-16 w-24 shrink-0 flex-col items-center justify-center rounded-xl bg-[#E1232E] text-white shadow-[0_3px_10px_rgb(225_35_46/0.35)]">
+      <span className="text-xl font-extrabold leading-none tracking-wide">KHQR</span>
+      <span className="mt-1.5 h-[3px] w-12 rounded bg-white/70" />
     </span>
   );
 }
