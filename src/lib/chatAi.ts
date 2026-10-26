@@ -89,13 +89,13 @@ How to use it: tell the customer clearly whether the money for their order arriv
 - Not paid yet: say no money has reached the shop for that order yet. If they already paid, ask them to send the receipt screenshot and the order code to the admin on Telegram ${store.telegram}. If the QR expired, they should make a new order instead of paying the old QR.`;
 }
 
-/** Workers AI model. Gemma 3 covers Khmer; override with the YURIC_BOT_MODEL variable. */
-export const DEFAULT_MODEL = "@cf/google/gemma-3-12b-it";
-/** Tried in order: the YURIC_BOT_MODEL override, Gemma 3, then Llama 3.3 as a backup. */
+/** Workers AI model. Llama 3.3 answers in Khmer; override with the YURIC_BOT_MODEL variable. */
+export const DEFAULT_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+/** Tried in order: the YURIC_BOT_MODEL override, Llama 3.3, then the smaller Llama 3.1 as a backup. */
 export function botModels(
   override = typeof process !== "undefined" ? process.env["YURIC_BOT_MODEL"] : "",
 ) {
-  return [...new Set([override, DEFAULT_MODEL, "@cf/meta/llama-3.3-70b-instruct-fp8-fast"])].filter(
+  return [...new Set([override, DEFAULT_MODEL, "@cf/meta/llama-3.1-8b-instruct-fast"])].filter(
     (m): m is string => !!m,
   );
 }
