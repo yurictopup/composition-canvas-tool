@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import {
   cachedLookup,
+  lookupRoblox,
   lookupWithGamesDrop,
   parseOfferIds,
   type LookupResult,
@@ -24,6 +25,7 @@ export const lookupPlayer = createServerFn({ method: "POST" })
     const { clientIp } = await import("@/lib/rate-limit.server");
     // Each check may call GamesDrop; too many from one visitor reads as busy.
     if (!allowRequest(`lookup:${clientIp()}`, 20, 60_000)) return { status: "unavailable" };
+    if (data.gameId === "roblox") return cachedLookup(data, () => lookupRoblox(data.primary));
     const usesServerPicker = !!getIdConfig(data.gameId).secondary?.options;
     return cachedLookup(data, async () => {
       const offerIds = parseOfferIds(process.env["GAMESDROP_OFFER_IDS"]);

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { cachedLookup, lookupWithGamesDrop, parseOfferIds } from "@/lib/player-lookup";
+import { cachedLookup, lookupRoblox, lookupWithGamesDrop, parseOfferIds } from "@/lib/player-lookup";
 
 function fakeFetch(routes: Record<string, unknown>, status = 200) {
   return vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
@@ -131,5 +131,23 @@ describe("Lookup cache", () => {
     await cachedLookup({ gameId: "mlbb", primary: "cache-2" }, down);
     await cachedLookup({ gameId: "mlbb", primary: "cache-2" }, down);
     expect(down).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("Roblox username lookup", () => {
+  const robloxFetch = (body: unknown, status = 200) =>
+    vi.fn(async () => new Response(JSON.stringify(body), { status })) as unknown as typeof fetch;
+
+  it("returns the display name and username", async () => {
+    const f = robloxFetch({ data: [{ name: "Yuric_Player", displayName: "Yuric" }] });
+    expect(await lookupRoblox("Yuric_Player", f)).toEqual({ status: "found", name: "Yuric (@Yuric_Player)" });
+  });
+
+  it("reports an unknown username as not found", async () => {
+    expect(await lookupRoblox("nobody_here", robloxFetch({ data: [] }))).toEqual({ status: "not_found" });
+  });
+
+  it("treats a Roblox outage as unavailable", async () => {
+    expect(await lookupRoblox("Yuric_Player", robloxFetch({}, 503))).toEqual({ status: "unavailable" });
   });
 });

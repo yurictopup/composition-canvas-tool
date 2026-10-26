@@ -142,6 +142,32 @@ export async function lookupWithGamesDrop(
   }
 }
 
+// Roblox usernames are checked against Roblox's own public users API, so
+// they need no supplier token.
+const ROBLOX_USERS_URL = "https://users.roblox.com/v1/usernames/users";
+
+export async function lookupRoblox(username: string, fetchImpl: Fetch = fetch): Promise<LookupResult> {
+  try {
+    const res = await fetchImpl(ROBLOX_USERS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usernames: [username.trim()], excludeBannedUsers: true }),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    if (!res.ok) return { status: "unavailable" };
+    const body = (await res.json()) as { data?: { name?: unknown; displayName?: unknown }[] };
+    const user = body.data?.[0];
+    if (!user) return { status: "not_found" };
+    const name = typeof user.name === "string" ? user.name : "";
+    const display = typeof user.displayName === "string" ? user.displayName : "";
+    if (!name) return { status: "unavailable" };
+    return { status: "found", name: display && display !== name ? `${display} (@${name})` : name };
+  } catch (error) {
+    console.error("[player-lookup] roblox", error instanceof Error ? error.message : error);
+    return { status: "unavailable" };
+  }
+}
+
 // Short-lived cache so repeated Check ID taps don't spend supplier quota.
 const CACHE_TTL_MS = 10 * 60 * 1000;
 const CACHE_MAX = 500;
