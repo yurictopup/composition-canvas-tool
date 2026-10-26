@@ -1,5 +1,6 @@
 // Yuric Bot in Khmer — adapted from src/components/ChatWidget.tsx (yurictopup/composition-canvas-tool@031a95c):
-// FAQ threads and Telegram hand-off as before; typed questions are answered by topic and game (chatBrain.ts).
+// FAQ threads and Telegram hand-off as before; typed questions are answered by Workers AI
+// (chat.functions.ts), or by topic and game (chatBrain.ts) when the AI is not available.
 import { useEffect, useRef, useState, type ComponentType } from "react";
 import {
   ChevronLeft,
@@ -16,7 +17,8 @@ import {
   X,
 } from "lucide-react";
 import { BotLogo } from "./BotLogo";
-import { answer, DEFAULT_SUGGESTIONS, type BotAction } from "@/lib/chatBrain";
+import { answer, DEFAULT_SUGGESTIONS, detectGame, type BotAction } from "@/lib/chatBrain";
+import { askBot } from "@/lib/chat.functions";
 
 type Icon = ComponentType<{ className?: string }>;
 type ChatMessage = {
@@ -147,19 +149,34 @@ export function ChatWidget({
     }
     setDraft("");
     setTyping(true);
-    const reply = answer(text, gameHref);
     const threadId = id;
-    timer.current = setTimeout(
-      () => {
-        setThreads((prev) =>
-          prev.map((t) =>
-            t.id === threadId ? { ...t, messages: [...t.messages, { role: "bot", ...reply }] } : t,
-          ),
-        );
-        setTyping(false);
-      },
-      650 + Math.min(900, reply.text.length * 4),
-    );
+    const history = [...(active?.messages ?? []), { role: "user" as const, text }];
+    const started = Date.now();
+    const post = (reply: Omit<ChatMessage, "role">) => {
+      setThreads((prev) =>
+        prev.map((t) =>
+          t.id === threadId ? { ...t, messages: [...t.messages, { role: "bot", ...reply }] } : t,
+        ),
+      );
+      setTyping(false);
+    };
+    askBot({ data: { turns: history.map(({ role, text }) => ({ role, text })) } })
+      .catch(() => null)
+      .then((ai) => {
+        if (ai) {
+          // The AI writes the answer; the buttons come from what the customer asked about.
+          const game = detectGame(text.toLowerCase());
+          const actions: BotAction[] = [];
+          if (game) actions.push({ label: `បញ្ចូល ${game.name}`, href: gameHref(game.id) });
+          if (/telegram|តេឡេក្រាម/i.test(ai.text)) actions.push(telegramAction);
+          post({ text: ai.text, actions });
+          return;
+        }
+        // No AI (quota used up, or not on Cloudflare): the keyword answers.
+        const reply = answer(text, gameHref);
+        const wait = 650 + Math.min(900, reply.text.length * 4) - (Date.now() - started);
+        timer.current = setTimeout(() => post(reply), Math.max(0, wait));
+      });
   }
 
   const composer = (
@@ -342,9 +359,9 @@ export function ChatWidget({
                 className={`flex-1 overflow-y-auto bg-gradient-to-b from-brand-100/50 to-card px-4 pb-4 pt-4 ${scroll}`}
               >
                 <div className="card-3d rounded-2xl p-4">
-                  <p className="font-khmer text-lg leading-8 text-brand-700">សួស្តី! 👋</p>
+                  <p className="font-khmer text-lg leading-8 text-brand-700">សួស្តី!</p>
                   <p className="mt-1 text-sm leading-7 text-muted-foreground">
-                    សួរខ្ញុំអំពីហ្គេម កញ្ចប់ ការបង់ប្រាក់ ឬ Player ID បានគ្រប់ពេល
+                    សួរខ្ញុំអ្វីក៏បានអំពីហ្គេម កញ្ចប់ តម្លៃ ការបង់ប្រាក់ ឬ Player ID
                     ឬជ្រើសសំណួរខាងក្រោម។
                   </p>
                 </div>
