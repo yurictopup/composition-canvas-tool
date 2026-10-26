@@ -2,7 +2,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
-  Crown,
+  Circle,
+  CircleDot,
+  Gem,
+  Inbox,
   LayoutDashboard,
   Menu,
   RefreshCw,
@@ -18,6 +21,7 @@ import { isOwner } from "@/lib/games";
 import { AdminPrices } from "@/components/AdminPrices";
 import { DeliveryCell } from "@/components/AdminDelivery";
 import { AdminOverview, money } from "@/components/admin/AdminOverview";
+import { AdminTopbar, type Lang, type ThemeChoice } from "@/components/admin/AdminTopbar";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import type { AdminOrder } from "@/components/admin/types";
 
@@ -35,6 +39,43 @@ type NavItem = {
   title: string;
   section: string;
 };
+
+const KM: Record<string, string> = {
+  Overview: "ទិដ្ឋភាពទូទៅ",
+  Dashboard: "ផ្ទាំងគ្រប់គ្រង",
+  Orders: "ការកម្មង់",
+  Customers: "អតិថិជន",
+  "Cash Flow": "លំហូរសាច់ប្រាក់",
+  Prices: "តម្លៃ",
+  Store: "ហាង",
+  "Live status": "ស្ថានភាពផ្ទាល់",
+  "Paid orders": "បានបង់",
+  Pending: "រង់ចាំ",
+  Processing: "កំពុងដំណើរការ",
+  "Back to Store": "ត្រឡប់ទៅហាង",
+  Today: "ថ្ងៃនេះ",
+  "7 Days": "៧ ថ្ងៃ",
+  "30 Days": "៣០ ថ្ងៃ",
+  "All time": "ទាំងអស់",
+  Refresh: "ផ្ទុកឡើងវិញ",
+};
+
+function loadPref<T extends string>(key: string, allowed: readonly T[], fallback: T): T {
+  try {
+    const v = localStorage.getItem(key) as T | null;
+    return v && allowed.includes(v) ? v : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function savePref(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // private mode: the choice just isn't remembered
+  }
+}
 
 const NAV: NavItem[] = [
   { id: "overview",  icon: <LayoutDashboard size={22} />, label: "Overview",  title: "Dashboard", section: "Dashboard" },
@@ -60,6 +101,34 @@ function AdminPage() {
   const [timeFilter, setTimeFilter] = useState<"today" | "7d" | "30d" | "all">("all");
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [lang, setLang] = useState<Lang>("en");
+  const [theme, setTheme] = useState<ThemeChoice>("light");
+  const [systemDark, setSystemDark] = useState(false);
+  // Desktop menu: collapsed to icons, and opens over the page while hovered.
+  const [collapsed, setCollapsed] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  useEffect(() => {
+    setLang(loadPref("yt-admin-lang", ["en", "km"] as const, "en"));
+    setTheme(loadPref("yt-admin-theme", ["light", "dark", "system"] as const, "light"));
+    setCollapsed(loadPref("yt-admin-menu", ["open", "collapsed"] as const, "open") === "collapsed");
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    setSystemDark(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  const t = (s: string) => (lang === "km" ? KM[s] ?? s : s);
+  const dark = theme === "dark" || (theme === "system" && systemDark);
+  const mini = collapsed && !hovered;
+
+  function toggleCollapsed() {
+    const next = !collapsed;
+    setCollapsed(next);
+    setHovered(false);
+    savePref("yt-admin-menu", next ? "collapsed" : "open");
+  }
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -140,7 +209,7 @@ function AdminPage() {
   if (!allowed) return null;
 
   return (
-    <div className="vx flex min-h-screen text-[15px]">
+    <div className={`vx ${dark ? "vx-dark" : ""} flex min-h-screen text-[15px]`}>
 
       {/* ── Mobile overlay ── */}
       {menuOpen && (
@@ -149,42 +218,56 @@ function AdminPage() {
 
       {/* ── Vertical menu ── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col bg-white shadow-[0_2px_8px_rgb(47_43_61_/_0.12)] transition-transform lg:translate-x-0 ${
+        data-mini={mini}
+        onMouseEnter={() => collapsed && setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className={`group/side fixed inset-y-0 left-0 z-40 vx-side flex w-[260px] flex-col overflow-x-hidden transition-[transform,width] duration-200 lg:translate-x-0 lg:data-[mini=true]:w-[72px] ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-16 items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--vx-primary)] text-white">
-              <Crown size={18} />
-            </span>
-            <span className="text-[22px] font-bold tracking-tight text-[var(--vx-heading)]">Yuric Topup</span>
-          </div>
+        <div className="flex h-16 items-center justify-between px-6 lg:group-data-[mini=true]/side:px-0 lg:group-data-[mini=true]/side:justify-center">
+          <span className="whitespace-nowrap font-display text-lg font-black text-white text-glow">
+            <Gem size={20} className="mr-1.5 inline-block -translate-y-0.5 text-brand-400 lg:group-data-[mini=true]/side:mr-0" />
+            <span className="lg:group-data-[mini=true]/side:hidden">YURIC<span className="text-brand-400"> TOPUP</span></span>
+          </span>
           <button className="lg:hidden" onClick={() => setMenuOpen(false)} aria-label="Close menu">
             <X size={20} />
           </button>
+          <button
+            className="hidden text-[var(--vx-muted)] hover:text-white lg:block lg:group-data-[mini=true]/side:hidden"
+            onClick={toggleCollapsed}
+            title={collapsed ? (lang === "km" ? "បើក menu" : "Keep menu open") : (lang === "km" ? "បិទ menu" : "Collapse menu")}
+            aria-label="Toggle menu"
+          >
+            {collapsed ? <Circle size={18} /> : <CircleDot size={18} />}
+          </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-4 pb-4">
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 lg:group-data-[mini=true]/side:px-3">
           {["Dashboard", "Store"].map((section) => (
             <div key={section}>
-              <div className="px-2 pb-2 pt-5 text-[13px] uppercase tracking-wide text-[var(--vx-muted)]">{section}</div>
+              <div className="whitespace-nowrap px-2 pb-2 pt-5 text-[13px] uppercase tracking-wide text-[var(--vx-muted)] lg:group-data-[mini=true]/side:hidden">{t(section)}</div>
+              <div className="mx-3 my-4 hidden h-px bg-white/15 lg:group-data-[mini=true]/side:block" />
               {NAV.filter((n) => n.section === section).map((n) => {
                 const badge = n.id === "orders" ? pendingOrders.length + processingOrders.length : 0;
                 return (
                   <button
                     key={n.id}
                     onClick={() => openTab(n.id)}
-                    className={`mb-1 flex w-full items-center gap-3 rounded-md px-4 py-2 text-[15px] transition-colors ${
-                      tab === n.id ? "vx-nav-active" : "text-[var(--vx-heading)] hover:bg-[#f3f2f4]"
+                    title={t(n.label)}
+                    className={`relative mb-1 flex w-full items-center gap-3 whitespace-nowrap rounded-md px-4 py-2 text-[15px] transition-colors lg:group-data-[mini=true]/side:justify-center lg:group-data-[mini=true]/side:px-0 ${
+                      tab === n.id ? "vx-nav-active" : "text-[var(--vx-muted)] hover:bg-white/10 hover:text-white"
                     }`}
                   >
                     {n.icon}
-                    <span className="flex-1 text-left">{n.label}</span>
+                    <span className="flex-1 text-left lg:group-data-[mini=true]/side:hidden">{t(n.label)}</span>
                     {badge > 0 && (
-                      <span className="rounded-full bg-[var(--vx-danger)] px-2 text-xs font-medium leading-5 text-white">
+                      <span className="rounded-full bg-[var(--vx-danger)] px-2 text-xs font-medium leading-5 text-white lg:group-data-[mini=true]/side:hidden">
                         {badge}
                       </span>
+                    )}
+                    {badge > 0 && (
+                      <span className="absolute right-2 top-1.5 hidden h-2 w-2 rounded-full bg-[var(--vx-danger)] lg:group-data-[mini=true]/side:block" />
                     )}
                   </button>
                 );
@@ -192,8 +275,8 @@ function AdminPage() {
             </div>
           ))}
 
-          <div className="px-2 pb-2 pt-5 text-[13px] uppercase tracking-wide text-[var(--vx-muted)]">Live status</div>
-          <div className="space-y-2 px-4 text-[13px]">
+          <div className="whitespace-nowrap px-2 pb-2 pt-5 text-[13px] uppercase tracking-wide text-[var(--vx-muted)] lg:group-data-[mini=true]/side:hidden">{t("Live status")}</div>
+          <div className="space-y-2 whitespace-nowrap px-4 text-[13px] lg:group-data-[mini=true]/side:hidden">
             {[
               { label: "Paid orders", value: completedOrders.length, color: "var(--vx-success)" },
               { label: "Pending",     value: pendingOrders.length,   color: "var(--vx-warning)" },
@@ -201,26 +284,27 @@ function AdminPage() {
             ].map((s) => (
               <div key={s.label} className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full" style={{ background: s.color }} />
-                <span className="flex-1">{s.label}</span>
+                <span className="flex-1">{t(s.label)}</span>
                 <span className="font-medium text-[var(--vx-heading)]">{s.value}</span>
               </div>
             ))}
           </div>
         </nav>
 
-        <div className="px-4 pb-5">
+        <div className="px-4 pb-5 lg:group-data-[mini=true]/side:px-3">
           <Link
             to="/"
-            className="flex items-center gap-3 rounded-md px-4 py-2 text-[15px] text-[var(--vx-heading)] hover:bg-[#f3f2f4]"
+            title={t("Back to Store")}
+            className="flex items-center gap-3 whitespace-nowrap rounded-md px-4 py-2 text-[15px] text-[var(--vx-muted)] hover:bg-white/10 hover:text-white lg:group-data-[mini=true]/side:justify-center lg:group-data-[mini=true]/side:px-0"
           >
-            <ArrowLeft size={20} />
-            Back to Store
+            <ArrowLeft size={20} className="shrink-0" />
+            <span className="lg:group-data-[mini=true]/side:hidden">{t("Back to Store")}</span>
           </Link>
         </div>
       </aside>
 
       {/* ── Main ── */}
-      <div className="flex min-w-0 flex-1 flex-col lg:pl-[260px]">
+      <div className={`flex min-w-0 flex-1 flex-col transition-[padding] duration-200 ${collapsed ? "lg:pl-[72px]" : "lg:pl-[260px]"}`}>
 
         {/* Navbar (detached) */}
         <div className="sticky top-0 z-20 bg-[var(--vx-bg)]/90 px-4 pt-4 backdrop-blur sm:px-6">
@@ -229,39 +313,70 @@ function AdminPage() {
               <Menu size={22} className="text-[var(--vx-heading)]" />
             </button>
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-lg font-medium leading-tight">{current.title}</h1>
+              <h1 className="truncate text-lg font-medium leading-tight">{t(current.title)}</h1>
               <p className="hidden text-[13px] text-[var(--vx-muted)] sm:block">
-                Admin / {current.label}
+                Admin / {t(current.label)}
               </p>
             </div>
             <select
               value={timeFilter}
               onChange={e => setTimeFilter(e.target.value as typeof timeFilter)}
-              className="rounded-md border border-[var(--vx-border)] bg-white px-3 py-1.5 text-[13px] text-[var(--vx-heading)] outline-none focus:border-[var(--vx-primary)]"
+              className="hidden rounded-md border border-[var(--vx-border)] bg-[var(--vx-card)] px-3 py-1.5 text-[13px] sm:block text-[var(--vx-heading)] outline-none focus:border-[var(--vx-primary)]"
             >
-              <option value="today">Today</option>
-              <option value="7d">7 Days</option>
-              <option value="30d">30 Days</option>
-              <option value="all">All time</option>
+              <option value="today">{t("Today")}</option>
+              <option value="7d">{t("7 Days")}</option>
+              <option value="30d">{t("30 Days")}</option>
+              <option value="all">{t("All time")}</option>
             </select>
             <button
               onClick={loadData}
-              title="Refresh"
-              className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--vx-heading)] hover:bg-[#f3f2f4]"
+              title={t("Refresh")}
+              className="hidden h-9 w-9 sm:flex items-center justify-center rounded-full text-[var(--vx-heading)] hover:bg-[var(--vx-hover)]"
             >
               <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
             </button>
-            <div className="relative" title={ownerEmail}>
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--vx-primary-soft)] text-sm font-semibold uppercase text-[var(--vx-primary)]">
-                {ownerName.slice(0, 2)}
-              </span>
-              <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-[var(--vx-success)]" />
-            </div>
+            <AdminTopbar
+              orders={orders}
+              ownerEmail={ownerEmail}
+              lang={lang}
+              onLang={(l) => {
+                setLang(l);
+                savePref("yt-admin-lang", l);
+              }}
+              theme={theme}
+              onTheme={(th) => {
+                setTheme(th);
+                savePref("yt-admin-theme", th);
+              }}
+              onOpenTab={openTab}
+              onRefresh={loadData}
+            />
           </header>
         </div>
 
         {/* Content */}
         <main className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 sm:px-6">
+          {/* On phones the top bar has no room for the period filter, so it sits here. */}
+          <div className="mb-4 flex items-center gap-2 sm:hidden">
+            <select
+              value={timeFilter}
+              onChange={e => setTimeFilter(e.target.value as typeof timeFilter)}
+              className="flex-1 rounded-md border border-[var(--vx-border)] bg-[var(--vx-card)] px-3 py-2 text-[13px] text-[var(--vx-heading)] outline-none focus:border-[var(--vx-primary)]"
+            >
+              <option value="today">{t("Today")}</option>
+              <option value="7d">{t("7 Days")}</option>
+              <option value="30d">{t("30 Days")}</option>
+              <option value="all">{t("All time")}</option>
+            </select>
+            <button
+              onClick={loadData}
+              title={t("Refresh")}
+              className="vx-card flex h-9 w-9 items-center justify-center text-[var(--vx-heading)]"
+            >
+              <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+            </button>
+          </div>
+
 
           {loading && orders.length === 0 ? (
             <div className="vx-card flex h-48 items-center justify-center">
@@ -300,7 +415,7 @@ function AdminPage() {
                   </div>
                   {shownOrders.length === 0 ? (
                     <div className="p-12 text-center text-[var(--vx-muted)]">
-                      <div className="text-4xl mb-3">📭</div>
+                      <Inbox size={40} strokeWidth={1.5} className="mx-auto mb-3" />
                       <p>មិនទាន់មាន orders ទេ</p>
                     </div>
                   ) : (
@@ -322,7 +437,7 @@ function AdminPage() {
                         </thead>
                         <tbody className="divide-y divide-[var(--vx-border)]">
                           {shownOrders.map((o) => (
-                            <tr key={o.id} className="transition-colors hover:bg-[#f8f7fa]">
+                            <tr key={o.id} className="transition-colors hover:bg-[var(--vx-hover)]">
                               <td className="px-4 py-3 text-xs font-medium text-[var(--vx-primary)]">#{o.id.slice(0, 8).toUpperCase()}</td>
                               <td className="px-4 py-3 max-w-[160px] truncate text-xs">{o.user_email}</td>
                               <td className="px-4 py-3 font-medium text-[var(--vx-heading)]">{o.game_name}</td>
@@ -368,7 +483,7 @@ function AdminPage() {
                   </div>
                   {uniqueCustomers.length === 0 ? (
                     <div className="p-12 text-center text-[var(--vx-muted)]">
-                      <div className="text-4xl mb-3">👥</div>
+                      <Users size={40} strokeWidth={1.5} className="mx-auto mb-3" />
                       <p>មិនទាន់មាន customers ទេ</p>
                     </div>
                   ) : (
@@ -388,7 +503,7 @@ function AdminPage() {
                             const spent = userOrders.filter(o => o.status === "completed").reduce((s, o) => s + Number(o.price_usd), 0);
                             const last = userOrders[0]?.created_at;
                             return (
-                              <tr key={email} className="transition-colors hover:bg-[#f8f7fa]">
+                              <tr key={email} className="transition-colors hover:bg-[var(--vx-hover)]">
                                 <td className="px-6 py-3">
                                   <div className="flex items-center gap-3">
                                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--vx-primary-soft)] text-xs font-semibold uppercase text-[var(--vx-primary)]">
@@ -453,7 +568,7 @@ function AdminPage() {
                           </thead>
                           <tbody className="divide-y divide-[var(--vx-border)]">
                             {completedOrders.map((o) => (
-                              <tr key={o.id} className="hover:bg-[#f8f7fa]">
+                              <tr key={o.id} className="hover:bg-[var(--vx-hover)]">
                                 <td className="px-6 py-3 text-xs text-[var(--vx-muted)]">{fmtDate(o.created_at)}</td>
                                 <td className="px-6 py-3 text-xs">{o.user_email}</td>
                                 <td className="px-6 py-3">{o.game_name} — {o.package_amt}</td>

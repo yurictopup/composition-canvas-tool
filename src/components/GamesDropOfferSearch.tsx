@@ -39,16 +39,16 @@ export function GamesDropOfferSearch() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="e.g. Mobile Legends"
-          className="flex-1 rounded-lg border border-gray-200 px-3 py-2 outline-none focus:border-[#7367F0]"
+          className="flex-1 rounded-lg border border-gray-200 px-3 py-2 outline-none focus:border-[#1C3CB2]"
         />
         <button
           disabled={busy || search.trim().length < 2}
-          className="rounded-lg bg-[#7367F0] px-4 py-2 text-xs font-semibold text-white disabled:opacity-30"
+          className="rounded-lg bg-[#1C3CB2] px-4 py-2 text-xs font-semibold text-white disabled:opacity-30"
         >
           {busy ? "Searching…" : "Search GamesDrop"}
         </button>
       </form>
-      {err && <p className="text-red-600">⚠️ {err}</p>}
+      {err && <p className="text-red-600">{err}</p>}
       {results && results.length === 0 && <p className="text-gray-400">No offers found.</p>}
       {results && results.length > 0 && (
         <div className="max-h-64 overflow-y-auto rounded-lg border border-gray-100">

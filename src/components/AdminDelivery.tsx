@@ -30,7 +30,7 @@ export function DeliveryCell({
     setMsg(null);
     try {
       const res = await checkPayment({ data: { orderId: order.id } });
-      setMsg(res.paid ? "Paid ✅" : (res.message ?? "Not paid yet."));
+      setMsg(res.paid ? "Paid." : (res.message ?? "Not paid yet."));
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Something went wrong.");
     }
@@ -60,23 +60,23 @@ export function DeliveryCell({
 
   return (
     <div className="grid gap-1 text-xs">
-      {order.paid_at && <span className="font-semibold text-green-700">💰 Paid by Bakong</span>}
+      {order.paid_at && <span className="font-semibold text-green-700">Paid by Bakong</span>}
       {canCheckPayment && (
         <button
           disabled={busy}
           onClick={runPaymentCheck}
           className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-semibold disabled:opacity-40"
         >
-          {busy ? "Checking…" : "💳 Check payment"}
+          {busy ? "Checking…" : "Check payment"}
         </button>
       )}
       {canDeliver && (
         <button
           disabled={busy}
           onClick={() => run("deliver")}
-          className="rounded-lg bg-[#7367F0] px-3 py-1.5 font-semibold text-white disabled:opacity-40"
+          className="rounded-lg bg-[#1C3CB2] px-3 py-1.5 font-semibold text-white disabled:opacity-40"
         >
-          {busy ? "Sending…" : "🚀 Deliver"}
+          {busy ? "Sending…" : "Deliver"}
         </button>
       )}
       {canRefresh && (
@@ -85,7 +85,7 @@ export function DeliveryCell({
           onClick={() => run("refresh")}
           className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-semibold disabled:opacity-40"
         >
-          {busy ? "Checking…" : "↻ Check"}
+          {busy ? "Checking…" : "Check delivery"}
         </button>
       )}
       {order.supplier_status && (

@@ -32,15 +32,15 @@ import type { AdminOrder } from "./types";
 import { StatusBadge } from "./StatusBadge";
 
 const C = {
-  primary: "#7367F0",
-  primarySoft: "rgba(115,103,240,0.16)",
+  primary: "#2F5FE0",
+  primarySoft: "rgba(47,95,224,0.16)",
   success: "#28C76F",
-  info: "#00BAD1",
+  info: "#3FA2F0",
   warning: "#FF9F43",
   danger: "#FF4C51",
-  secondary: "#808390",
-  grid: "#E6E6E8",
-  muted: "#ACAAB1",
+  secondary: "#7A86A3",
+  grid: "var(--vx-border)",
+  muted: "#8E9BB8",
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -211,7 +211,7 @@ export function AdminOverview({
       {/* Congratulations */}
       <Card className="relative overflow-hidden lg:col-span-4">
         <div className="p-6">
-          <h5 className="text-lg font-medium">Congratulations {ownerName}! 🎉</h5>
+          <h5 className="text-lg font-medium">Congratulations {ownerName}!</h5>
           <p className="text-[13px]">Revenue in this period</p>
           <h4 className="mt-5 text-2xl font-medium" style={{ color: C.primary }}>
             {money(revenue)}
@@ -251,7 +251,7 @@ export function AdminOverview({
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={thisWeek} barSize={8}>
               <Tooltip content={<ChartTip />} cursor={false} />
-              <Bar dataKey="Orders" radius={[4, 4, 4, 4]} fill={C.warning} background={{ fill: "#F1F0F2", radius: 4 }} />
+              <Bar dataKey="Orders" radius={[4, 4, 4, 4]} fill={C.warning} background={{ fill: "var(--vx-track)", radius: 4 }} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -342,7 +342,7 @@ export function AdminOverview({
               <CartesianGrid stroke={C.grid} strokeDasharray="4 4" vertical={false} />
               <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: C.muted, fontSize: 12 }} />
               <YAxis axisLine={false} tickLine={false} width={44} tick={{ fill: C.muted, fontSize: 12 }} tickFormatter={(v) => `$${v}`} />
-              <Tooltip content={<ChartTip />} cursor={{ fill: "rgba(115,103,240,0.06)" }} />
+              <Tooltip content={<ChartTip />} cursor={{ fill: "rgba(47,95,224,0.06)" }} />
               <Bar dataKey="Revenue" fill={C.primary} radius={[6, 6, 0, 0]} />
               <Bar dataKey="Unpaid" fill={C.warning} radius={[6, 6, 0, 0]} />
             </BarChart>
@@ -392,7 +392,7 @@ export function AdminOverview({
                   stroke="none"
                 >
                   {(hasStatus ? statusData : [{ name: "none" }]).map((s) => (
-                    <Cell key={s.name} fill={STATUS_COLORS[s.name] ?? "#F1F0F2"} />
+                    <Cell key={s.name} fill={STATUS_COLORS[s.name] ?? "var(--vx-track)"} />
                   ))}
                 </Pie>
               </PieChart>
@@ -454,7 +454,7 @@ export function AdminOverview({
                     {money(g.revenue)} · {g.count} orders
                   </span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-[#F1F0F2]">
+                <div className="h-2 overflow-hidden rounded-full bg-[var(--vx-track)]">
                   <div
                     className="h-full rounded-full"
                     style={{ width: `${Math.max(4, (g.revenue / topMax) * 100)}%`, background: gameColors[i] }}

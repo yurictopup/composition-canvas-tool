@@ -55,7 +55,7 @@ export function AdminPrices() {
     const text = (offerDrafts[id] ?? "").trim();
     const offerId = Number(text);
     if (text && (!Number.isInteger(offerId) || offerId <= 0)) {
-      setMsg(`⚠️ ${row.key}: the GamesDrop offer ID is a whole number.`);
+      setMsg(`${row.key}: the GamesDrop offer ID is a whole number.`);
       return;
     }
     setSaving(id);
@@ -73,12 +73,12 @@ export function AdminPrices() {
           .eq("game_id", row.gameId)
           .eq("package_amt", row.key);
     if (error) {
-      setMsg(`⚠️ ${row.key}: ${error.message}`);
+      setMsg(`${row.key}: ${error.message}`);
     } else {
       setMsg(
         text
-          ? `✅ ${row.key} delivers with GamesDrop offer ${offerId}`
-          : `✅ ${row.key}: GamesDrop offer removed`,
+          ? `${row.key} delivers with GamesDrop offer ${offerId}`
+          : `${row.key}: GamesDrop offer removed`,
       );
       setOfferDrafts(({ [id]: _, ...rest }) => rest);
       await load();
@@ -97,7 +97,7 @@ export function AdminPrices() {
       drafts[id] ?? (current ? current.price_usd.toFixed(2) : (row.fallback?.toFixed(2) ?? ""));
     const price = Number(text);
     if (!Number.isFinite(price) || price <= 0) {
-      setMsg(`⚠️ ${row.key}: enter a price above $0.`);
+      setMsg(`${row.key}: enter a price above $0.`);
       return;
     }
     setSaving(id);
@@ -110,9 +110,9 @@ export function AdminPrices() {
       active,
     });
     if (error) {
-      setMsg(`⚠️ ${row.key}: ${error.message}`);
+      setMsg(`${row.key}: ${error.message}`);
     } else {
-      setMsg(`✅ ${row.gameName} — ${row.key}: $${price.toFixed(2)}${active ? "" : " (hidden)"}`);
+      setMsg(`${row.gameName} — ${row.key}: $${price.toFixed(2)}${active ? "" : " (hidden)"}`);
       setDrafts(({ [id]: _, ...rest }) => rest);
       await load();
     }
@@ -148,7 +148,7 @@ export function AdminPrices() {
               onClick={() => setGameFilter(g.id)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
                 gameFilter === g.id
-                  ? "border-[#7367F0] bg-[#7367F0] text-white"
+                  ? "border-[#1C3CB2] bg-[#1C3CB2] text-white"
                   : "border-gray-200 bg-white hover:bg-gray-50"
               }`}
             >
@@ -189,7 +189,7 @@ export function AdminPrices() {
                           value={value}
                           placeholder={row.fallback?.toFixed(2) ?? "0.00"}
                           onChange={(e) => setDrafts((d) => ({ ...d, [id]: e.target.value }))}
-                          className="w-24 rounded-lg border border-gray-200 px-2 py-1 outline-none focus:border-[#7367F0]"
+                          className="w-24 rounded-lg border border-gray-200 px-2 py-1 outline-none focus:border-[#1C3CB2]"
                         />
                       </div>
                     </td>
@@ -213,7 +213,7 @@ export function AdminPrices() {
                           value={offerDrafts[id] ?? (offers[id] ? String(offers[id]) : "")}
                           placeholder="Offer ID"
                           onChange={(e) => setOfferDrafts((d) => ({ ...d, [id]: e.target.value }))}
-                          className="w-24 rounded-lg border border-gray-200 px-2 py-1 outline-none focus:border-[#7367F0]"
+                          className="w-24 rounded-lg border border-gray-200 px-2 py-1 outline-none focus:border-[#1C3CB2]"
                         />
                         <button
                           disabled={saving === id || offerDrafts[id] === undefined}
@@ -228,7 +228,7 @@ export function AdminPrices() {
                       <button
                         disabled={saving === id || !prices || drafts[id] === undefined}
                         onClick={() => save(row, current ? active : true)}
-                        className="rounded-lg bg-[#7367F0] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-30"
+                        className="rounded-lg bg-[#1C3CB2] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-30"
                       >
                         {saving === id ? "Saving…" : "Save"}
                       </button>

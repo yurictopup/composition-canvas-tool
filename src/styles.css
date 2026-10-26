@@ -290,22 +290,24 @@
 .yt-bot[data-stars="false"] .yt-bot-s1,.yt-bot[data-stars="false"] .yt-bot-s2,.yt-bot[data-stars="false"] .yt-bot-s3{display:none}
 
 
-/* Admin dashboard: clean light admin look (soft grey canvas, white cards, violet primary) */
+/* Admin dashboard: clean light admin look in the store's colors (navy menu, light blue canvas, royal blue primary) */
 .vx {
-  --vx-primary: #7367f0;
-  --vx-primary-soft: rgb(115 103 240 / 0.16);
+  --vx-primary: #2f5fe0;
+  --vx-primary-soft: rgb(47 95 224 / 0.14);
   --vx-success: #28c76f;
-  --vx-info: #00bad1;
+  --vx-info: #3fa2f0;
   --vx-warning: #ff9f43;
   --vx-danger: #ff4c51;
-  --vx-secondary: #808390;
-  --vx-bg: #f8f7fa;
+  --vx-secondary: #7a86a3;
+  --vx-bg: #eef4fd;
   --vx-card: #ffffff;
-  --vx-heading: #444050;
-  --vx-body: #6d6b77;
-  --vx-muted: #acaab1;
-  --vx-border: #e6e6e8;
-  --vx-shadow: 0 3px 12px rgb(47 43 61 / 0.14);
+  --vx-heading: #142650;
+  --vx-body: #4b5b7c;
+  --vx-muted: #8e9bb8;
+  --vx-border: #dfe8f6;
+  --vx-hover: #f3f7fe;
+  --vx-track: #e8effb;
+  --vx-shadow: 0 3px 12px rgb(7 28 80 / 0.1);
   font-family: "Public Sans", "Kantumruy Pro", ui-sans-serif, system-ui, sans-serif;
   background: var(--vx-bg);
   color: var(--vx-body);
@@ -316,23 +318,64 @@
   border-radius: 0.375rem;
   box-shadow: var(--vx-shadow);
 }
+.vx-side {
+  --vx-heading: #f5f8ff;
+  --vx-muted: #b8cde5;
+  background: linear-gradient(180deg, #071c50 0%, #0c2a72 100%);
+  color: #f5f8ff;
+  box-shadow: 0 2px 12px rgb(7 28 80 / 0.35);
+}
 .vx-nav-active {
-  background: linear-gradient(270deg, rgb(115 103 240 / 0.7) 0%, #7367f0 100%);
+  background: linear-gradient(270deg, #3567de 0%, #1c3cb2 100%);
   color: #fff;
-  box-shadow: 0 2px 6px rgb(115 103 240 / 0.3);
+  box-shadow: 0 2px 10px rgb(100 169 243 / 0.45);
 }
 .vx-btn {
   background: var(--vx-primary);
   color: #fff;
   border-radius: 0.375rem;
-  box-shadow: 0 2px 6px rgb(115 103 240 / 0.3);
+  box-shadow: 0 2px 8px rgb(47 95 224 / 0.35);
   transition: background 0.15s;
 }
-.vx-btn:hover { background: #685dd8; }
+.vx-btn:hover { background: #1c3cb2; }
 .vx-table thead th {
   font-size: 0.8125rem;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.2px;
   color: var(--vx-heading);
+}
+.vx.vx-dark {
+  --vx-primary: #5b86ff;
+  --vx-primary-soft: rgb(91 134 255 / 0.18);
+  --vx-bg: #0a1638;
+  --vx-card: #11204a;
+  --vx-heading: #e8efff;
+  --vx-body: #b3c2e0;
+  --vx-muted: #7e8fb5;
+  --vx-border: #22356b;
+  --vx-hover: #172a5c;
+  --vx-track: #1b2d5e;
+  --vx-shadow: 0 3px 12px rgb(0 0 0 / 0.35);
+  color-scheme: dark;
+}
+/* the shared admin widgets use plain Tailwind greys; map them onto the dark tokens */
+.vx.vx-dark .bg-white { background-color: var(--vx-card); }
+.vx.vx-dark .bg-gray-50,
+.vx.vx-dark .hover\:bg-gray-50\/60:hover,
+.vx.vx-dark .hover\:bg-gray-50:hover { background-color: var(--vx-hover); }
+.vx.vx-dark .border-gray-100,
+.vx.vx-dark .border-gray-200,
+.vx.vx-dark .divide-gray-50 > * + * { border-color: var(--vx-border); }
+.vx.vx-dark .text-gray-400,
+.vx.vx-dark .text-gray-500,
+.vx.vx-dark .text-gray-600 { color: var(--vx-muted); }
+.vx.vx-dark input,
+.vx.vx-dark select { background-color: var(--vx-card); color: var(--vx-heading); }
+.vx-pop {
+  background: var(--vx-card);
+  color: var(--vx-body);
+  border: 1px solid var(--vx-border);
+  border-radius: 0.375rem;
+  box-shadow: 0 6px 24px rgb(7 28 80 / 0.18);
 }
