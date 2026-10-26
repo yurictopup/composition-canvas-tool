@@ -2,7 +2,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { store, games, isOwner } from "@/lib/games";
+import { store } from "@/lib/games";
+import { StoreUserMenu } from "@/components/StoreUserMenu";
 import { ChatWidget } from "@/components/ChatWidget";
 
 export function SiteChrome({ children }: { children: ReactNode }) {
@@ -31,23 +32,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
           </Link>
           <nav className="flex items-center gap-4 text-sm">
             {user ? (
-              <>
-                {isOwner(user.email) && (
-                  <Link
-                    to="/admin"
-                    className="rounded-lg border border-amber-400/60 bg-amber-400/10 px-3 py-1.5 font-semibold text-amber-400 transition-colors hover:bg-amber-400/20"
-                  >
-                    👑 Admin
-                  </Link>
-                )}
-                <span className="hidden max-w-[180px] truncate text-on-dark-muted sm:inline">{user.email}</span>
-                <button
-                  onClick={signOut}
-                  className="rounded-lg border border-brand-400/40 px-4 py-1.5 font-semibold text-on-dark-muted transition-colors hover:text-on-dark"
-                >
-                  Sign Out
-                </button>
-              </>
+              <StoreUserMenu user={user} onSignOut={signOut} />
             ) : (
               <Link
                 to="/auth"
