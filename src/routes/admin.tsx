@@ -20,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isOwner } from "@/lib/games";
 import { AdminPrices } from "@/components/AdminPrices";
 import { DeliveryCell } from "@/components/AdminDelivery";
-import { AdminOverview, money } from "@/components/admin/AdminOverview";
+import { AdminOverview, money, paid } from "@/components/admin/AdminOverview";
 import { AdminTopbar, type Lang, type ThemeChoice } from "@/components/admin/AdminTopbar";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import type { AdminOrder } from "@/components/admin/types";
@@ -179,10 +179,10 @@ function AdminPage() {
   }
 
   const fo = filteredOrders();
-  const revenue = fo.filter(o => o.status === "completed").reduce((s, o) => s + Number(o.price_usd), 0);
-  const pendingOrders    = fo.filter(o => o.status === "pending");
-  const processingOrders = fo.filter(o => o.status === "processing");
-  const completedOrders  = fo.filter(o => o.status === "completed");
+  const revenue = fo.filter(paid).reduce((s, o) => s + Number(o.price_usd), 0);
+  const pendingOrders    = fo.filter(o => o.status === "pending" && !o.paid_at);
+  const processingOrders = fo.filter(o => o.status === "processing" || (o.status === "pending" && !!o.paid_at));
+  const completedOrders  = fo.filter(paid);
 
   // Unique customers
   const uniqueCustomers = [...new Set(fo.map(o => o.user_email))];

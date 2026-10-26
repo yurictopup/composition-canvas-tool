@@ -52,7 +52,9 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export const money = (n: number) => `$${n.toFixed(2)}`;
-const paid = (o: AdminOrder) => o.status === "completed";
+// Paid by Bakong counts as revenue even before the diamonds are delivered.
+export const paid = (o: AdminOrder) =>
+  o.status === "completed" || (!!o.paid_at && o.status !== "refunded" && o.status !== "failed");
 const sum = (list: AdminOrder[]) => list.reduce((s, o) => s + Number(o.price_usd), 0);
 
 function dayKey(d: Date) {
@@ -119,8 +121,8 @@ export function AdminOverview({
 }) {
   const revenue = sum(orders.filter(paid));
   const grossProfit = revenue; // no cost data yet
-  const pending = orders.filter((o) => o.status === "pending");
-  const processing = orders.filter((o) => o.status === "processing");
+  const pending = orders.filter((o) => o.status === "pending" && !o.paid_at);
+  const processing = orders.filter((o) => o.status === "processing" || (o.status === "pending" && !!o.paid_at));
   const completed = orders.filter(paid);
   const failed = orders.filter((o) => o.status === "failed");
   const customers = new Set(orders.map((o) => o.user_email)).size;
@@ -159,7 +161,7 @@ export function AdminOverview({
     return {
       label: d.toLocaleDateString("en", { month: "short" }),
       Revenue: sum(list.filter(paid)),
-      Unpaid: sum(list.filter((o) => o.status === "pending" || o.status === "failed")),
+      Unpaid: sum(list.filter((o) => (o.status === "pending" && !o.paid_at) || o.status === "failed")),
     };
   });
   const yearRevenue = months.reduce((s, m) => s + m.Revenue, 0);
