@@ -21,9 +21,18 @@ import {
   X,
 } from "lucide-react";
 import { BotLogo } from "./BotLogo";
-import { answer, DEFAULT_SUGGESTIONS, detectGame, type BotAction } from "@/lib/chatBrain";
-import { askBot } from "@/lib/chat.functions";
+import {
+  answer,
+  DEFAULT_SUGGESTIONS,
+  detectGame,
+  isOrderQuestion,
+  type BotAction,
+} from "@/lib/chatBrain";
+import { askBot, checkMyOrders } from "@/lib/chat.functions";
 import { setStoreTheme, useStorePrefs } from "@/lib/storePrefs";
+
+/** Workers AI answers (slow, about 5-10 seconds); off until a faster model is chosen. */
+const USE_AI = false;
 
 type Icon = ComponentType<{ className?: string }>;
 type ChatMessage = {
@@ -196,6 +205,22 @@ export function ChatWidget({
       );
       setTyping(false);
     };
+    const keywords = () => {
+      const reply = answer(text, gameHref);
+      const wait = 350 + Math.min(500, reply.text.length * 2) - (Date.now() - started);
+      timer.current = setTimeout(() => post(reply), Math.max(0, wait));
+    };
+    // KENZO found the AI too slow, so answers come from the keyword brain right away.
+    // Payment problems still get a live check of the customer's orders.
+    if (!USE_AI) {
+      if (!isOrderQuestion(text)) return keywords();
+      checkMyOrders()
+        .catch((error: unknown) => ({ unavailable: String(error) }))
+        .then((res) =>
+          "text" in res ? post({ text: res.text, actions: [telegramAction] }) : keywords(),
+        );
+      return;
+    }
     askBot({ data: { turns: history.map(({ role, text }) => ({ role, text })) } })
       .catch((error: unknown) => ({ unavailable: String(error) }))
       .then((ai) => {
@@ -216,9 +241,7 @@ export function ChatWidget({
         }
         // No AI (quota used up, or not on Cloudflare): the keyword answers.
         console.warn("Yuric Bot AI unavailable:", ai.unavailable);
-        const reply = answer(text, gameHref);
-        const wait = 650 + Math.min(900, reply.text.length * 4) - (Date.now() - started);
-        timer.current = setTimeout(() => post(reply), Math.max(0, wait));
+        keywords();
       });
   }
 
