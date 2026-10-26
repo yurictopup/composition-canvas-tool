@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
+  Circle,
+  CircleDot,
   Gem,
   Inbox,
   LayoutDashboard,
@@ -102,10 +104,14 @@ function AdminPage() {
   const [lang, setLang] = useState<Lang>("en");
   const [theme, setTheme] = useState<ThemeChoice>("light");
   const [systemDark, setSystemDark] = useState(false);
+  // Desktop menu: collapsed to icons, and opens over the page while hovered.
+  const [collapsed, setCollapsed] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
     setLang(loadPref("yt-admin-lang", ["en", "km"] as const, "en"));
     setTheme(loadPref("yt-admin-theme", ["light", "dark", "system"] as const, "light"));
+    setCollapsed(loadPref("yt-admin-menu", ["open", "collapsed"] as const, "open") === "collapsed");
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     setSystemDark(mq.matches);
     const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches);
@@ -115,6 +121,14 @@ function AdminPage() {
 
   const t = (s: string) => (lang === "km" ? KM[s] ?? s : s);
   const dark = theme === "dark" || (theme === "system" && systemDark);
+  const mini = collapsed && !hovered;
+
+  function toggleCollapsed() {
+    const next = !collapsed;
+    setCollapsed(next);
+    setHovered(false);
+    savePref("yt-admin-menu", next ? "collapsed" : "open");
+  }
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -204,41 +218,56 @@ function AdminPage() {
 
       {/* ── Vertical menu ── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 vx-side flex w-[260px] flex-col transition-transform lg:translate-x-0 ${
+        data-mini={mini}
+        onMouseEnter={() => collapsed && setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className={`group/side fixed inset-y-0 left-0 z-40 vx-side flex w-[260px] flex-col overflow-x-hidden transition-[transform,width] duration-200 lg:translate-x-0 lg:data-[mini=true]:w-[72px] ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-16 items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            <span className="font-display text-lg font-black text-white text-glow">
-              <Gem size={20} className="mr-1.5 inline-block -translate-y-0.5 text-brand-400" />YURIC<span className="text-brand-400"> TOPUP</span>
-            </span>
-          </div>
+        <div className="flex h-16 items-center justify-between px-6 lg:group-data-[mini=true]/side:px-0 lg:group-data-[mini=true]/side:justify-center">
+          <span className="whitespace-nowrap font-display text-lg font-black text-white text-glow">
+            <Gem size={20} className="mr-1.5 inline-block -translate-y-0.5 text-brand-400 lg:group-data-[mini=true]/side:mr-0" />
+            <span className="lg:group-data-[mini=true]/side:hidden">YURIC<span className="text-brand-400"> TOPUP</span></span>
+          </span>
           <button className="lg:hidden" onClick={() => setMenuOpen(false)} aria-label="Close menu">
             <X size={20} />
           </button>
+          <button
+            className="hidden text-[var(--vx-muted)] hover:text-white lg:block lg:group-data-[mini=true]/side:hidden"
+            onClick={toggleCollapsed}
+            title={collapsed ? (lang === "km" ? "បើក menu" : "Keep menu open") : (lang === "km" ? "បិទ menu" : "Collapse menu")}
+            aria-label="Toggle menu"
+          >
+            {collapsed ? <Circle size={18} /> : <CircleDot size={18} />}
+          </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-4 pb-4">
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 lg:group-data-[mini=true]/side:px-3">
           {["Dashboard", "Store"].map((section) => (
             <div key={section}>
-              <div className="px-2 pb-2 pt-5 text-[13px] uppercase tracking-wide text-[var(--vx-muted)]">{t(section)}</div>
+              <div className="whitespace-nowrap px-2 pb-2 pt-5 text-[13px] uppercase tracking-wide text-[var(--vx-muted)] lg:group-data-[mini=true]/side:hidden">{t(section)}</div>
+              <div className="mx-3 my-4 hidden h-px bg-white/15 lg:group-data-[mini=true]/side:block" />
               {NAV.filter((n) => n.section === section).map((n) => {
                 const badge = n.id === "orders" ? pendingOrders.length + processingOrders.length : 0;
                 return (
                   <button
                     key={n.id}
                     onClick={() => openTab(n.id)}
-                    className={`mb-1 flex w-full items-center gap-3 rounded-md px-4 py-2 text-[15px] transition-colors ${
+                    title={t(n.label)}
+                    className={`relative mb-1 flex w-full items-center gap-3 whitespace-nowrap rounded-md px-4 py-2 text-[15px] transition-colors lg:group-data-[mini=true]/side:justify-center lg:group-data-[mini=true]/side:px-0 ${
                       tab === n.id ? "vx-nav-active" : "text-[var(--vx-muted)] hover:bg-white/10 hover:text-white"
                     }`}
                   >
                     {n.icon}
-                    <span className="flex-1 text-left">{t(n.label)}</span>
+                    <span className="flex-1 text-left lg:group-data-[mini=true]/side:hidden">{t(n.label)}</span>
                     {badge > 0 && (
-                      <span className="rounded-full bg-[var(--vx-danger)] px-2 text-xs font-medium leading-5 text-white">
+                      <span className="rounded-full bg-[var(--vx-danger)] px-2 text-xs font-medium leading-5 text-white lg:group-data-[mini=true]/side:hidden">
                         {badge}
                       </span>
+                    )}
+                    {badge > 0 && (
+                      <span className="absolute right-2 top-1.5 hidden h-2 w-2 rounded-full bg-[var(--vx-danger)] lg:group-data-[mini=true]/side:block" />
                     )}
                   </button>
                 );
@@ -246,8 +275,8 @@ function AdminPage() {
             </div>
           ))}
 
-          <div className="px-2 pb-2 pt-5 text-[13px] uppercase tracking-wide text-[var(--vx-muted)]">{t("Live status")}</div>
-          <div className="space-y-2 px-4 text-[13px]">
+          <div className="whitespace-nowrap px-2 pb-2 pt-5 text-[13px] uppercase tracking-wide text-[var(--vx-muted)] lg:group-data-[mini=true]/side:hidden">{t("Live status")}</div>
+          <div className="space-y-2 whitespace-nowrap px-4 text-[13px] lg:group-data-[mini=true]/side:hidden">
             {[
               { label: "Paid orders", value: completedOrders.length, color: "var(--vx-success)" },
               { label: "Pending",     value: pendingOrders.length,   color: "var(--vx-warning)" },
@@ -262,19 +291,20 @@ function AdminPage() {
           </div>
         </nav>
 
-        <div className="px-4 pb-5">
+        <div className="px-4 pb-5 lg:group-data-[mini=true]/side:px-3">
           <Link
             to="/"
-            className="flex items-center gap-3 rounded-md px-4 py-2 text-[15px] text-[var(--vx-muted)] hover:bg-white/10 hover:text-white"
+            title={t("Back to Store")}
+            className="flex items-center gap-3 whitespace-nowrap rounded-md px-4 py-2 text-[15px] text-[var(--vx-muted)] hover:bg-white/10 hover:text-white lg:group-data-[mini=true]/side:justify-center lg:group-data-[mini=true]/side:px-0"
           >
-            <ArrowLeft size={20} />
-            {t("Back to Store")}
+            <ArrowLeft size={20} className="shrink-0" />
+            <span className="lg:group-data-[mini=true]/side:hidden">{t("Back to Store")}</span>
           </Link>
         </div>
       </aside>
 
       {/* ── Main ── */}
-      <div className="flex min-w-0 flex-1 flex-col lg:pl-[260px]">
+      <div className={`flex min-w-0 flex-1 flex-col transition-[padding] duration-200 ${collapsed ? "lg:pl-[72px]" : "lg:pl-[260px]"}`}>
 
         {/* Navbar (detached) */}
         <div className="sticky top-0 z-20 bg-[var(--vx-bg)]/90 px-4 pt-4 backdrop-blur sm:px-6">
