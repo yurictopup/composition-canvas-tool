@@ -134,4 +134,9 @@ describe("Matching a payment to the order", () => {
     expect(paymentMatches({ ...paid, toAccountId: "someone@aclb" }, expected)).toBe(false);
     expect(paymentMatches({ ...paid, amount: null }, expected)).toBe(false);
   });
+  it("skips the account check when the QR came from KHQR.dev", () => {
+    const relay = { amount: 1.09, accountId: null };
+    expect(paymentMatches({ ...paid, toAccountId: "shop@abaa" }, relay)).toBe(true);
+    expect(paymentMatches({ ...paid, toAccountId: "shop@abaa", amount: 1.0 }, relay)).toBe(false);
+  });
 });
