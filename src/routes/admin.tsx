@@ -221,12 +221,12 @@ function AdminPage() {
         data-mini={mini}
         onMouseEnter={() => collapsed && setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className={`group/side fixed inset-y-0 left-0 z-40 vx-side flex w-[260px] flex-col overflow-x-hidden transition-[transform,width] duration-200 lg:translate-x-0 lg:data-[mini=true]:w-[72px] ${
+        className={`group/side fixed inset-y-0 left-0 z-40 vx-side flex w-[240px] flex-col overflow-x-hidden transition-[transform,width] duration-200 lg:translate-x-0 lg:data-[mini=true]:w-[72px] ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-16 items-center justify-between px-6 lg:group-data-[mini=true]/side:px-0 lg:group-data-[mini=true]/side:justify-center">
-          <span className="whitespace-nowrap font-display text-lg font-black text-white text-glow">
+        <div className="flex h-16 items-center justify-between px-5 lg:group-data-[mini=true]/side:px-0 lg:group-data-[mini=true]/side:justify-center">
+          <span className="whitespace-nowrap font-display text-base font-black text-white text-glow">
             <Gem size={20} className="mr-1.5 inline-block -translate-y-0.5 text-brand-400 lg:group-data-[mini=true]/side:mr-0" />
             <span className="lg:group-data-[mini=true]/side:hidden">YURIC<span className="text-brand-400"> TOPUP</span></span>
           </span>
@@ -255,7 +255,7 @@ function AdminPage() {
                     key={n.id}
                     onClick={() => openTab(n.id)}
                     title={t(n.label)}
-                    className={`relative mb-1 flex w-full items-center gap-3 whitespace-nowrap rounded-md px-4 py-2 text-[15px] transition-colors lg:group-data-[mini=true]/side:justify-center lg:group-data-[mini=true]/side:px-0 ${
+                    className={`relative mb-1 flex w-full items-center gap-3 whitespace-nowrap rounded-md px-3.5 py-2 text-sm transition-colors lg:group-data-[mini=true]/side:justify-center lg:group-data-[mini=true]/side:px-0 ${
                       tab === n.id ? "vx-nav-active" : "text-[var(--vx-muted)] hover:bg-white/10 hover:text-white"
                     }`}
                   >
@@ -304,11 +304,11 @@ function AdminPage() {
       </aside>
 
       {/* ── Main ── */}
-      <div className={`flex min-w-0 flex-1 flex-col transition-[padding] duration-200 ${collapsed ? "lg:pl-[72px]" : "lg:pl-[260px]"}`}>
+      <div className={`flex min-w-0 flex-1 flex-col transition-[padding] duration-200 ${collapsed ? "lg:pl-[72px]" : "lg:pl-[240px]"}`}>
 
         {/* Navbar (detached) */}
-        <div className="sticky top-0 z-20 bg-[var(--vx-bg)]/90 px-4 pt-4 backdrop-blur sm:px-6">
-          <header className="vx-card mx-auto flex h-16 max-w-[1440px] items-center gap-3 px-4 sm:px-6">
+        <div className="sticky top-0 z-20 bg-[var(--vx-bg)]/90 px-4 pt-3 backdrop-blur sm:px-5">
+          <header className="vx-card flex h-14 items-center gap-3 px-4 sm:px-6">
             <button className="lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu">
               <Menu size={22} className="text-[var(--vx-heading)]" />
             </button>
@@ -355,7 +355,7 @@ function AdminPage() {
         </div>
 
         {/* Content */}
-        <main className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 sm:px-6">
+        <main className="w-full flex-1 px-4 py-4 sm:px-5">
           {/* On phones the top bar has no room for the period filter, so it sits here. */}
           <div className="mb-4 flex items-center gap-2 sm:hidden">
             <select
@@ -589,7 +589,7 @@ function AdminPage() {
           )}
         </main>
 
-        <footer className="mx-auto w-full max-w-[1440px] px-6 pb-6 text-[13px] text-[var(--vx-muted)]">
+        <footer className="w-full px-5 pb-4 text-[13px] text-[var(--vx-muted)]">
           © {new Date().getFullYear()} Yuric Topup · Owner Control Center
         </footer>
       </div>

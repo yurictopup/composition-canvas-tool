@@ -65,9 +65,9 @@ function Card({ children, className = "" }: { children: ReactNode; className?: s
 
 function CardHead({ title, sub, right }: { title: string; sub?: string; right?: ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-3 px-6 pt-6">
+    <div className="flex items-start justify-between gap-3 px-5 pt-5">
       <div>
-        <h5 className="text-lg font-medium leading-tight">{title}</h5>
+        <h5 className="text-base font-medium leading-tight">{title}</h5>
         {sub && <p className="mt-0.5 text-[13px] text-[var(--vx-muted)]">{sub}</p>}
       </div>
       {right}
@@ -182,10 +182,10 @@ export function AdminOverview({
   const gameColors = [C.primary, C.success, C.info, C.warning, C.danger];
 
   const stats = [
-    { label: "Sales", value: String(orders.length), icon: <TrendingUp size={24} />, color: C.primary },
-    { label: "Customers", value: String(customers), icon: <Users size={24} />, color: C.info },
-    { label: "Paid orders", value: String(completed.length), icon: <ShoppingCart size={24} />, color: C.danger },
-    { label: "Revenue", value: money(revenue), icon: <DollarSign size={24} />, color: C.success },
+    { label: "Sales", value: String(orders.length), icon: <TrendingUp size={20} />, color: C.primary },
+    { label: "Customers", value: String(customers), icon: <Users size={20} />, color: C.info },
+    { label: "Paid orders", value: String(completed.length), icon: <ShoppingCart size={20} />, color: C.danger },
+    { label: "Revenue", value: money(revenue), icon: <DollarSign size={20} />, color: C.success },
   ];
 
   const alerts = [
@@ -207,13 +207,13 @@ export function AdminOverview({
   const recent = orders.slice(0, 6);
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
       {/* Congratulations */}
       <Card className="relative overflow-hidden lg:col-span-4">
-        <div className="p-6">
-          <h5 className="text-lg font-medium">Congratulations {ownerName}!</h5>
+        <div className="p-5">
+          <h5 className="text-base font-medium">Congratulations {ownerName}!</h5>
           <p className="text-[13px]">Revenue in this period</p>
-          <h4 className="mt-5 text-2xl font-medium" style={{ color: C.primary }}>
+          <h4 className="mt-3 text-xl font-medium" style={{ color: C.primary }}>
             {money(revenue)}
           </h4>
           <p className="mt-1 text-[13px]">{completed.length} paid orders</p>
@@ -221,22 +221,22 @@ export function AdminOverview({
             View Sales
           </button>
         </div>
-        <div className="pointer-events-none absolute bottom-4 right-6 flex h-28 w-28 items-center justify-center rounded-full" style={{ background: C.primarySoft }}>
-          <Trophy size={56} color={C.warning} strokeWidth={1.6} />
+        <div className="pointer-events-none absolute bottom-4 right-6 flex h-20 w-20 items-center justify-center rounded-full" style={{ background: C.primarySoft }}>
+          <Trophy size={40} color={C.warning} strokeWidth={1.6} />
         </div>
       </Card>
 
       {/* Statistics */}
       <Card className="flex flex-col lg:col-span-8">
         <CardHead title="Statistics" right={<span className="text-[13px] text-[var(--vx-muted)]">Updated just now</span>} />
-        <div className="grid flex-1 grid-cols-2 content-center gap-6 p-6 md:grid-cols-4">
+        <div className="grid flex-1 grid-cols-2 content-center gap-4 p-5 md:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.label} className="flex items-center gap-4">
-              <IconBubble color={s.color} size={42}>
+            <div key={s.label} className="flex items-center gap-3">
+              <IconBubble color={s.color} size={36}>
                 {s.icon}
               </IconBubble>
               <div>
-                <h5 className="text-lg font-medium leading-tight">{s.value}</h5>
+                <h5 className="text-lg font-semibold leading-tight">{s.value}</h5>
                 <p className="text-[13px]">{s.label}</p>
               </div>
             </div>
@@ -255,8 +255,8 @@ export function AdminOverview({
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex items-center justify-between px-6 pb-6 pt-2">
-          <h4 className="text-2xl font-medium text-[var(--vx-heading)]">{weekOrders}</h4>
+        <div className="flex items-center justify-between px-5 pb-5 pt-2">
+          <h4 className="text-xl font-medium text-[var(--vx-heading)]">{weekOrders}</h4>
           <Trend value={orderGrowth} />
         </div>
       </Card>
@@ -278,22 +278,22 @@ export function AdminOverview({
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex items-center justify-between px-6 pb-6 pt-2">
-          <h4 className="text-2xl font-medium text-[var(--vx-heading)]">{money(weekRevenue)}</h4>
+        <div className="flex items-center justify-between px-5 pb-5 pt-2">
+          <h4 className="text-xl font-medium text-[var(--vx-heading)]">{money(weekRevenue)}</h4>
           <Trend value={growth} />
         </div>
       </Card>
 
       {/* Revenue Growth */}
       <Card className="lg:col-span-6">
-        <div className="grid h-full grid-cols-1 gap-4 p-6 sm:grid-cols-5">
+        <div className="grid h-full grid-cols-1 gap-4 p-5 sm:grid-cols-5">
           <div className="flex flex-col justify-between sm:col-span-2">
             <div>
-              <h5 className="text-lg font-medium">Revenue Growth</h5>
+              <h5 className="text-base font-medium">Revenue Growth</h5>
               <p className="text-[13px] text-[var(--vx-muted)]">Weekly report</p>
             </div>
             <div className="mt-6">
-              <h4 className="text-3xl font-medium text-[var(--vx-heading)]">{money(weekRevenue)}</h4>
+              <h4 className="text-xl font-medium text-[var(--vx-heading)]">{money(weekRevenue)}</h4>
               <span
                 className="mt-2 inline-block rounded px-2 py-0.5 text-[13px] font-medium"
                 style={{ color: growth >= 0 ? C.success : C.danger, background: `${growth >= 0 ? C.success : C.danger}29` }}
@@ -304,7 +304,7 @@ export function AdminOverview({
               <p className="mt-2 text-[13px]">Compared to last week</p>
             </div>
           </div>
-          <div className="h-44 sm:col-span-3">
+          <div className="h-36 sm:col-span-3">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={thisWeek} barSize={26}>
                 <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: C.muted, fontSize: 12 }} />
@@ -332,11 +332,11 @@ export function AdminOverview({
             </div>
           }
         />
-        <div className="flex gap-5 px-6 pt-3 text-[13px]">
+        <div className="flex gap-5 px-5 pt-3 text-[13px]">
           <Legend color={C.primary} label="Revenue (paid)" />
           <Legend color={C.warning} label="Unpaid / failed" />
         </div>
-        <div className="h-72 px-3 pb-4 pt-2">
+        <div className="h-60 px-3 pb-3 pt-2">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={months} barGap={4} barSize={10}>
               <CartesianGrid stroke={C.grid} strokeDasharray="4 4" vertical={false} />
@@ -353,7 +353,7 @@ export function AdminOverview({
       {/* Finance alerts */}
       <Card className="lg:col-span-4">
         <CardHead title="Finance alerts" sub="Attention needed" />
-        <ul className="space-y-5 p-6">
+        <ul className="space-y-3.5 p-5">
           {alerts.map((a) => (
             <li key={a.label}>
               <button onClick={onOpenOrders} className="flex w-full items-center gap-4 text-left">
@@ -375,19 +375,19 @@ export function AdminOverview({
       {/* Order statistics */}
       <Card className="lg:col-span-4">
         <CardHead title="Order Statistics" sub={`${orders.length} total orders`} />
-        <div className="flex items-center justify-between px-6 pt-4">
+        <div className="flex items-center justify-between px-5 pt-4">
           <div>
-            <h3 className="text-3xl font-medium">{completed.length}</h3>
+            <h3 className="text-xl font-medium">{completed.length}</h3>
             <p className="text-[13px]">Completed</p>
           </div>
-          <div className="relative h-28 w-28">
+          <div className="relative h-24 w-24">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={hasStatus ? statusData : [{ name: "none", value: 1 }]}
                   dataKey="value"
-                  innerRadius={40}
-                  outerRadius={54}
+                  innerRadius={34}
+                  outerRadius={46}
                   paddingAngle={hasStatus ? 2 : 0}
                   stroke="none"
                 >
@@ -405,7 +405,7 @@ export function AdminOverview({
             </div>
           </div>
         </div>
-        <ul className="space-y-4 p-6">
+        <ul className="space-y-3 p-5">
           {statusData.map((s) => (
             <li key={s.name} className="flex items-center gap-3">
               <span className="h-2.5 w-2.5 rounded-full" style={{ background: STATUS_COLORS[s.name] }} />
@@ -423,7 +423,7 @@ export function AdminOverview({
           sub="Net profit after all adjustments"
           right={<span className="text-xl font-medium" style={{ color: C.primary }}>{money(grossProfit)}</span>}
         />
-        <ul className="space-y-4 p-6">
+        <ul className="space-y-3 p-5">
           {profit.map((p) => (
             <li key={p.label} className="flex items-center gap-4">
               <IconBubble color={p.color} size={34}>
@@ -443,9 +443,9 @@ export function AdminOverview({
       <Card className="lg:col-span-4">
         <CardHead title="Top Games" sub="By paid revenue" />
         {topGames.length === 0 ? (
-          <p className="p-6 text-[13px] text-[var(--vx-muted)]">No orders yet.</p>
+          <p className="p-5 text-[13px] text-[var(--vx-muted)]">No orders yet.</p>
         ) : (
-          <ul className="space-y-5 p-6">
+          <ul className="space-y-3.5 p-5">
             {topGames.map(([name, g], i) => (
               <li key={name}>
                 <div className="mb-1.5 flex items-center justify-between">
@@ -477,32 +477,32 @@ export function AdminOverview({
           }
         />
         {recent.length === 0 ? (
-          <p className="p-6 text-[13px] text-[var(--vx-muted)]">មិនទាន់មាន orders ទេ</p>
+          <p className="p-5 text-[13px] text-[var(--vx-muted)]">មិនទាន់មាន orders ទេ</p>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="vx-table w-full text-sm">
               <thead className="border-y border-[var(--vx-border)]">
                 <tr className="text-left">
-                  <th className="px-6 py-3">Order</th>
-                  <th className="px-6 py-3">Customer</th>
-                  <th className="px-6 py-3">Game</th>
-                  <th className="px-6 py-3">Amount</th>
-                  <th className="px-6 py-3">Status</th>
+                  <th className="px-5 py-3">Order</th>
+                  <th className="px-5 py-3">Customer</th>
+                  <th className="px-5 py-3">Game</th>
+                  <th className="px-5 py-3">Amount</th>
+                  <th className="px-5 py-3">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--vx-border)]">
                 {recent.map((o) => (
                   <tr key={o.id}>
-                    <td className="px-6 py-3 font-medium" style={{ color: C.primary }}>
+                    <td className="px-5 py-3 font-medium" style={{ color: C.primary }}>
                       #{o.id.slice(0, 8).toUpperCase()}
                     </td>
-                    <td className="max-w-[200px] truncate px-6 py-3">{o.user_email}</td>
-                    <td className="px-6 py-3">
+                    <td className="max-w-[200px] truncate px-5 py-3">{o.user_email}</td>
+                    <td className="px-5 py-3">
                       <span className="font-medium text-[var(--vx-heading)]">{o.game_name}</span>
                       <span className="text-[var(--vx-muted)]"> · {o.package_amt}</span>
                     </td>
-                    <td className="px-6 py-3 font-medium text-[var(--vx-heading)]">{money(Number(o.price_usd))}</td>
-                    <td className="px-6 py-3">
+                    <td className="px-5 py-3 font-medium text-[var(--vx-heading)]">{money(Number(o.price_usd))}</td>
+                    <td className="px-5 py-3">
                       <StatusBadge status={o.status} />
                     </td>
                   </tr>
