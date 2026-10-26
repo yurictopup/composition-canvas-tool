@@ -39,8 +39,9 @@ export function findGame(id: string | undefined): Game | undefined {
 export type GamePackage = { amt: string; price: number | null; hot?: boolean; img?: string };
 export type HotItem = { label: string; price: number; img: string };
 
-// Real in-game denominations per game. Prices stay null until the shop
-// provides its real selling prices — unpriced packages cannot be purchased.
+// Real in-game denominations per game. The live selling price comes from the
+// Supabase product_prices table (edited on /admin, see src/lib/prices.ts);
+// the prices here are only shown until that table loads.
 export const gamePackages: Record<string, GamePackage[]> = {
   mlbb: [
     { amt: "5", price: 0.11 },

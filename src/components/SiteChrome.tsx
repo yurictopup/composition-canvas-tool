@@ -65,7 +65,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
           <div className="marquee-track">
             {[0, 1].map((k) => (
               <span key={k} className="flex shrink-0 items-center gap-10 pr-10">
-                <span>⚡ Instant delivery in 1-3 minutes</span>
+                <span>⚡ Instant delivery in 1-5 minutes</span>
                 <span>💎 Best prices</span>
                 <span>🔒 Secure payment</span>
                 <span>🎧 Support {store.hours}</span>

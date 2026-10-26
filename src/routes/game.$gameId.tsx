@@ -5,6 +5,7 @@ import { SiteChrome } from "@/components/SiteChrome";
 import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import { supabase } from "@/integrations/supabase/client";
+import { livePrice, packageKey, useLivePrices } from "@/lib/prices";
 
 export const Route = createFileRoute("/game/$gameId")({
   head: ({ params }) => {
@@ -14,9 +15,9 @@ export const Route = createFileRoute("/game/$gameId")({
     return {
       meta: [
         { title: `${name} — Yuric Topup` },
-        { name: "description", content: `Top up ${unit} ${name} — fast and secure via ABA KHQR.` },
+        { name: "description", content: `Top up ${unit} ${name} — fast and secure via Bakong.` },
         { property: "og:title", content: `${name} — Yuric Topup` },
-        { property: "og:description", content: `Top up ${name} in 1-3 minutes via KHQR.` },
+        { property: "og:description", content: `Top up ${name} in 1-5 minutes via Bakong.` },
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" },
       ],
@@ -41,7 +42,9 @@ function GamePage({ gameId }: { gameId: string }) {
   const [pay, setPay] = useState(payments[0] ?? "Bakong");
   const [busy, setBusy] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [paidPrice, setPaidPrice] = useState<number | null>(null);
   const [orderErr, setOrderErr] = useState<string | null>(null);
+  const prices = useLivePrices(gameId);
 
   if (!game) {
     return (
@@ -54,8 +57,14 @@ function GamePage({ gameId }: { gameId: string }) {
   }
 
   const idConfig = getIdConfig(gameId);
-  const availablePackages = getPackages(gameId);
-  const hotItems = gameId === "mlbb" ? mlbbHotItems : [];
+  const availablePackages = getPackages(gameId).map((p) => ({
+    ...p,
+    price: livePrice(prices, gameId, packageKey(p.amt, game.unit), p.price),
+  }));
+  const hotItems = (gameId === "mlbb" ? mlbbHotItems : []).map((item) => ({
+    ...item,
+    price: livePrice(prices, gameId, packageKey(item.label, game.unit), item.price),
+  }));
   const selected =
     hotPkg !== null
       ? { amt: hotItems[hotPkg]!.label, price: hotItems[hotPkg]!.price }
@@ -100,10 +109,12 @@ function GamePage({ gameId }: { gameId: string }) {
         player_id: uid.trim(),
         player_zone: zone.trim() || null,
         status: "pending",
-      }).select("id").single();
+      }).select("id, price_usd").single();
 
       if (error) throw error;
       setOrderId(data.id);
+      // The database sets the final price; show what was actually charged.
+      setPaidPrice(Number(data.price_usd));
     } catch (e: any) {
       setOrderErr(e.message ?? "Order failed. Please try again.");
     } finally {
@@ -133,9 +144,9 @@ function GamePage({ gameId }: { gameId: string }) {
                   <p className="font-bold text-foreground text-base">Yuric Topup</p>
                   <p className="text-xs mt-1">Telegram: <a href={`https://t.me/${store.telegram.replace("@","")}`} target="_blank" rel="noopener noreferrer" className="text-primary font-semibold">{store.telegram}</a></p>
                 </div>
-                <p className="mt-2">3. Amount: <strong className="text-accent text-base">${selected?.price?.toFixed(2)}</strong></p>
+                <p className="mt-2">3. Amount: <strong className="text-accent text-base">${(paidPrice ?? selected?.price)?.toFixed(2)}</strong></p>
                 <p>4. Note/Description: <strong className="text-foreground">{orderId.slice(0,8).toUpperCase()}</strong></p>
-                <p className="mt-2">5. Screenshot ផ្ញើ Telegram — diamonds ចូល 1-3 នាទី ✨</p>
+                <p className="mt-2">5. Screenshot ផ្ញើ Telegram — diamonds ចូល 1-5 នាទី ✨</p>
               </div>
             </div>
 
@@ -174,7 +185,7 @@ function GamePage({ gameId }: { gameId: string }) {
           </span>
           <div>
             <h1 className="font-display text-2xl font-black">{game.name}</h1>
-            <p className="text-sm text-muted-foreground">{game.blurb} · Delivered in 1-3 minutes</p>
+            <p className="text-sm text-muted-foreground">{game.blurb} · Delivered in 1-5 minutes</p>
           </div>
         </div>
 
@@ -240,7 +251,7 @@ function GamePage({ gameId }: { gameId: string }) {
                     className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition-all hover:-translate-y-0.5 ${hotPkg === i ? "border-rose-400 bg-rose-100 ring-2 ring-rose-300 shadow-[0_0_14px_rgba(244,63,94,0.25)]" : "border-rose-100 bg-rose-50"}`}>
                     <div>
                       <div className={`text-sm font-bold ${hotPkg === i ? "text-rose-600" : "text-card-foreground"}`}>{item.label}</div>
-                      <div className="text-sm font-bold text-rose-500">${item.price.toFixed(2)}</div>
+                      <div className="text-sm font-bold text-rose-500">{item.price !== null ? `$${item.price.toFixed(2)}` : "—"}</div>
                     </div>
                     <img src={item.img} alt={item.label} className={`h-12 w-12 shrink-0 rounded-full object-cover transition-transform ${hotPkg === i ? "scale-110" : ""}`} />
                   </button>
