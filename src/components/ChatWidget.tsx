@@ -14,13 +14,16 @@ import {
   IdCard,
   MessageCircle,
   Send,
+  Moon,
   Sparkles,
   SquarePen,
+  Sun,
   X,
 } from "lucide-react";
 import { BotLogo } from "./BotLogo";
 import { answer, DEFAULT_SUGGESTIONS, detectGame, type BotAction } from "@/lib/chatBrain";
 import { askBot } from "@/lib/chat.functions";
+import { setStoreTheme, useStorePrefs } from "@/lib/storePrefs";
 
 type Icon = ComponentType<{ className?: string }>;
 type ChatMessage = {
@@ -88,6 +91,7 @@ export function ChatWidget({
   defaultOpen = false,
 }: ChatWidgetProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const { light } = useStorePrefs();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [draft, setDraft] = useState("");
@@ -207,7 +211,7 @@ export function ChatWidget({
             kw.actions?.some((a) => a.href.startsWith("http"))
           )
             actions.push(telegramAction);
-          post({ text: ai.text, actions, ai: true });
+          post({ text: ai.text, actions, ai: ai.source === "ai" });
           return;
         }
         // No AI (quota used up, or not on Cloudflare): the keyword answers.
@@ -219,14 +223,14 @@ export function ChatWidget({
   }
 
   // Dark "AI app" look on every site theme: deep navy glass, aurora glow, blue-violet accents.
-  const glass = "border border-white/10 bg-white/[0.06] backdrop-blur-md";
-  const scroll = "[scrollbar-width:thin] [scrollbar-color:oklch(1_0_0/0.15)_transparent]";
+  const glass = "border border-[var(--chat-line)] bg-[var(--chat-glass)] backdrop-blur-md";
+  const scroll = "[scrollbar-width:thin] [scrollbar-color:var(--chat-line-strong)_transparent]";
   const hint = "AI អាចមានកំហុស · តម្លៃពិតប្រាកដនៅទំព័រហ្គេម";
 
   const composer = (
     <div className="rounded-[22px] bg-[linear-gradient(120deg,oklch(0.72_0.13_252),oklch(0.6_0.22_290),oklch(0.78_0.12_210))] p-px shadow-[0_0_28px_oklch(0.6_0.2_270/0.35)]">
-      <div className="flex items-center gap-2 rounded-[21px] bg-[oklch(0.17_0.05_268)] py-1.5 pl-3.5 pr-1.5">
-        <Sparkles className="h-4 w-4 shrink-0 text-[oklch(0.8_0.12_230)]" aria-hidden="true" />
+      <div className="flex items-center gap-2 rounded-[21px] bg-[var(--chat-input)] py-1.5 pl-3.5 pr-1.5">
+        <Sparkles className="h-4 w-4 shrink-0 text-[var(--chat-accent)]" aria-hidden="true" />
         <input
           id="yt-chat-input"
           value={draft}
@@ -235,7 +239,7 @@ export function ChatWidget({
           placeholder="សួរ Yuric AI អ្វីក៏បាន…"
           aria-label="សរសេរសំណួររបស់អ្នក"
           maxLength={500}
-          className="h-10 min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40"
+          className="h-10 min-w-0 flex-1 bg-transparent text-sm text-[var(--chat-fg)] outline-none placeholder:text-[var(--chat-muted)]"
         />
         <button
           type="button"
@@ -259,18 +263,19 @@ export function ChatWidget({
   const footer = (
     <div className="relative px-3 pb-2.5 pt-2">
       {composer}
-      <p className="mt-1.5 text-center text-[11px] leading-5 text-white/40">{hint}</p>
+      <p className="mt-1.5 text-center text-[11px] leading-5 text-[var(--chat-muted)]">{hint}</p>
     </div>
   );
 
   return (
-    <>
+    // Colours come from CSS variables (.yt-chat in styles.css) so the chat follows the light/dark switch.
+    <div className="yt-chat contents" data-light={light ? "true" : undefined}>
       {/* launcher — bot head floats freely, with an "ask AI" pill on wide screens */}
       {!open && (
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="fixed bottom-8 right-24 z-40 hidden items-center gap-2 rounded-full border border-white/15 bg-[oklch(0.17_0.05_268/0.92)] py-2 pl-2 pr-4 text-sm font-semibold leading-6 text-white shadow-[0_10px_30px_oklch(0.15_0.08_268/0.5),0_0_24px_oklch(0.6_0.2_280/0.3)] backdrop-blur transition hover:-translate-y-0.5 animate-in fade-in slide-in-from-right-2 duration-500 sm:flex"
+          className="fixed bottom-8 right-24 z-40 hidden items-center gap-2 rounded-full border border-[var(--chat-line)] bg-[var(--chat-pill)] py-2 pl-2 pr-4 text-sm font-semibold leading-6 text-[var(--chat-fg)] shadow-[0_10px_30px_oklch(0.15_0.08_268/0.5),0_0_24px_oklch(0.6_0.2_280/0.3)] backdrop-blur transition hover:-translate-y-0.5 animate-in fade-in slide-in-from-right-2 duration-500 sm:flex"
         >
           <span className="grid h-7 w-7 place-items-center rounded-full bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))]">
             <Sparkles className="h-3.5 w-3.5" />
@@ -299,21 +304,21 @@ export function ChatWidget({
       </button>
 
       {open && (
-        <div className="fixed inset-x-2 bottom-24 top-16 z-40 rounded-[30px] bg-[linear-gradient(150deg,oklch(0.75_0.13_240/0.9),oklch(0.5_0.24_290/0.6)_45%,oklch(0.3_0.1_268/0.4)_70%,oklch(0.75_0.12_210/0.8))] p-px shadow-[0_30px_90px_oklch(0.12_0.08_268/0.7),0_0_60px_oklch(0.55_0.22_280/0.3)] animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-200 sm:inset-x-auto sm:right-5 sm:top-auto sm:h-[min(640px,calc(100vh-8rem))] sm:w-[400px]">
-          <div className="relative flex h-full flex-col overflow-hidden rounded-[29px] bg-[oklch(0.14_0.045_268)] font-sans text-white">
+        <div className="fixed inset-x-3 bottom-24 z-40 h-[min(500px,58svh)] rounded-[30px] bg-[linear-gradient(150deg,oklch(0.75_0.13_240/0.9),oklch(0.5_0.24_290/0.6)_45%,oklch(0.3_0.1_268/0.4)_70%,oklch(0.75_0.12_210/0.8))] p-px shadow-[0_30px_90px_oklch(0.12_0.08_268/0.7),0_0_60px_oklch(0.55_0.22_280/0.3)] animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-200 sm:inset-x-auto sm:right-5 sm:top-auto sm:h-[min(640px,calc(100vh-8rem))] sm:w-[400px]">
+          <div className="relative flex h-full flex-col overflow-hidden rounded-[29px] bg-[var(--chat-bg)] font-sans text-[var(--chat-fg)]">
             {/* aurora glow behind everything */}
             <span className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-[oklch(0.55_0.2_255/0.45)] blur-3xl yt-aurora" />
             <span className="pointer-events-none absolute -right-20 top-24 h-56 w-56 rounded-full bg-[oklch(0.5_0.24_295/0.35)] blur-3xl yt-aurora [animation-delay:-4s]" />
             <span className="pointer-events-none absolute -bottom-24 left-10 h-56 w-56 rounded-full bg-[oklch(0.6_0.14_210/0.25)] blur-3xl yt-aurora [animation-delay:-8s]" />
 
             {/* header */}
-            <div className="relative flex items-center gap-3 border-b border-white/10 px-4 py-3.5">
+            <div className="relative flex items-center gap-3 border-b border-[var(--chat-line)] px-4 py-3.5">
               {active && (
                 <button
                   type="button"
                   aria-label="ត្រឡប់ក្រោយ"
                   onClick={() => setActiveId(null)}
-                  className="-ml-1 grid h-8 w-8 shrink-0 place-items-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                  className="-ml-1 grid h-8 w-8 shrink-0 place-items-center rounded-full text-[var(--chat-fg)] transition-colors hover:bg-[var(--chat-hover)] hover:text-[var(--chat-fg)]"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
@@ -322,16 +327,18 @@ export function ChatWidget({
                 <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[radial-gradient(circle_at_50%_35%,oklch(0.5_0.2_268),oklch(0.2_0.08_268)_85%)] shadow-[0_0_20px_oklch(0.6_0.2_270/0.45)] ring-1 ring-white/20">
                   <BotLogo size={36} stars={false} title="" className="-mt-0.5" />
                 </span>
-                <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-[oklch(0.14_0.045_268)] bg-emerald-400 shadow-[0_0_8px_oklch(0.8_0.18_155/0.9)]" />
+                <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-[var(--chat-bg)] bg-emerald-400 shadow-[0_0_8px_oklch(0.8_0.18_155/0.9)]" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-1.5 font-display text-[15px] font-bold leading-5">
+                <p className="flex items-center gap-1.5 whitespace-nowrap font-display text-[15px] font-bold leading-5">
                   Yuric Bot
                   <span className="inline-flex items-center gap-0.5 rounded-full bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))] px-1.5 text-[10px] font-bold uppercase leading-4 tracking-wide">
                     <Sparkles className="h-2.5 w-2.5" /> AI
                   </span>
                 </p>
-                <p className="text-xs leading-5 text-white/55">អនឡាញ · ឆ្លើយភ្លាមៗ 24 ម៉ោង</p>
+                <p className="truncate text-xs leading-5 text-[var(--chat-muted)]">
+                  អនឡាញ · ឆ្លើយភ្លាមៗ 24 ម៉ោង
+                </p>
               </div>
               {active && (
                 <button
@@ -339,16 +346,25 @@ export function ChatWidget({
                   aria-label="ការសន្ទនាថ្មី"
                   title="ការសន្ទនាថ្មី"
                   onClick={startChat}
-                  className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-white/80 transition hover:text-white ${glass}`}
+                  className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-[var(--chat-fg)] transition hover:text-[var(--chat-fg)] ${glass}`}
                 >
                   <SquarePen className="h-4 w-4" />
                 </button>
               )}
               <button
                 type="button"
+                aria-label={light ? "ប្តូរទៅងងឹត" : "ប្តូរទៅភ្លឺ"}
+                title={light ? "ប្តូរទៅងងឹត" : "ប្តូរទៅភ្លឺ"}
+                onClick={() => setStoreTheme(light ? "dark" : "light")}
+                className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-[var(--chat-fg)] transition hover:text-[var(--chat-fg)] ${glass}`}
+              >
+                {light ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              </button>
+              <button
+                type="button"
                 aria-label="បិទការជជែក"
                 onClick={() => setOpen(false)}
-                className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-white/80 transition hover:text-white ${glass}`}
+                className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-[var(--chat-fg)] transition hover:text-[var(--chat-fg)] ${glass}`}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -378,7 +394,7 @@ export function ChatWidget({
                             className={`whitespace-pre-line rounded-[20px] px-4 py-2.5 text-sm leading-7 ${
                               m.role === "user"
                                 ? "rounded-br-md bg-[linear-gradient(135deg,oklch(0.6_0.18_258),oklch(0.5_0.24_290))] text-white shadow-[0_8px_22px_oklch(0.5_0.22_280/0.35)]"
-                                : `rounded-bl-md text-white/90 ${glass}`
+                                : `rounded-bl-md text-[var(--chat-fg)] ${glass}`
                             }`}
                           >
                             {m.role === "bot" && !seen.current.has(key) ? (
@@ -388,7 +404,7 @@ export function ChatWidget({
                             )}
                           </p>
                           {m.ai && (
-                            <span className="-mt-1 inline-flex items-center gap-1 pl-1 text-[10.5px] font-semibold leading-4 text-[oklch(0.8_0.12_230)]">
+                            <span className="-mt-1 inline-flex items-center gap-1 pl-1 text-[10.5px] font-semibold leading-4 text-[var(--chat-accent)]">
                               <Sparkles className="h-3 w-3" /> Yuric AI
                             </span>
                           )}
@@ -418,7 +434,7 @@ export function ChatWidget({
                                   key={q}
                                   type="button"
                                   onClick={() => ask(q)}
-                                  className={`rounded-full px-3 py-1 text-xs font-semibold leading-6 text-white/85 transition hover:border-white/30 hover:bg-white/10 ${glass}`}
+                                  className={`rounded-full px-3 py-1 text-xs font-semibold leading-6 text-[var(--chat-fg)] transition hover:border-[var(--chat-line-strong)] hover:bg-[var(--chat-hover)] ${glass}`}
                                 >
                                   {q}
                                 </button>
@@ -433,7 +449,7 @@ export function ChatWidget({
                     <div className="flex items-end gap-2" aria-label="Yuric Bot កំពុងសរសេរ">
                       {botAvatar}
                       <span
-                        className={`flex items-center gap-2 rounded-[20px] rounded-bl-md px-4 py-2.5 text-xs leading-6 text-white/60 ${glass}`}
+                        className={`flex items-center gap-2 rounded-[20px] rounded-bl-md px-4 py-2.5 text-xs leading-6 text-[var(--chat-muted)] ${glass}`}
                       >
                         <span className="flex gap-1">
                           <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[oklch(0.78_0.12_220)]" />
@@ -458,10 +474,10 @@ export function ChatWidget({
                         <BotLogo size={62} stars={false} title="" />
                       </span>
                     </span>
-                    <p className="mt-4 bg-[linear-gradient(90deg,oklch(0.85_0.1_230),oklch(0.8_0.14_290))] bg-clip-text font-khmer text-xl leading-9 text-transparent">
+                    <p className="mt-4 bg-[linear-gradient(90deg,var(--chat-title-a),var(--chat-title-b))] bg-clip-text font-khmer text-xl leading-9 text-transparent">
                       សួស្តី! ខ្ញុំជា Yuric Bot
                     </p>
-                    <p className="mt-0.5 max-w-[290px] text-[13px] leading-6 text-white/60">
+                    <p className="mt-0.5 max-w-[290px] text-[13px] leading-6 text-[var(--chat-muted)]">
                       ជំនួយការ AI របស់ Yuric Topup សួរខ្ញុំអំពីហ្គេម កញ្ចប់ តម្លៃ ការបង់ប្រាក់ ឬ
                       បញ្ហាការបញ្ជាទិញ បានគ្រប់ពេល
                     </p>
@@ -475,12 +491,12 @@ export function ChatWidget({
                           key={f.q}
                           type="button"
                           onClick={() => openFaq(f)}
-                          className={`group flex flex-col gap-2 rounded-2xl p-3 text-left transition hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/10 ${glass}`}
+                          className={`group flex flex-col gap-2 rounded-2xl p-3 text-left transition hover:-translate-y-0.5 hover:border-[var(--chat-line-strong)] hover:bg-[var(--chat-hover)] ${glass}`}
                         >
-                          <span className="grid h-8 w-8 place-items-center rounded-xl bg-[linear-gradient(135deg,oklch(0.72_0.13_252/0.3),oklch(0.55_0.24_290/0.3))] text-[oklch(0.85_0.1_235)] ring-1 ring-white/10 transition group-hover:bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))] group-hover:text-white">
+                          <span className="grid h-8 w-8 place-items-center rounded-xl bg-[linear-gradient(135deg,oklch(0.72_0.13_252/0.3),oklch(0.55_0.24_290/0.3))] text-[var(--chat-accent)] ring-1 ring-[var(--chat-line)] transition group-hover:bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))] group-hover:text-white">
                             <FaqIcon className="h-4 w-4" />
                           </span>
-                          <span className="line-clamp-2 text-[12.5px] font-medium leading-[1.7] text-white/85">
+                          <span className="line-clamp-2 text-[12.5px] font-medium leading-[1.7] text-[var(--chat-fg)]">
                             {f.q}
                           </span>
                         </button>
@@ -490,7 +506,7 @@ export function ChatWidget({
 
                   {threads.length > 0 && (
                     <div className="mt-5">
-                      <p className="mb-2 text-xs font-semibold leading-6 text-white/45">
+                      <p className="mb-2 text-xs font-semibold leading-6 text-[var(--chat-muted)]">
                         ការសន្ទនាថ្មីៗ
                       </p>
                       <ul className="space-y-1">
@@ -499,11 +515,11 @@ export function ChatWidget({
                             <button
                               type="button"
                               onClick={() => setActiveId(t.id)}
-                              className="group flex w-full items-center gap-3 rounded-xl px-2.5 py-1.5 text-left text-sm leading-6 text-white/80 transition hover:bg-white/10"
+                              className="group flex w-full items-center gap-3 rounded-xl px-2.5 py-1.5 text-left text-sm leading-6 text-[var(--chat-fg)] transition hover:bg-[var(--chat-hover)]"
                             >
-                              <MessageCircle className="h-4 w-4 shrink-0 text-[oklch(0.78_0.12_230)]" />
+                              <MessageCircle className="h-4 w-4 shrink-0 text-[var(--chat-accent)]" />
                               <span className="flex-1 truncate">{t.title}</span>
-                              <ChevronRight className="h-4 w-4 shrink-0 text-white/40 transition-transform group-hover:translate-x-0.5" />
+                              <ChevronRight className="h-4 w-4 shrink-0 text-[var(--chat-muted)] transition-transform group-hover:translate-x-0.5" />
                             </button>
                           </li>
                         ))}
@@ -515,18 +531,18 @@ export function ChatWidget({
                     href={`https://t.me/${telegram}`}
                     target="_blank"
                     rel="noreferrer"
-                    className={`mt-5 flex items-center gap-3 rounded-2xl px-3 py-2.5 transition hover:border-white/25 hover:bg-white/10 ${glass}`}
+                    className={`mt-5 flex items-center gap-3 rounded-2xl px-3 py-2.5 transition hover:border-[var(--chat-line-strong)] hover:bg-[var(--chat-hover)] ${glass}`}
                   >
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))] shadow-[0_0_14px_oklch(0.6_0.22_280/0.5)]">
                       <Headphones className="h-4 w-4" />
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm font-bold leading-6">ជជែកជាមួយ Admin</span>
-                      <span className="block text-xs leading-5 text-white/50">
+                      <span className="block text-xs leading-5 text-[var(--chat-muted)]">
                         Telegram · @{telegram}
                       </span>
                     </span>
-                    <Send className="h-4 w-4 shrink-0 text-[oklch(0.8_0.12_230)]" />
+                    <Send className="h-4 w-4 shrink-0 text-[var(--chat-accent)]" />
                   </a>
                 </div>
                 <div className="relative px-3 pb-3 pt-2">
@@ -544,7 +560,7 @@ export function ChatWidget({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 

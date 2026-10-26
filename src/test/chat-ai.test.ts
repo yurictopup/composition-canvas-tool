@@ -6,6 +6,7 @@ import {
   gamesInChat,
   modelMessages,
   MAX_TURNS,
+  orderReply,
   ordersSection,
   systemPrompt,
 } from "@/lib/chatAi";
@@ -100,5 +101,35 @@ describe("model answers", () => {
   it("tries the override first, then the default models, without repeats", () => {
     expect(botModels("@cf/x")[0]).toBe("@cf/x");
     expect(botModels("")).toHaveLength(2);
+  });
+});
+
+describe("orderReply (no AI)", () => {
+  const base = {
+    code: "AB12CD34",
+    game: "Mobile Legends",
+    pack: "86 Diamonds",
+    price: 1.25,
+    playerId: "123 (4567)",
+    minutesAgo: 3,
+    status: "pending",
+    qrExpired: false,
+  };
+
+  it("says the money arrived and delivery is on its way", () => {
+    const text = orderReply([{ ...base, paid: true }]);
+    expect(text).toContain("AB12CD34");
+    expect(text).toContain("ប្រាក់របស់អ្នកបានចូលហើយ");
+    expect(text).not.toContain("។");
+  });
+
+  it("says no money yet and points to the admin", () => {
+    const text = orderReply([{ ...base, paid: false }]);
+    expect(text).toContain("មិនទាន់ឃើញប្រាក់ចូល");
+    expect(text).toContain("@Yuricccc");
+  });
+
+  it("asks guests to sign in", () => {
+    expect(orderReply(null)).toContain("Sign In");
   });
 });
