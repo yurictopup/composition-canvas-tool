@@ -4,6 +4,10 @@ import mlbbWeeklyX3 from "@/assets/mlbb-weekly-x3.png";
 import mlbb165Weekly from "@/assets/mlbb-165-weekly.png";
 import mlbbTwilight from "@/assets/mlbb-twilight.png";
 import freefire from "@/assets/freefire.png";
+import ffWeeklyLite from "@/assets/ff-weekly-lite.png";
+import ffWeeklyCard from "@/assets/ff-weekly-card.png";
+import ffMonthlyCard from "@/assets/ff-monthly-card.png";
+import ffMembershipBundle from "@/assets/ff-membership-bundle.png";
 import roblox from "@/assets/roblox.png";
 import magicchess from "@/assets/magicchess.png";
 import pubg from "@/assets/pubg-clean.png";
@@ -49,7 +53,7 @@ export function findGame(id: string | undefined): Game | undefined {
 }
 
 export type GamePackage = { amt: string; price: number | null; hot?: boolean; img?: string };
-export type HotItem = { label: string; price: number; img: string };
+export type HotItem = { label: string; price: number; img: string; note?: string; badge?: string; banner?: boolean };
 
 // Real in-game denominations per game. The live selling price comes from the
 // Supabase product_prices table (edited on /admin, see src/lib/prices.ts);
@@ -222,6 +226,20 @@ export const mlbbHotItems: HotItem[] = [
   { label: "Weekly + 223💎", price: 6.59, img: mlbb165Weekly },
   { label: "Twilight Pass", price: 8.39, img: mlbbTwilight },
 ];
+
+// Free Fire membership cards, delivered by the team like the diamond packs.
+export const ffHotItems: HotItem[] = [
+  { label: "Weekly Lite", price: 0.39, img: ffWeeklyLite, note: "7 days", banner: true },
+  { label: "Weekly Card", price: 1.59, img: ffWeeklyCard, note: "7 days", banner: true },
+  { label: "Monthly Card", price: 7.59, img: ffMonthlyCard, note: "30 days", banner: true },
+  { label: "Bundle M+W+L", price: 9.57, img: ffMembershipBundle, note: "Monthly + Weekly + Lite", badge: "BUNDLE", banner: true },
+];
+
+const hotItemsByGame: Record<string, HotItem[]> = { mlbb: mlbbHotItems, ff: ffHotItems };
+
+export function getHotItems(gameId: string): HotItem[] {
+  return hotItemsByGame[gameId] ?? [];
+}
 
 export const payments = ["Bakong"];
 
