@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { deliverOrder, refreshDelivery } from "@/lib/delivery.functions";
 import { checkPayment } from "@/lib/payment.functions";
+import { useAdminT } from "@/components/admin/i18n";
 
 // One order's supplier delivery controls on the admin Orders tab.
 export function DeliveryCell({
@@ -17,6 +18,7 @@ export function DeliveryCell({
   };
   onChanged: () => void;
 }) {
+  const { t } = useAdminT();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -30,9 +32,9 @@ export function DeliveryCell({
     setMsg(null);
     try {
       const res = await checkPayment({ data: { orderId: order.id } });
-      setMsg(res.paid ? "Paid." : (res.message ?? "Not paid yet."));
+      setMsg(res.paid ? t("Paid.") : (res.message ?? t("Not paid yet.")));
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Something went wrong.");
+      setMsg(e instanceof Error ? e.message : t("Something went wrong."));
     }
     setBusy(false);
     onChanged();
@@ -44,8 +46,8 @@ export function DeliveryCell({
       action === "deliver" &&
       !window.confirm(
         unpaid
-          ? "Bakong has NOT confirmed this order is paid. Only continue if the customer paid you another way. Buy it from the supplier (FazerCards) now?"
-          : "Buy this package from FazerCards now? It uses your FazerCards balance.",
+          ? t("Bakong has NOT confirmed this order is paid. Only continue if the customer paid you another way. Buy it from FazerCards now?")
+          : t("Buy this package from FazerCards now? It uses your FazerCards balance."),
       )
     ) {
       return;
@@ -59,22 +61,22 @@ export function DeliveryCell({
           : await refreshDelivery({ data: { orderId: order.id } });
       setMsg(res.message);
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Something went wrong.");
+      setMsg(e instanceof Error ? e.message : t("Something went wrong."));
     }
     setBusy(false);
     onChanged();
   }
 
   return (
-    <div className="grid gap-1 text-xs">
-      {order.paid_at && <span className="font-semibold text-green-700">Paid by Bakong</span>}
+    <div className="grid gap-1 whitespace-nowrap text-xs">
+      {order.paid_at && <span className="font-semibold text-green-700">{t("Paid by Bakong")}</span>}
       {canCheckPayment && (
         <button
           disabled={busy}
           onClick={runPaymentCheck}
           className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-semibold disabled:opacity-40"
         >
-          {busy ? "Checking…" : "Check payment"}
+          {busy ? t("Checking…") : t("Check payment")}
         </button>
       )}
       {canDeliver && (
@@ -83,7 +85,7 @@ export function DeliveryCell({
           onClick={() => run("deliver")}
           className="rounded-lg bg-[#1C3CB2] px-3 py-1.5 font-semibold text-white disabled:opacity-40"
         >
-          {busy ? "Sending…" : "Deliver"}
+          {busy ? t("Sending…") : t("Deliver")}
         </button>
       )}
       {canRefresh && (
@@ -92,11 +94,11 @@ export function DeliveryCell({
           onClick={() => run("refresh")}
           className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-semibold disabled:opacity-40"
         >
-          {busy ? "Checking…" : "Check delivery"}
+          {busy ? t("Checking…") : t("Check delivery")}
         </button>
       )}
       {order.supplier_status && (
-        <span className="text-gray-400">Supplier: {order.supplier_status}</span>
+        <span className="text-gray-400">{t("Supplier")}: {order.supplier_status}</span>
       )}
       {msg && <span className="max-w-[200px] text-gray-600">{msg}</span>}
     </div>

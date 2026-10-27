@@ -20,8 +20,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { isOwner } from "@/lib/games";
 import { AdminPrices } from "@/components/AdminPrices";
 import { DeliveryCell } from "@/components/AdminDelivery";
-import { AdminOverview, money, paid } from "@/components/admin/AdminOverview";
-import { AdminTopbar, type Lang, type ThemeChoice } from "@/components/admin/AdminTopbar";
+import { AdminOverview, money, orderCost, paid } from "@/components/admin/AdminOverview";
+import { AdminTopbar, type ThemeChoice } from "@/components/admin/AdminTopbar";
+import { AdminLangContext, translate, type Lang } from "@/components/admin/i18n";
+import { FAZER_COSTS_DATE } from "@/lib/fazercards-costs";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import type { AdminOrder } from "@/components/admin/types";
 
@@ -38,26 +40,6 @@ type NavItem = {
   label: string;
   title: string;
   section: string;
-};
-
-const KM: Record<string, string> = {
-  Overview: "ទិដ្ឋភាពទូទៅ",
-  Dashboard: "ផ្ទាំងគ្រប់គ្រង",
-  Orders: "ការកម្មង់",
-  Customers: "អតិថិជន",
-  "Cash Flow": "លំហូរសាច់ប្រាក់",
-  Prices: "តម្លៃ",
-  Store: "ហាង",
-  "Live status": "ស្ថានភាពផ្ទាល់",
-  "Paid orders": "បានបង់",
-  Pending: "រង់ចាំ",
-  Processing: "កំពុងដំណើរការ",
-  "Back to Store": "ត្រឡប់ទៅហាង",
-  Today: "ថ្ងៃនេះ",
-  "7 Days": "៧ ថ្ងៃ",
-  "30 Days": "៣០ ថ្ងៃ",
-  "All time": "ទាំងអស់",
-  Refresh: "ផ្ទុកឡើងវិញ",
 };
 
 function loadPref<T extends string>(key: string, allowed: readonly T[], fallback: T): T {
@@ -86,7 +68,7 @@ const NAV: NavItem[] = [
 ];
 
 function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("km-KH", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
 function AdminPage() {
@@ -101,7 +83,7 @@ function AdminPage() {
   const [timeFilter, setTimeFilter] = useState<"today" | "7d" | "30d" | "all">("all");
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [lang, setLang] = useState<Lang>("en");
+  const [lang, setLang] = useState<Lang>("km");
   const [theme, setTheme] = useState<ThemeChoice>("light");
   const [systemDark, setSystemDark] = useState(false);
   // Desktop menu: collapsed to icons, and opens over the page while hovered.
@@ -109,7 +91,7 @@ function AdminPage() {
   const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
-    setLang(loadPref("yt-admin-lang", ["en", "km"] as const, "en"));
+    setLang(loadPref("yt-admin-lang", ["en", "km"] as const, "km"));
     setTheme(loadPref("yt-admin-theme", ["light", "dark", "system"] as const, "light"));
     setCollapsed(loadPref("yt-admin-menu", ["open", "collapsed"] as const, "open") === "collapsed");
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -119,7 +101,7 @@ function AdminPage() {
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
-  const t = (s: string) => (lang === "km" ? KM[s] ?? s : s);
+  const t = (s: string) => translate(lang, s);
   const dark = theme === "dark" || (theme === "system" && systemDark);
   const mini = collapsed && !hovered;
 
@@ -183,6 +165,7 @@ function AdminPage() {
   const pendingOrders    = fo.filter(o => o.status === "pending" && !o.paid_at);
   const processingOrders = fo.filter(o => o.status === "processing" || (o.status === "pending" && !!o.paid_at));
   const completedOrders  = fo.filter(paid);
+  const supplierCost = completedOrders.reduce((s, o) => s + (orderCost(o) ?? 0), 0);
 
   // Unique customers
   const uniqueCustomers = [...new Set(fo.map(o => o.user_email))];
@@ -202,13 +185,14 @@ function AdminPage() {
   if (checking) {
     return (
       <div className="vx flex h-screen items-center justify-center">
-        <p>កំពុងពិនិត្យ...</p>
+        <p>{t("Checking...")}</p>
       </div>
     );
   }
   if (!allowed) return null;
 
   return (
+    <AdminLangContext.Provider value={lang}>
     <div className={`vx ${dark ? "vx-dark" : ""} flex min-h-screen text-[15px]`}>
 
       {/* ── Mobile overlay ── */}
@@ -236,7 +220,7 @@ function AdminPage() {
           <button
             className="hidden text-[var(--vx-muted)] hover:text-white lg:block lg:group-data-[mini=true]/side:hidden"
             onClick={toggleCollapsed}
-            title={collapsed ? (lang === "km" ? "បើក menu" : "Keep menu open") : (lang === "km" ? "បិទ menu" : "Collapse menu")}
+            title={collapsed ? t("Keep menu open") : t("Collapse menu")}
             aria-label="Toggle menu"
           >
             {collapsed ? <Circle size={18} /> : <CircleDot size={18} />}
@@ -315,7 +299,7 @@ function AdminPage() {
             <div className="min-w-0 flex-1">
               <h1 className="truncate text-lg font-medium leading-tight">{t(current.title)}</h1>
               <p className="hidden text-[13px] text-[var(--vx-muted)] sm:block">
-                Admin / {t(current.label)}
+                {t("Admin")} / {t(current.label)}
               </p>
             </div>
             <select
@@ -380,7 +364,7 @@ function AdminPage() {
 
           {loading && orders.length === 0 ? (
             <div className="vx-card flex h-48 items-center justify-center">
-              <p>កំពុងទាញទិន្នន័យ...</p>
+              <p>{t("Loading...")}</p>
             </div>
           ) : (
 
@@ -400,15 +384,15 @@ function AdminPage() {
                 <div className="vx-card overflow-hidden">
                   <div className="flex flex-wrap items-center justify-between gap-3 p-6">
                     <div>
-                      <h5 className="text-lg font-medium">Orders</h5>
-                      <p className="text-[13px] text-[var(--vx-muted)]">{shownOrders.length} orders</p>
+                      <h5 className="text-lg font-medium">{t("Orders")}</h5>
+                      <p className="text-[13px] text-[var(--vx-muted)]">{shownOrders.length} {t("orders")}</p>
                     </div>
                     <label className="flex items-center gap-2 rounded-md border border-[var(--vx-border)] px-3 py-1.5 focus-within:border-[var(--vx-primary)]">
                       <Search size={16} className="text-[var(--vx-muted)]" />
                       <input
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Search order, email, player ID"
+                        placeholder={t("Search order, email, player ID")}
                         className="w-56 bg-transparent text-[13px] outline-none"
                       />
                     </label>
@@ -416,23 +400,23 @@ function AdminPage() {
                   {shownOrders.length === 0 ? (
                     <div className="p-12 text-center text-[var(--vx-muted)]">
                       <Inbox size={40} strokeWidth={1.5} className="mx-auto mb-3" />
-                      <p>មិនទាន់មាន orders ទេ</p>
+                      <p>{t("No orders yet")}</p>
                     </div>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="vx-table w-full text-sm">
                         <thead className="border-y border-[var(--vx-border)]">
                           <tr className="text-left">
-                            <th className="px-4 py-3">Order ID</th>
-                            <th className="px-4 py-3">Customer</th>
-                            <th className="px-4 py-3">Game</th>
-                            <th className="px-4 py-3">Package</th>
-                            <th className="px-4 py-3">Player ID</th>
-                            <th className="px-4 py-3">Price</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3">Date</th>
-                            <th className="px-4 py-3">Update</th>
-                            <th className="px-4 py-3">Delivery</th>
+                            <th className="px-4 py-3">{t("Order ID")}</th>
+                            <th className="px-4 py-3">{t("Customer")}</th>
+                            <th className="px-4 py-3">{t("Game")}</th>
+                            <th className="px-4 py-3">{t("Package")}</th>
+                            <th className="px-4 py-3">{t("Player ID")}</th>
+                            <th className="px-4 py-3">{t("Price")}</th>
+                            <th className="px-4 py-3">{t("Status")}</th>
+                            <th className="px-4 py-3">{t("Date")}</th>
+                            <th className="px-4 py-3">{t("Update")}</th>
+                            <th className="px-4 py-3">{t("Delivery")}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--vx-border)]">
@@ -455,11 +439,11 @@ function AdminPage() {
                                   onChange={(e) => updateStatus(o.id, e.target.value)}
                                   className="rounded-md border border-[var(--vx-border)] bg-white px-2 py-1 text-xs outline-none focus:border-[var(--vx-primary)]"
                                 >
-                                  <option value="pending">pending</option>
-                                  <option value="processing">processing</option>
-                                  <option value="completed">completed</option>
-                                  <option value="failed">failed</option>
-                                  <option value="refunded">refunded</option>
+                                  <option value="pending">{t("pending")}</option>
+                                  <option value="processing">{t("processing")}</option>
+                                  <option value="completed">{t("completed")}</option>
+                                  <option value="failed">{t("failed")}</option>
+                                  <option value="refunded">{t("refunded")}</option>
                                 </select>
                               </td>
                               <td className="px-4 py-3">
@@ -478,29 +462,29 @@ function AdminPage() {
               {tab === "customers" && (
                 <div className="vx-card overflow-hidden">
                   <div className="p-6">
-                    <h5 className="text-lg font-medium">Customers</h5>
-                    <p className="text-[13px] text-[var(--vx-muted)]">{uniqueCustomers.length} customers</p>
+                    <h5 className="text-lg font-medium">{t("Customers")}</h5>
+                    <p className="text-[13px] text-[var(--vx-muted)]">{uniqueCustomers.length} {t("customers")}</p>
                   </div>
                   {uniqueCustomers.length === 0 ? (
                     <div className="p-12 text-center text-[var(--vx-muted)]">
                       <Users size={40} strokeWidth={1.5} className="mx-auto mb-3" />
-                      <p>មិនទាន់មាន customers ទេ</p>
+                      <p>{t("No customers yet")}</p>
                     </div>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="vx-table w-full text-sm">
                         <thead className="border-y border-[var(--vx-border)]">
                           <tr className="text-left">
-                            <th className="px-6 py-3">Customer</th>
-                            <th className="px-6 py-3">Total Orders</th>
-                            <th className="px-6 py-3">Total Spent</th>
-                            <th className="px-6 py-3">Last Order</th>
+                            <th className="px-6 py-3">{t("Customer")}</th>
+                            <th className="px-6 py-3">{t("Total Orders")}</th>
+                            <th className="px-6 py-3">{t("Total Spent")}</th>
+                            <th className="px-6 py-3">{t("Last Order")}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--vx-border)]">
                           {uniqueCustomers.map((email) => {
                             const userOrders = fo.filter(o => o.user_email === email);
-                            const spent = userOrders.filter(o => o.status === "completed").reduce((s, o) => s + Number(o.price_usd), 0);
+                            const spent = userOrders.filter(paid).reduce((s, o) => s + Number(o.price_usd), 0);
                             const last = userOrders[0]?.created_at;
                             return (
                               <tr key={email} className="transition-colors hover:bg-[var(--vx-hover)]">
@@ -530,9 +514,9 @@ function AdminPage() {
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                     {[
-                      { label: "Total Revenue",  value: money(revenue), color: "var(--vx-success)", icon: <Wallet size={22} /> },
-                      { label: "Total Expenses", value: "$0.00",        color: "var(--vx-danger)",  icon: <Tag size={22} /> },
-                      { label: "Net Cash Flow",  value: money(revenue), color: "var(--vx-primary)", icon: <LayoutDashboard size={22} /> },
+                      { label: "Total Revenue", value: money(revenue),                color: "var(--vx-success)", icon: <Wallet size={22} /> },
+                      { label: "Supplier cost", value: money(supplierCost),           color: "var(--vx-danger)",  icon: <Tag size={22} /> },
+                      { label: "Net profit",    value: money(revenue - supplierCost), color: "var(--vx-primary)", icon: <LayoutDashboard size={22} /> },
                     ].map((c) => (
                       <div key={c.label} className="vx-card flex items-center gap-4 p-6">
                         <span
@@ -543,38 +527,49 @@ function AdminPage() {
                         </span>
                         <div>
                           <div className="text-2xl font-medium text-[var(--vx-heading)]">{c.value}</div>
-                          <div className="text-[13px]">{c.label}</div>
+                          <div className="text-[13px]">{t(c.label)}</div>
                         </div>
                       </div>
                     ))}
                   </div>
 
+                  <p className="text-[13px] text-[var(--vx-muted)]">
+                    {t("Cost is an estimate from FazerCards prices on")} {FAZER_COSTS_DATE} {t("Manual packages (Roblox, FF bundle) have no cost here.")}
+                  </p>
+
                   <div className="vx-card overflow-hidden">
                     <div className="p-6">
-                      <h5 className="text-lg font-medium">Completed Transactions</h5>
+                      <h5 className="text-lg font-medium">{t("Paid Transactions")}</h5>
                     </div>
                     {completedOrders.length === 0 ? (
-                      <div className="p-8 text-center text-sm text-[var(--vx-muted)]">មិនទាន់មាន completed orders ទេ</div>
+                      <div className="p-8 text-center text-sm text-[var(--vx-muted)]">{t("No paid orders yet")}</div>
                     ) : (
                       <div className="overflow-x-auto">
                         <table className="vx-table w-full text-sm">
                           <thead className="border-y border-[var(--vx-border)]">
                             <tr className="text-left">
-                              <th className="px-6 py-3">Date</th>
-                              <th className="px-6 py-3">Customer</th>
-                              <th className="px-6 py-3">Game</th>
-                              <th className="px-6 py-3">Amount</th>
+                              <th className="px-6 py-3">{t("Date")}</th>
+                              <th className="px-6 py-3">{t("Customer")}</th>
+                              <th className="px-6 py-3">{t("Game")}</th>
+                              <th className="px-6 py-3">{t("Amount")}</th>
+                              <th className="px-6 py-3">{t("Cost")}</th>
+                              <th className="px-6 py-3">{t("Profit")}</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-[var(--vx-border)]">
-                            {completedOrders.map((o) => (
-                              <tr key={o.id} className="hover:bg-[var(--vx-hover)]">
-                                <td className="px-6 py-3 text-xs text-[var(--vx-muted)]">{fmtDate(o.created_at)}</td>
-                                <td className="px-6 py-3 text-xs">{o.user_email}</td>
-                                <td className="px-6 py-3">{o.game_name} — {o.package_amt}</td>
-                                <td className="px-6 py-3 font-medium text-[var(--vx-success)]">+{money(Number(o.price_usd))}</td>
-                              </tr>
-                            ))}
+                            {completedOrders.map((o) => {
+                              const cost = orderCost(o);
+                              return (
+                                <tr key={o.id} className="hover:bg-[var(--vx-hover)]">
+                                  <td className="px-6 py-3 text-xs text-[var(--vx-muted)]">{fmtDate(o.created_at)}</td>
+                                  <td className="px-6 py-3 text-xs">{o.user_email}</td>
+                                  <td className="px-6 py-3">{o.game_name} — {o.package_amt}</td>
+                                  <td className="px-6 py-3 font-medium text-[var(--vx-success)]">+{money(Number(o.price_usd))}</td>
+                                  <td className="px-6 py-3 text-[var(--vx-danger)]">{cost === null ? t("Manual") : `-${money(cost)}`}</td>
+                                  <td className="px-6 py-3 font-medium text-[var(--vx-heading)]">{cost === null ? "—" : money(Number(o.price_usd) - cost)}</td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>
@@ -590,9 +585,10 @@ function AdminPage() {
         </main>
 
         <footer className="mx-auto w-full max-w-[1440px] px-6 pb-6 text-[13px] text-[var(--vx-muted)]">
-          © {new Date().getFullYear()} Yuric Topup · Owner Control Center
+          © {new Date().getFullYear()} Yuric Topup · {t("Owner Control Center")}
         </footer>
       </div>
     </div>
+    </AdminLangContext.Provider>
   );
 }

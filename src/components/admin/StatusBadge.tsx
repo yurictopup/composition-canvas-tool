@@ -1,3 +1,5 @@
+import { useAdminT } from "./i18n";
+
 const STATUS_STYLE: Record<string, { color: string; bg: string }> = {
   pending: { color: "#FF9F43", bg: "rgba(255,159,67,0.16)" },
   processing: { color: "#2F5FE0", bg: "rgba(47,95,224,0.14)" },
@@ -7,13 +9,14 @@ const STATUS_STYLE: Record<string, { color: string; bg: string }> = {
 };
 
 export function StatusBadge({ status }: { status: string }) {
+  const { t } = useAdminT();
   const s = STATUS_STYLE[status] ?? STATUS_STYLE["refunded"]!;
   return (
     <span
-      className="inline-block rounded px-2 py-0.5 text-[13px] font-medium capitalize"
+      className="inline-block whitespace-nowrap rounded px-2 py-0.5 text-[13px] font-medium"
       style={{ color: s.color, background: s.bg }}
     >
-      {status}
+      {t(status)}
     </span>
   );
 }

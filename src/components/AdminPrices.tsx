@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { games, getHotItems, getPackages, serverGames } from "@/lib/games";
 import { fetchPrices, packageKey, type PriceMap } from "@/lib/prices";
-import { GamesDropOfferSearch } from "@/components/GamesDropOfferSearch";
+import { fazerCosts } from "@/lib/fazercards-costs";
+import { useAdminT } from "@/components/admin/i18n";
 
 // Owner-only price editor. Each row is one package from games.ts; saving
 // writes it to product_prices, which the database charges and the shop shows.
@@ -21,6 +22,7 @@ function allRows(): Row[] {
 }
 
 export function AdminPrices() {
+  const { t } = useAdminT();
   const rows = allRows();
   const [prices, setPrices] = useState<PriceMap | null>(null);
   const [loadErr, setLoadErr] = useState(false);
@@ -28,62 +30,11 @@ export function AdminPrices() {
   const [saving, setSaving] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [gameFilter, setGameFilter] = useState(games[0]!.id);
-  // GamesDrop offer per package, used for automatic delivery.
-  const [offers, setOffers] = useState<Record<string, number>>({});
-  const [offerDrafts, setOfferDrafts] = useState<Record<string, string>>({});
 
   async function load() {
     const map = await fetchPrices();
     setLoadErr(!map);
     setPrices(map);
-    const { data } = await supabase
-      .from("supplier_offers")
-      .select("game_id, package_amt, gamesdrop_offer_id");
-    const next: Record<string, number> = {};
-    for (const row of (data ?? []) as unknown as {
-      game_id: string;
-      package_amt: string;
-      gamesdrop_offer_id: number;
-    }[]) {
-      next[`${row.game_id}|${row.package_amt}`] = row.gamesdrop_offer_id;
-    }
-    setOffers(next);
-  }
-
-  async function saveOffer(row: Row) {
-    const id = `${row.gameId}|${row.key}`;
-    const text = (offerDrafts[id] ?? "").trim();
-    const offerId = Number(text);
-    if (text && (!Number.isInteger(offerId) || offerId <= 0)) {
-      setMsg(`${row.key}: the GamesDrop offer ID is a whole number.`);
-      return;
-    }
-    setSaving(id);
-    setMsg(null);
-    const { error } = text
-      ? await supabase.from("supplier_offers").upsert({
-          game_id: row.gameId,
-          package_amt: row.key,
-          gamesdrop_offer_id: offerId,
-          updated_at: new Date().toISOString(),
-        })
-      : await supabase
-          .from("supplier_offers")
-          .delete()
-          .eq("game_id", row.gameId)
-          .eq("package_amt", row.key);
-    if (error) {
-      setMsg(`${row.key}: ${error.message}`);
-    } else {
-      setMsg(
-        text
-          ? `${row.key} delivers with GamesDrop offer ${offerId}`
-          : `${row.key}: GamesDrop offer removed`,
-      );
-      setOfferDrafts(({ [id]: _, ...rest }) => rest);
-      await load();
-    }
-    setSaving(null);
   }
 
   useEffect(() => {
@@ -97,7 +48,7 @@ export function AdminPrices() {
       drafts[id] ?? (current ? current.price_usd.toFixed(2) : (row.fallback?.toFixed(2) ?? ""));
     const price = Number(text);
     if (!Number.isFinite(price) || price <= 0) {
-      setMsg(`${row.key}: enter a price above $0.`);
+      setMsg(`${row.key}: ${t("enter a price above $0")}`);
       return;
     }
     setSaving(id);
@@ -112,7 +63,7 @@ export function AdminPrices() {
     if (error) {
       setMsg(`${row.key}: ${error.message}`);
     } else {
-      setMsg(`${row.gameName} — ${row.key}: $${price.toFixed(2)}${active ? "" : " (hidden)"}`);
+      setMsg(`${row.gameName} — ${row.key}: $${price.toFixed(2)}${active ? "" : ` (${t("hidden")})`}`);
       setDrafts(({ [id]: _, ...rest }) => rest);
       await load();
     }
@@ -124,15 +75,14 @@ export function AdminPrices() {
   return (
     <div className="space-y-4">
       <div className="vx-card p-5 text-sm text-gray-600">
-        These are the prices customers see and pay. A saved price takes effect for new orders right
-        away. Switch a package off to hide it from sale.
+        {t(
+          "These are the prices customers see and pay. A saved price works for new orders right away. Switch a package off to hide it from sale.",
+        )}
       </div>
-
-      <GamesDropOfferSearch />
 
       {loadErr && (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          Couldn't read the price table. Make sure the product_prices table exists in Supabase.
+          {t("Couldn't read the price table. Make sure the product_prices table exists in Supabase.")}
         </div>
       )}
       {msg && (
@@ -162,10 +112,11 @@ export function AdminPrices() {
           <table className="vx-table w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr className="text-left text-xs text-gray-500">
-                <th className="px-4 py-3 font-semibold">Package</th>
-                <th className="px-4 py-3 font-semibold">Price (USD)</th>
-                <th className="px-4 py-3 font-semibold">On sale</th>
-                <th className="px-4 py-3 font-semibold">GamesDrop offer</th>
+                <th className="px-4 py-3 font-semibold">{t("Package")}</th>
+                <th className="px-4 py-3 font-semibold">{t("Price (USD)")}</th>
+                <th className="px-4 py-3 font-semibold">{t("FazerCards cost")}</th>
+                <th className="px-4 py-3 font-semibold">{t("Profit")}</th>
+                <th className="px-4 py-3 font-semibold">{t("On sale")}</th>
                 <th className="px-4 py-3 font-semibold"></th>
               </tr>
             </thead>
@@ -175,6 +126,9 @@ export function AdminPrices() {
                 const current = prices?.get(id);
                 const active = current?.active ?? false;
                 const value = drafts[id] ?? (current ? current.price_usd.toFixed(2) : "");
+                const cost = fazerCosts[id];
+                const price = Number(value || row.fallback);
+                const profit = cost !== undefined && price > 0 ? price - cost : null;
                 return (
                   <tr key={id} className="hover:bg-gray-50/60">
                     <td className="px-4 py-3 font-semibold">{row.key}</td>
@@ -193,6 +147,20 @@ export function AdminPrices() {
                         />
                       </div>
                     </td>
+                    <td className="px-4 py-3 text-gray-500">
+                      {cost === undefined ? t("Manual") : `$${cost.toFixed(2)}`}
+                    </td>
+                    <td className="px-4 py-3">
+                      {profit === null ? (
+                        "—"
+                      ) : profit < 0 ? (
+                        <span className="font-semibold text-red-600">{t("Below cost")}</span>
+                      ) : (
+                        <span className="font-semibold text-green-700">
+                          ${profit.toFixed(2)} ({Math.round((profit / cost!) * 100)}%)
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <button
                         disabled={saving === id || !prices}
@@ -203,26 +171,8 @@ export function AdminPrices() {
                             : "border-gray-300 bg-gray-100 text-gray-600"
                         }`}
                       >
-                        {active ? "On" : current ? "Off" : "Not listed"}
+                        {active ? t("On") : current ? t("Off") : t("Not listed")}
                       </button>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1">
-                        <input
-                          inputMode="numeric"
-                          value={offerDrafts[id] ?? (offers[id] ? String(offers[id]) : "")}
-                          placeholder="Offer ID"
-                          onChange={(e) => setOfferDrafts((d) => ({ ...d, [id]: e.target.value }))}
-                          className="w-24 rounded-lg border border-gray-200 px-2 py-1 outline-none focus:border-[#1C3CB2]"
-                        />
-                        <button
-                          disabled={saving === id || offerDrafts[id] === undefined}
-                          onClick={() => saveOffer(row)}
-                          className="rounded-lg border border-gray-200 px-2 py-1 text-xs font-semibold disabled:opacity-30"
-                        >
-                          Set
-                        </button>
-                      </div>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button
@@ -230,7 +180,7 @@ export function AdminPrices() {
                         onClick={() => save(row, current ? active : true)}
                         className="rounded-lg bg-[#1C3CB2] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-30"
                       >
-                        {saving === id ? "Saving…" : "Save"}
+                        {saving === id ? t("Saving…") : t("Save")}
                       </button>
                     </td>
                   </tr>
