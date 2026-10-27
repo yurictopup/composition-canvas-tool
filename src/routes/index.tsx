@@ -53,7 +53,7 @@ function Index() {
   const { t } = useStorePrefs();
   return (
     <SiteChrome>
-      <section className="mx-auto w-full max-w-[1500px] px-4 pt-4 sm:px-6">
+      <section className="mx-auto w-full max-w-[1500px] px-3 pt-3 sm:px-6 sm:pt-4">
         <Link
           to="/"
           hash="games"
@@ -99,19 +99,19 @@ function Index() {
 
       <section
         id="games"
-        className="mx-auto w-full max-w-[1500px] scroll-mt-6 px-4 pt-5 pb-6 sm:px-6 sm:pt-6"
+        className="mx-auto w-full max-w-[1500px] scroll-mt-6 px-3 pt-4 pb-6 sm:px-6 sm:pt-6"
       >
         <Tabs defaultValue="all">
-          <div className="overflow-x-auto pb-3">
+          <div className="overflow-x-auto pb-2 sm:pb-3">
             <TabsList
               aria-label="ជ្រើសរើសហ្គេម"
-              className="h-auto w-max justify-start gap-2 bg-transparent p-0 sm:gap-2.5"
+              className="h-auto w-max justify-start gap-1.5 bg-transparent p-0 sm:gap-2.5"
             >
               {gameTabs.map((tab) => (
                 <TabsTrigger
                   key={tab.id}
                   value={tab.id}
-                  className="min-h-9 rounded-full border border-border/60 bg-secondary/60 px-4 py-1.5 text-sm font-semibold text-secondary-foreground backdrop-blur-sm transition-all hover:border-brand-400/50 hover:bg-card hover:text-foreground data-[state=active]:border-transparent data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_2px_12px_oklch(0.55_0.18_264/0.4)]"
+                  className="min-h-8 rounded-full border border-border/60 bg-secondary/60 px-3 py-1 text-xs font-semibold sm:min-h-9 sm:px-4 sm:py-1.5 sm:text-sm text-secondary-foreground backdrop-blur-sm transition-all hover:border-brand-400/50 hover:bg-card hover:text-foreground data-[state=active]:border-transparent data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_2px_12px_oklch(0.55_0.18_264/0.4)]"
                 >
                   {t(tab.label)}
                 </TabsTrigger>
@@ -122,9 +122,9 @@ function Index() {
             <TabsContent
               key={tab.id}
               value={tab.id}
-              className="mt-1 min-h-52 rounded-lg border border-border bg-card p-4 text-card-foreground sm:p-6"
+              className="mt-1 min-h-52 rounded-lg border border-border bg-card p-3 text-card-foreground sm:p-6"
             >
-              <div className="grid grid-cols-3 gap-x-4 gap-y-6 sm:grid-cols-6 sm:gap-x-5 lg:grid-cols-7 xl:grid-cols-9 2xl:grid-cols-10">
+              <div className="grid grid-cols-4 gap-x-3 gap-y-4 sm:grid-cols-6 sm:gap-y-6 sm:gap-x-5 lg:grid-cols-7 xl:grid-cols-9 2xl:grid-cols-10">
                 {tab.items.map((g, i) => (
                   <Link
                     key={g.id}
@@ -142,7 +142,7 @@ function Index() {
                         className="block aspect-square w-full object-cover"
                       />
                     </span>
-                    <span className="mt-2 block truncate text-[11px] font-semibold">
+                    <span className="mt-1.5 block truncate text-[10px] font-semibold sm:mt-2 sm:text-[11px]">
                       {(tab.id === g.id && mainServerTile[g.id]) || g.name}
                     </span>
                   </Link>
@@ -213,7 +213,7 @@ function BannerOverlay() {
       </svg>
 
       {/* white swoosh with 3D game tiles */}
-      <span className="absolute inset-y-0 left-0 hidden w-[19%] sm:block">
+      <span className="absolute inset-y-0 left-0 block w-[19%]">
         <svg viewBox="0 0 200 250" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden="true">
           <path d="M0 0H118C84 64 92 164 168 250H0Z" fill="#ffffff" fillOpacity="0.94" />
           <path d="M118 0C84 64 92 164 168 250" fill="none" stroke="#7cc4ff" strokeWidth="4" />
@@ -223,7 +223,7 @@ function BannerOverlay() {
             key={g.id}
             src={g.icon}
             alt=""
-            className="banner-float absolute block aspect-square w-[30%] rounded-[24%] object-cover ring-[3px] ring-white shadow-[0_5px_0_#b9c9e6,0_10px_18px_rgb(10_30_80/0.35)]"
+            className="banner-float absolute block aspect-square w-[30%] rounded-[24%] object-cover ring-2 ring-white shadow-[0_3px_0_#b9c9e6,0_6px_12px_rgb(10_30_80/0.35)] sm:ring-[3px] sm:shadow-[0_5px_0_#b9c9e6,0_10px_18px_rgb(10_30_80/0.35)]"
             style={{
               top: `${iconSpots[i]!.top}%`,
               left: `${iconSpots[i]!.left}%`,
@@ -253,19 +253,19 @@ function BannerOverlay() {
       </span>
 
       {/* headline */}
-      <span className="absolute left-[40%] top-[46%] flex w-[70%] -translate-x-1/2 -translate-y-1/2 flex-col items-center text-center sm:left-[50%] sm:w-[48%]">
-        <span className="grid font-khmer text-[clamp(34px,6.2vw,96px)] leading-[1.1]">
+      <span className="absolute left-[47%] top-[46%] flex w-[56%] -translate-x-1/2 -translate-y-1/2 flex-col items-center text-center sm:left-[50%] sm:w-[48%]">
+        <span className="grid font-khmer text-[clamp(28px,6.2vw,96px)] leading-[1.1]">
           <span className="banner-title-back col-start-1 row-start-1" aria-hidden="true">សូមស្វាគមន៍</span>
           <span className="banner-title col-start-1 row-start-1">សូមស្វាគមន៍</span>
         </span>
-        <span className="-mt-[0.15em] grid self-end pr-[14%] font-khmer text-[clamp(15px,2vw,30px)]">
+        <span className="-mt-[0.15em] grid self-end pr-[14%] font-khmer text-[clamp(12px,2vw,30px)]">
           <span className="banner-title-back col-start-1 row-start-1" aria-hidden="true">មកកាន់</span>
           <span className="banner-title col-start-1 row-start-1">មកកាន់</span>
         </span>
-        <span className="mt-[0.15em] rounded-md border-2 border-[#fff2b0] bg-gradient-to-b from-[#ffd75e] to-[#ff9d00] px-[0.9em] py-[0.12em] font-display text-[clamp(14px,2.3vw,34px)] font-black tracking-[0.14em] text-[#0b2a7a] shadow-[0_4px_0_#b86e00,0_10px_20px_rgb(0_0_0/0.4)]">
+        <span className="mt-[0.15em] rounded-md border-2 border-[#fff2b0] bg-gradient-to-b from-[#ffd75e] to-[#ff9d00] px-[0.9em] py-[0.12em] font-display text-[clamp(11px,2.3vw,34px)] font-black tracking-[0.14em] text-[#0b2a7a] shadow-[0_4px_0_#b86e00,0_10px_20px_rgb(0_0_0/0.4)]">
           YURIC TOPUP
         </span>
-        <span className="banner-sub mt-[0.55em] font-khmer text-[clamp(13px,1.7vw,26px)]">បញ្ចូលពេជ្របានភ្លាមៗ - ដោយសុវត្ថិភាព</span>
+        <span className="banner-sub mt-[0.55em] font-khmer text-[clamp(10px,1.7vw,26px)]">បញ្ចូលពេជ្របានភ្លាមៗ - ដោយសុវត្ថិភាព</span>
       </span>
 
       {gems.map((g, i) => (

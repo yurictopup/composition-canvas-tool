@@ -59,7 +59,7 @@ function timeAgo(iso: string, km: boolean) {
 }
 
 const iconBtn =
-  "store-icon-btn relative flex h-9 w-9 items-center justify-center rounded-full text-on-dark-muted outline-none transition-colors";
+  "store-icon-btn relative flex h-8 w-8 items-center justify-center rounded-full text-on-dark-muted sm:h-9 sm:w-9 outline-none transition-colors";
 const pop = "store-pop z-50 rounded-lg";
 const itemCls =
   "flex cursor-pointer select-none items-center gap-3 rounded-md px-3 py-2 text-sm text-on-dark outline-none";
@@ -112,7 +112,7 @@ export function StoreSettingsMenu() {
 }
 
 const avatarCls =
-  "flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-white ring-2 ring-brand-400/40";
+  "flex h-8 w-8 items-center justify-center rounded-full sm:h-9 sm:w-9 bg-gradient-to-br from-brand-500 to-brand-700 text-white ring-2 ring-brand-400/40";
 
 export function StoreGuestMenu() {
   const { light, t } = useStorePrefs();
@@ -257,7 +257,7 @@ export function StoreUserMenu({ user, onSignOut }: { user: User; onSignOut: () =
       {/* Account */}
       <DM.Root modal={false}>
         <DM.Trigger className="relative ml-1 rounded-full outline-none" title={user.email ?? ""}>
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold uppercase text-white ring-2 ring-brand-400/40">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full sm:h-9 sm:w-9 bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold uppercase text-white ring-2 ring-brand-400/40">
             {initials}
           </span>
           <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-[var(--store-dot-ring,var(--brand-950))] bg-[#28C76F]" />

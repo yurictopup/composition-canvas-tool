@@ -35,11 +35,11 @@ export function SiteChrome({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className={`page-gradient flex min-h-screen flex-col ${light ? "store-light" : ""}`}>
+    <div className={`store-chrome page-gradient flex min-h-screen flex-col ${light ? "store-light" : ""}`}>
       <header className="store-header sticky top-0 z-20 border-b backdrop-blur">
-        <div className="mx-auto flex w-full max-w-[1500px] items-center justify-between px-4 py-3 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 font-display text-xl font-black text-glow">
-            <Gem className="h-5 w-5 text-brand-400" aria-hidden="true" />
+        <div className="mx-auto flex w-full max-w-[1500px] items-center justify-between px-3 py-2 sm:px-6 sm:py-3">
+          <Link to="/" className="flex items-center gap-2 font-display text-base font-black text-glow sm:text-xl">
+            <Gem className="h-4 w-4 sm:h-5 sm:w-5 text-brand-400" aria-hidden="true" />
             YURIC<span className="text-brand-400"> TOPUP</span>
           </Link>
           <nav className="flex items-center gap-1 text-sm">
@@ -53,8 +53,8 @@ export function SiteChrome({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <div className="mx-auto w-full max-w-[1500px] px-4 pt-4 sm:px-6">
-        <div className="ticker-bar relative overflow-hidden rounded-xl border border-brand-400/30 py-2 text-primary-foreground shadow-[0_6px_20px_oklch(0.3_0.15_266/0.35)]">
+      <div className="mx-auto w-full max-w-[1500px] px-3 pt-3 sm:px-6 sm:pt-4">
+        <div className="ticker-bar relative overflow-hidden rounded-xl border border-brand-400/30 py-1 sm:py-2 text-primary-foreground shadow-[0_6px_20px_oklch(0.3_0.15_266/0.35)]">
           <div className="ticker-fade pointer-events-none absolute inset-0 z-10" aria-hidden="true" />
           <div className="marquee-track ticker-track">
             {[0, 1].map((k) => (
@@ -62,9 +62,9 @@ export function SiteChrome({ children }: { children: ReactNode }) {
                 {/* Each half repeats the list so it is wider than the bar on any screen; no gap appears. */}
                 {[...tickerItems, ...tickerItems].map(({ Icon, label, tone }, i) => (
                   <span key={i} className="flex items-center gap-3">
-                    <span className="flex items-center gap-2 rounded-full border border-white/15 bg-white/10 py-1 pl-1 pr-4 font-khmer text-[15px] font-normal leading-[1.9] tracking-wide backdrop-blur-sm">
-                      <span className={`grid h-7 w-7 place-items-center rounded-full ${tone}`}>
-                        <Icon size={15} strokeWidth={2.5} />
+                    <span className="flex items-center gap-2 rounded-full border border-white/15 bg-white/10 py-0.5 pl-0.5 pr-3 font-khmer text-[13px] font-normal leading-[1.9] sm:py-1 sm:pl-1 sm:pr-4 sm:text-[15px] tracking-wide backdrop-blur-sm">
+                      <span className={`grid h-6 w-6 place-items-center rounded-full sm:h-7 sm:w-7 ${tone}`}>
+                        <Icon className="h-3.5 w-3.5 sm:h-[15px] sm:w-[15px]" strokeWidth={2.5} />
                       </span>
                       {label === "support" ? `${t("Support")} ${store.hours}` : t(label)}
                     </span>
