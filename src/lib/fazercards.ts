@@ -60,10 +60,13 @@ async function call(
   return json;
 }
 
-/** The FazerCards offer name for one of our packages, or null when it is delivered by hand. */
-export function fazerOfferFor(gameId: string, packageAmt: string) {
+/**
+ * The FazerCards offer name for one of our packages, or null when it is delivered by hand.
+ * A product the owner picked on /admin (product_prices.fazer_offer) wins over the built-in list.
+ */
+export function fazerOfferFor(gameId: string, packageAmt: string, picked?: string | null) {
   const game = fazerCatalog[gameId];
-  const offerName = game?.offers[packageAmt];
+  const offerName = picked || game?.offers[packageAmt];
   return game && offerName ? { ...game, offerName } : null;
 }
 
@@ -172,10 +175,10 @@ const REJECTED =
   /balance|insufficient|invalid|validation|not_found|unavailable|out_of_stock|unauthor|forbidden/i;
 
 export async function placeFazerOrder(
-  order: DeliveryOrder & { package_amt: string },
+  order: DeliveryOrder & { package_amt: string; fazer_offer?: string | null },
   opts: Opts,
 ): Promise<DeliveryResult> {
-  const target = fazerOfferFor(order.game_id, order.package_amt);
+  const target = fazerOfferFor(order.game_id, order.package_amt, order.fazer_offer);
   if (!target) {
     return {
       status: "failed",

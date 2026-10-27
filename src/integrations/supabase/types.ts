@@ -89,6 +89,7 @@ export type Database = {
       product_prices: {
         Row: {
           active: boolean;
+          fazer_offer: string | null;
           game_id: string;
           game_name: string;
           package_amt: string;
@@ -96,6 +97,7 @@ export type Database = {
         };
         Insert: {
           active?: boolean;
+          fazer_offer?: string | null;
           game_id: string;
           game_name: string;
           package_amt: string;
@@ -103,6 +105,7 @@ export type Database = {
         };
         Update: {
           active?: boolean;
+          fazer_offer?: string | null;
           game_id?: string;
           game_name?: string;
           package_amt?: string;

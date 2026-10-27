@@ -70,7 +70,7 @@ const KM: Record<string, string> = {
   "Manual packages (Roblox, FF bundle) have no cost here.": "Roblox និង FF bundle មិនគិតថ្លៃដើម",
 
   // Overview
-  "Congratulations": "សួស្តី",
+  Congratulations: "សួស្តី",
   "Revenue in this period": "ចំណូលក្នុងរយៈពេលនេះ",
   "paid orders": "ការកម្មង់បានបង់",
   "View Sales": "មើលការលក់",
@@ -116,7 +116,7 @@ const KM: Record<string, string> = {
 
   // Prices tab
   "These are the prices customers see and pay. A saved price works for new orders right away. Switch a package off to hide it from sale.":
-    "តម្លៃនេះ អតិថិជនឃើញ និងបង់ ចុច រក្សាទុក ប្រើភ្លាម ចុច បិទ ដើម្បីលាក់កញ្ចប់",
+    "តម្លៃនេះ អតិថិជនឃើញ និងបង់ភ្លាម ចុច បិទ ដើម្បីលាក់កញ្ចប់ ជ្រើសផលិតផល FazerCards ដើម្បីបញ្ចូលពេជ្រស្វ័យប្រវត្តិ",
   "Couldn't read the price table. Make sure the product_prices table exists in Supabase.":
     "អានតារាងតម្លៃមិនបាន សូមសាកម្តងទៀត",
   "Price (USD)": "តម្លៃ (USD)",
@@ -131,6 +131,11 @@ const KM: Record<string, string> = {
   "Below cost": "ខាតដើម",
   "enter a price above $0": "សូមដាក់តម្លៃលើស $0",
   hidden: "លាក់",
+  "FazerCards product": "ផលិតផល FazerCards",
+  "Add package": "បន្ថែមកញ្ចប់",
+  Added: "បានបន្ថែម",
+  "New package, e.g. 86": "កញ្ចប់ថ្មី ឧ. 86",
+  "Amount is a number, like 86 or 78 + 8": "ចំនួនត្រូវជាលេខ ឧ. 86 ឬ 78 + 8",
 
   // Delivery cell
   "Paid by Bakong": "បានបង់តាម Bakong",
