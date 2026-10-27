@@ -76,3 +76,12 @@ describe("Per-game packages", () => {
     expect(getPackages("not-a-game")).toEqual([]);
   });
 });
+
+describe("Roblox Game Pass price", () => {
+  it("grosses up for Roblox's 30% cut so the buyer receives the package amount", async () => {
+    const { robloxGamePassPrice } = await import("@/lib/games");
+    expect(robloxGamePassPrice(80)).toBe(115);
+    expect(robloxGamePassPrice(1000)).toBe(1429);
+    expect(Math.floor(robloxGamePassPrice(500) * 0.7)).toBeGreaterThanOrEqual(500);
+  });
+});

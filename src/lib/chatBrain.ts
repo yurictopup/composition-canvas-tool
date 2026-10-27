@@ -24,6 +24,7 @@ export const DEFAULT_SUGGESTIONS = [
 const GAME_ALIASES: Record<string, string[]> = {
   mlbb: ["mlbb", "mobile legends", "mobile legend", "ml", "ម៉ូបាយលេជិន", "ម៉ូបាយ", "អឹមអិល"],
   ff: ["free fire", "freefire", "ff", "ហ្វ្រីហ្វាយ"],
+  roblox: ["roblox", "robux", "រ៉ូប្លុក", "រ៉ូបុក"],
   magicchess: ["magic chess", "mcgg", "magicchess"],
   pubg: ["pubg", "pubg mobile", "uc", "ប៉ាប់ជី", "ពាប់ជី"],
   hok: ["honor of kings", "hok"],
@@ -243,6 +244,15 @@ export function answer(
   const game = detectGame(text);
   const topics = topScores(text);
   const has_ = (t: string) => topics.includes(t);
+
+  // Roblox works differently from every other game.
+  if (game?.id === "roblox") {
+    return {
+      text: "យើងលក់ Robux តាម Game Pass សូមបង្កើត Game Pass ក្នុងហ្គេម Roblox របស់អ្នក ដាក់តម្លៃតាមដែលទំព័របង្ហាញ បញ្ចូល Username ហើយបង់ប្រាក់ យើងនឹងទិញ Game Pass នោះ Robux ចូលក្រោយ 5 ទៅ 7 ថ្ងៃ យើងមិនសុំលេខសម្ងាត់ទេ",
+      actions: [telegramAction],
+      suggestions: ["ហ្គេមអ្វីខ្លះ?", "បង់ប្រាក់តាមអ្វី?"],
+    };
+  }
 
   if (has_("late") || has_("refund")) {
     return {

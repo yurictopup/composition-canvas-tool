@@ -9,6 +9,7 @@ import ffMonthlyCard from "@/assets/ff-monthly-card.png";
 import ffMembershipBundle from "@/assets/ff-membership-bundle.png";
 import magicchess from "@/assets/magicchess.png";
 import pubg from "@/assets/pubg-clean.png";
+import roblox from "@/assets/roblox.png";
 import hok from "@/assets/hok.png";
 import wildrift from "@/assets/wildrift.jpg";
 import bloodstrike from "@/assets/bloodstrike.jpg";
@@ -22,14 +23,16 @@ import eafc from "@/assets/eafc.jpg";
 import lol from "@/assets/lol.jpg";
 import hi3 from "@/assets/hi3.jpg";
 
-// Only games FazerCards can top up for Cambodian accounts. Roblox, CODM (India-only there)
-// and the Supercell games were removed on 2026-10-27; their ID rules stay in player-id.ts.
+// Games FazerCards can top up for Cambodian accounts, plus Roblox, which the team delivers
+// by hand through the buyer's Game Pass. CODM (India-only there) and the Supercell games
+// were removed on 2026-10-27; their ID rules stay in player-id.ts.
 // EAFC Mobile, League of Legends and Honkai Impact 3rd use FazerCards' Cambodia-region packs.
 export const games = [
   { id: "mlbb", name: "Mobile Legends", icon: mlbb, unit: "Diamonds", blurb: "Instant MLBB diamond delivery" },
   { id: "ff", name: "Free Fire", icon: freefire, unit: "Diamonds", blurb: "Free Fire diamonds at the best price" },
   { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess, unit: "Diamonds", blurb: "Instant Magic Chess delivery" },
   { id: "pubg", name: "PUBG Mobile", icon: pubg, unit: "UC", blurb: "Fast PUBG UC delivery" },
+  { id: "roblox", name: "Roblox", icon: roblox, unit: "Robux", blurb: "Robux by Game Pass" },
   { id: "hok", name: "Honor of Kings", icon: hok, unit: "Tokens", blurb: "Tokens HoK ចូលភ្លាម" },
   { id: "wildrift", name: "League of Legends: Wild Rift", icon: wildrift, unit: "Wild Cores", blurb: "League of Legends: Wild Rift" },
   { id: "bloodstrike", name: "Blood Strike", icon: bloodstrike, unit: "Gold", blurb: "Blood Strike" },
@@ -263,7 +266,7 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "3300", price: 55.99 },
     { amt: "6600", price: 111.99 },
   ],
-  // Games no longer sold (no Cambodia stock at FazerCards); kept so old orders still resolve.
+  // CODM and the Supercell games are no longer sold (no Cambodia stock at FazerCards); kept so old orders still resolve.
   codm: [
     { amt: "80", price: 0.99 },
     { amt: "400 + 20", price: 4.99 },
@@ -296,14 +299,19 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "6500", price: 49.99 },
     { amt: "14000", price: 99.99 },
   ],
-  // Robux are sent by the team to the buyer's Roblox username.
+  // Robux the buyer receives. The team buys the buyer's Game Pass, priced by robloxGamePassPrice.
   roblox: [
-    { amt: "80", price: 0.89 },
-    { amt: "500", price: 4.45 },
-    { amt: "1000", price: 8.89, hot: true },
-    { amt: "2000", price: 17.79 },
+    { amt: "80", price: 1.59 },
+    { amt: "500", price: 9.89 },
+    { amt: "1000", price: 19.69, hot: true },
+    { amt: "2000", price: 39.29 },
   ],
 };
+
+// Roblox keeps 30% of a Game Pass sale, so the pass must cost more than the Robux delivered.
+export function robloxGamePassPrice(robux: number): number {
+  return Math.ceil(robux / 0.7);
+}
 
 export function getPackages(gameId: string): GamePackage[] {
   return gamePackages[gameId] ?? [];
