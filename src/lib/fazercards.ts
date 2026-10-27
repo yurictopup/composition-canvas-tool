@@ -172,7 +172,7 @@ const REJECTED =
   /balance|insufficient|invalid|validation|not_found|unavailable|out_of_stock|unauthor|forbidden/i;
 
 export async function placeFazerOrder(
-  order: DeliveryOrder & { package_amt: string },
+  order: DeliveryOrder & { package_amt: string; price_usd?: number | string | null },
   opts: Opts,
 ): Promise<DeliveryResult> {
   const target = fazerOfferFor(order.game_id, order.package_amt);
@@ -192,6 +192,17 @@ export async function placeFazerOrder(
         status: "failed",
         supplierStatus: "OFFER_NOT_FOUND",
         message: `FazerCards has no "${target.offerName}" in ${target.category} now.`,
+        notPlaced: true,
+      };
+    }
+    // Never buy for more than the customer paid (a wrong price row or a
+    // supplier price jump would otherwise lose money on every order).
+    const paid = Number(order.price_usd);
+    if (order.price_usd != null && typeof offer.price_usd === "number" && offer.price_usd > paid) {
+      return {
+        status: "failed",
+        supplierStatus: "COST_ABOVE_PRICE",
+        message: `FazerCards cost $${offer.price_usd.toFixed(2)} is above the paid $${paid.toFixed(2)}.`,
         notPlaced: true,
       };
     }

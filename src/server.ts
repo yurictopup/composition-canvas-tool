@@ -45,9 +45,12 @@ function isH3SwallowedErrorBody(body: string): boolean {
 }
 
 // Browser protections for every page: no framing by other sites (clickjacking),
-// no MIME sniffing, HTTPS only, and no camera/mic/location access.
+// no MIME sniffing, HTTPS only, forms post only to us, no other tab can reach
+// this window, and no camera/mic/location access.
 const SECURITY_HEADERS: Record<string, string> = {
-  "content-security-policy": "frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
+  "content-security-policy":
+    "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'; upgrade-insecure-requests",
+  "cross-origin-opener-policy": "same-origin-allow-popups",
   "x-frame-options": "DENY",
   "x-content-type-options": "nosniff",
   "referrer-policy": "strict-origin-when-cross-origin",
@@ -55,10 +58,17 @@ const SECURITY_HEADERS: Record<string, string> = {
   "permissions-policy": "camera=(), microphone=(), geolocation=()",
 };
 
-function withSecurityHeaders(response: Response): Response {
+// Pages search engines should never list (the admin and sign-in screens).
+const PRIVATE_PATHS = /^\/(admin|auth|profile)(\/|$)/;
+
+function withSecurityHeaders(response: Response, request?: Request): Response {
   const secured = new Response(response.body, response);
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
     if (!secured.headers.has(name)) secured.headers.set(name, value);
+  }
+  if (request && PRIVATE_PATHS.test(new URL(request.url).pathname)) {
+    secured.headers.set("x-robots-tag", "noindex, nofollow");
+    secured.headers.set("cache-control", "no-store");
   }
   return secured;
 }
@@ -76,7 +86,7 @@ export default {
       }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return withSecurityHeaders(await normalizeCatastrophicSsrResponse(response));
+      return withSecurityHeaders(await normalizeCatastrophicSsrResponse(response), request);
     } catch (error) {
       console.error(error);
       return withSecurityHeaders(
