@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { CurrencyIcon } from "@/components/CurrencyIcon";
-import { findGame, getHotItems, getPackages, payments, robloxGamePassPrice, store } from "@/lib/games";
+import { baseGameId, findGame, gameServers, getHotItems, getPackages, payments, robloxGamePassPrice, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { useStorePrefs } from "@/lib/storePrefs";
 import { OrderPayment } from "@/components/OrderPayment";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import { lookupPlayer } from "@/lib/player-lookup.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowUp, Check, CircleAlert, CircleCheck, Package, Receipt, ShoppingCart, Sparkles, Star, Ticket, Wallet } from "lucide-react";
+import { ArrowUp, Check, CircleAlert, CircleCheck, Globe, Package, Receipt, ShoppingCart, Sparkles, Star, Ticket, Wallet } from "lucide-react";
 import { livePrice, packageKey, useLivePrices } from "@/lib/prices";
 
 export const Route = createFileRoute("/game/$gameId")({
@@ -64,7 +64,10 @@ function GamePage({ gameId }: { gameId: string }) {
     );
   }
 
-  const idConfig = getIdConfig(gameId);
+  // Server variants (e.g. MLBB Philippines) share the main game's ID rules and name check.
+  const idGameId = baseGameId(gameId);
+  const servers = gameServers[idGameId];
+  const idConfig = getIdConfig(idGameId);
   const availablePackages = getPackages(gameId).map((p) => ({
     ...p,
     price: livePrice(prices, gameId, packageKey(p.amt, game.unit), p.price),
@@ -112,7 +115,7 @@ function GamePage({ gameId }: { gameId: string }) {
   function resetCheck() { checkSeq.current++; setCheck(null); setChecking(false); }
 
   async function runCheck() {
-    const error = validatePlayerId(gameId, uid, zone);
+    const error = validatePlayerId(idGameId, uid, zone);
     if (error) { setCheck({ ok: false, msg: error }); return; }
     if (!idConfig.requiresLookup) {
       setCheck({ ok: true, msg: "ID is valid, ready to order" });
@@ -123,7 +126,7 @@ function GamePage({ gameId }: { gameId: string }) {
     setCheck(null);
     let next: { ok: boolean; msg: string; name?: string };
     try {
-      const result = await lookupPlayer({ data: { gameId, primary: uid, secondary: zone || undefined } });
+      const result = await lookupPlayer({ data: { gameId: idGameId, primary: uid, secondary: zone || undefined } });
       if (result.status === "found") next = { ok: true, msg: "User verified:", name: result.name };
       else if (result.status === "not_found") next = { ok: false, msg: "User ID not found" };
       // No supplier name check for this game yet: a well-formed ID may still
@@ -248,6 +251,20 @@ function GamePage({ gameId }: { gameId: string }) {
           </div>
         </div>
 
+        {servers && (
+          <nav aria-label={t("Choose your server")} className="card-3d mt-5 rounded-3xl p-5">
+            <p className="mb-3 flex items-center gap-2 text-sm font-bold"><Globe className="h-4 w-4 text-primary" /> {t("Choose your server")}</p>
+            <div className="grid grid-cols-3 gap-2">
+              {servers.map((s) => (
+                <Link key={s.id} to="/game/$gameId" params={{ gameId: s.id }} replace
+                  className={`rounded-xl border px-3 py-2.5 text-center text-sm font-bold transition-colors ${s.id === gameId ? "border-primary bg-primary text-primary-foreground" : "border-border/60 bg-white hover:border-primary"}`}>
+                  {t(s.label)}
+                </Link>
+              ))}
+            </div>
+          </nav>
+        )}
+
         {/* Step 1 — Player ID */}
         <section className="card-3d mt-5 rounded-3xl p-5">
           <h2 className="mb-4 flex items-center gap-3 font-khmer text-lg">
@@ -336,7 +353,7 @@ function GamePage({ gameId }: { gameId: string }) {
                       {p.price !== null ? `$${p.price.toFixed(2)}` : "—"}
                     </div>
                   </div>
-                  <CurrencyIcon gameId={game.id} className={`h-9 w-9 shrink-0 transition-transform ${pkg === i && hotPkg === null ? "scale-125" : ""}`} />
+                  <CurrencyIcon gameId={idGameId} className={`h-9 w-9 shrink-0 transition-transform ${pkg === i && hotPkg === null ? "scale-125" : ""}`} />
                 </button>
               ))}
             </div>
@@ -360,7 +377,7 @@ function GamePage({ gameId }: { gameId: string }) {
                         <div className={`text-sm font-bold leading-tight ${on ? "text-primary" : "text-card-foreground"}`}>{item.label}</div>
                         <div className={`mt-1 text-sm font-bold ${on ? "text-primary" : "text-primary/70"}`}>{item.price !== null ? `$${item.price.toFixed(2)}` : "—"}</div>
                       </div>
-                      <CurrencyIcon gameId={game.id} className={`h-8 w-8 shrink-0 transition-transform ${on ? "scale-125" : ""}`} />
+                      <CurrencyIcon gameId={idGameId} className={`h-8 w-8 shrink-0 transition-transform ${on ? "scale-125" : ""}`} />
                     </button>
                   );
                 })}

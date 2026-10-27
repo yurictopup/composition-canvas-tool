@@ -3,17 +3,21 @@ import type { CSSProperties } from "react";
 import { QrCode } from "lucide-react";
 import banner from "@/assets/banner-angkor.png";
 import mascot from "@/assets/mascot-cut.png";
-import { games } from "@/lib/games";
+import { games, serverGames } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { useStorePrefs } from "@/lib/storePrefs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+// Inside a game's own tab the main tile names its server, next to the other servers' tiles.
+const mainServerTile: Record<string, string> = { mlbb: "Mobile Legends KH", ff: "Free Fire MY/SG" };
 
 const gameTabs = [
   { id: "all", label: "All", items: games },
   ...["mlbb", "ff", "roblox", "pubg"].map((id) => ({
     id,
     label: games.find((game) => game.id === id)?.name ?? id,
-    items: games.filter((game) => game.id === id),
+    // Each server of the game (e.g. Free Fire SG, PH) gets its own tile.
+    items: [...games.filter((game) => game.id === id), ...serverGames.filter((game) => game.base === id)],
   })),
   {
     id: "other",
@@ -138,7 +142,9 @@ function Index() {
                         className="block aspect-square w-full object-cover"
                       />
                     </span>
-                    <span className="mt-2 block truncate text-[11px] font-semibold">{g.name}</span>
+                    <span className="mt-2 block truncate text-[11px] font-semibold">
+                      {(tab.id === g.id && mainServerTile[g.id]) || g.name}
+                    </span>
                   </Link>
                 ))}
               </div>

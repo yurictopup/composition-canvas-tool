@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getIdConfig } from "@/lib/player-id";
 import { checkGamesDropOrder, placeGamesDropOrder, type DeliveryResult } from "@/lib/delivery";
+import { checkFazerOrder, placeFazerOrder } from "@/lib/fazercards";
 
 export type DeliveryResponse = { ok: boolean; message: string; status?: string };
 
@@ -13,6 +14,11 @@ export function gamesDropToken(): string {
   const token = process.env["GAMESDROP_API_TOKEN"];
   if (!token) throw new Error("GAMESDROP_API_TOKEN is not set.");
   return token;
+}
+
+/** FazerCards delivers when its key is set; GamesDrop is the older fallback. */
+function fazerKey(): string | undefined {
+  return process.env["FAZERCARDS_API_KEY"] || undefined;
 }
 
 async function saveResult(db: SupabaseClient, orderId: string, result: DeliveryResult) {
@@ -30,7 +36,7 @@ async function saveResult(db: SupabaseClient, orderId: string, result: DeliveryR
 }
 
 function describe(result: DeliveryResult): DeliveryResponse {
-  const base = `GamesDrop: ${result.supplierStatus}`;
+  const base = `${fazerKey() ? "FazerCards" : "GamesDrop"}: ${result.supplierStatus}`;
   return {
     ok: result.status !== "failed",
     status: result.notPlaced ? "pending" : result.status,
@@ -39,7 +45,7 @@ function describe(result: DeliveryResult): DeliveryResponse {
 }
 
 /**
- * Buys a paid order's package from GamesDrop. Used by the owner's Deliver
+ * Buys a paid order's package from FazerCards (or GamesDrop). Used by the owner's Deliver
  * button and by the automatic payment check.
  */
 export async function deliverPaidOrder(
@@ -66,6 +72,21 @@ export async function deliverPaidOrder(
         ? "This order is not waiting for delivery."
         : "This order is not paid by Bakong yet (or is not waiting for delivery).",
     };
+  }
+
+  const apiKey = fazerKey();
+  if (apiKey) {
+    const result = await placeFazerOrder(order, { apiKey });
+    if (result.supplierStatus === "NO_OFFER") {
+      // Not sold through the API (Roblox, bundles): stays under Paid not delivered.
+      await db
+        .from("orders")
+        .update({ status: order.paid_at ? "processing" : "pending", supplier_status: "NO_OFFER" })
+        .eq("id", orderId);
+      return { ok: false, message: result.message ?? "Deliver this package by hand." };
+    }
+    await saveResult(db, orderId, result);
+    return describe(result);
   }
 
   const { data: offer } = await db
@@ -105,8 +126,11 @@ export async function refreshPaidOrder(
     .eq("id", orderId)
     .maybeSingle();
   if (!order?.supplier_order_id)
-    return { ok: false, message: "This order has no GamesDrop order yet." };
-  const result = await checkGamesDropOrder(order.supplier_order_id, { token: gamesDropToken() });
+    return { ok: false, message: "This order has no supplier order yet." };
+  const apiKey = fazerKey();
+  const result = apiKey
+    ? await checkFazerOrder(order.supplier_order_id, { apiKey })
+    : await checkGamesDropOrder(order.supplier_order_id, { token: gamesDropToken() });
   await saveResult(db, orderId, result);
   return describe(result);
 }

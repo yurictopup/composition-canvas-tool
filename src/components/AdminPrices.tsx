@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { games, getHotItems, getPackages } from "@/lib/games";
+import { games, getHotItems, getPackages, serverGames } from "@/lib/games";
 import { fetchPrices, packageKey, type PriceMap } from "@/lib/prices";
 import { GamesDropOfferSearch } from "@/components/GamesDropOfferSearch";
 
@@ -9,7 +9,7 @@ import { GamesDropOfferSearch } from "@/components/GamesDropOfferSearch";
 type Row = { gameId: string; gameName: string; key: string; fallback: number | null };
 
 function allRows(): Row[] {
-  return games.flatMap((g) => {
+  return [...games, ...serverGames].flatMap((g) => {
     const hot = getHotItems(g.id).map((h) => ({ amt: h.label, price: h.price }));
     return [...hot, ...getPackages(g.id)].map((p) => ({
       gameId: g.id,
@@ -140,7 +140,7 @@ export function AdminPrices() {
       )}
 
       <div className="flex flex-wrap gap-2">
-        {games
+        {[...games, ...serverGames]
           .filter((g) => getPackages(g.id).length > 0)
           .map((g) => (
             <button

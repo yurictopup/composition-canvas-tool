@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { games } from "@/lib/games";
+import { findGame } from "@/lib/games";
 import {
   answerText,
   botModels,
@@ -43,7 +43,7 @@ async function livePrices(gameIds: string[]): Promise<Record<string, LivePrice[]
     .in("game_id", gameIds);
   for (const row of data ?? []) {
     if (!row.active) continue;
-    const unit = games.find((g) => g.id === row.game_id)?.unit ?? "";
+    const unit = findGame(row.game_id)?.unit ?? "";
     const amt = row.package_amt.endsWith(` ${unit}`)
       ? row.package_amt.slice(0, -unit.length - 1)
       : row.package_amt;

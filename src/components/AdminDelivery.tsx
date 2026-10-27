@@ -2,7 +2,7 @@ import { useState } from "react";
 import { deliverOrder, refreshDelivery } from "@/lib/delivery.functions";
 import { checkPayment } from "@/lib/payment.functions";
 
-// One order's GamesDrop delivery controls on the admin Orders tab.
+// One order's supplier delivery controls on the admin Orders tab.
 export function DeliveryCell({
   order,
   onChanged,
@@ -44,8 +44,8 @@ export function DeliveryCell({
       action === "deliver" &&
       !window.confirm(
         unpaid
-          ? "Bakong has NOT confirmed this order is paid. Only continue if the customer paid you another way. Buy from GamesDrop now?"
-          : "Buy this package from GamesDrop now? It uses your GamesDrop balance.",
+          ? "Bakong has NOT confirmed this order is paid. Only continue if the customer paid you another way. Buy it from the supplier (FazerCards) now?"
+          : "Buy this package from FazerCards now? It uses your FazerCards balance.",
       )
     ) {
       return;
@@ -96,7 +96,7 @@ export function DeliveryCell({
         </button>
       )}
       {order.supplier_status && (
-        <span className="text-gray-400">GamesDrop: {order.supplier_status}</span>
+        <span className="text-gray-400">Supplier: {order.supplier_status}</span>
       )}
       {msg && <span className="max-w-[200px] text-gray-600">{msg}</span>}
     </div>
