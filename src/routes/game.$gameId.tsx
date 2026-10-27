@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { CurrencyIcon } from "@/components/CurrencyIcon";
-import { findGame, getHotItems, getPackages, payments, store } from "@/lib/games";
+import { findGame, getHotItems, getPackages, payments, robloxGamePassPrice, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { useStorePrefs } from "@/lib/storePrefs";
 import { OrderPayment } from "@/components/OrderPayment";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import { lookupPlayer } from "@/lib/player-lookup.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowUp, Check, CircleAlert, CircleCheck, Package, Receipt, ShoppingCart, Sparkles, Star, Wallet } from "lucide-react";
+import { ArrowUp, Check, CircleAlert, CircleCheck, Package, Receipt, ShoppingCart, Sparkles, Star, Ticket, Wallet } from "lucide-react";
 import { livePrice, packageKey, useLivePrices } from "@/lib/prices";
 
 export const Route = createFileRoute("/game/$gameId")({
@@ -300,9 +300,6 @@ function GamePage({ gameId }: { gameId: string }) {
               </span>
             </p>
           )}
-          {gameId === "roblox" && (
-            <p className="mt-3 text-sm text-muted-foreground">{t("We send Robux to this Roblox username. We never ask for your password.")}</p>
-          )}
         </section>
 
         {/* Step 2 — Package */}
@@ -346,6 +343,8 @@ function GamePage({ gameId }: { gameId: string }) {
           ) : (
             <p className="text-sm text-muted-foreground">{t("No packages available yet.")}</p>
           )}
+
+          {gameId === "roblox" && <RobloxGamePassSteps robux={pkg !== null ? Number(availablePackages[pkg]?.amt) : null} />}
 
           {moreItems.length > 0 && (
             <div className="mt-6">
@@ -450,5 +449,41 @@ function KhqrMark() {
       <span className="text-xl font-extrabold leading-none tracking-wide">KHQR</span>
       <span className="mt-1.5 h-[3px] w-12 rounded bg-white/70" />
     </span>
+  );
+}
+
+// Robux go to the buyer through a Game Pass the buyer creates, so they need its price before paying.
+function RobloxGamePassSteps({ robux }: { robux: number | null }) {
+  const { lang } = useStorePrefs();
+  const pass = robux ? robloxGamePassPrice(robux) : null;
+  const km = lang === "km";
+  const steps = km
+    ? [
+        "ចូល create.roblox.com ហើយបង្កើត Game Pass ក្នុងហ្គេម (Experience) របស់អ្នក",
+        pass
+          ? `ដាក់តម្លៃ Game Pass ${pass} Robux (Roblox កាត់ 30% អ្នកនឹងទទួលបាន ${robux} Robux)`
+          : "ជ្រើសកញ្ចប់ខាងលើ ដើម្បីដឹងតម្លៃ Game Pass ដែលត្រូវដាក់",
+        "បញ្ចូល Username ខាងលើ ហើយបង់ប្រាក់ យើងនឹងទិញ Game Pass របស់អ្នក",
+        "Robux ចូលគណនីក្រោយ 5 ទៅ 7 ថ្ងៃ (Pending) យើងមិនសុំលេខសម្ងាត់ទេ",
+      ]
+    : [
+        "Go to create.roblox.com and create a Game Pass in one of your experiences.",
+        pass
+          ? `Set the Game Pass price to ${pass} Robux (Roblox keeps 30%, so you receive ${robux} Robux).`
+          : "Pick a package above to see the Game Pass price to set.",
+        "Enter your username above and pay. We buy your Game Pass.",
+        "Robux arrive after 5 to 7 days (pending). We never ask for your password.",
+      ];
+  return (
+    <div className="mt-5 rounded-2xl border border-primary/30 bg-primary/5 p-4">
+      <p className="mb-2 flex items-center gap-2 text-sm font-bold text-primary">
+        <Ticket className="h-4 w-4" /> {km ? "របៀបទទួល Robux តាម Game Pass" : "How to receive Robux by Game Pass"}
+      </p>
+      <ol className="list-decimal space-y-1 pl-5 font-sans text-sm leading-relaxed text-card-foreground">
+        {steps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
+      </ol>
+    </div>
   );
 }

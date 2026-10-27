@@ -4,7 +4,7 @@ import { games, store } from "@/lib/games";
 import { useStorePrefs } from "@/lib/storePrefs";
 
 const telegramUrl = `https://t.me/${store.telegram.replace("@", "")}`;
-const popular = ["mlbb", "ff", "pubg", "hok", "valorant"].map((id) =>
+const popular = ["mlbb", "ff", "pubg", "hok", "roblox"].map((id) =>
   games.find((g) => g.id === id)!,
 );
 
