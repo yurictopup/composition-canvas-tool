@@ -3,6 +3,7 @@
 // never buy it twice.
 import type { DeliveryOrder, DeliveryResult } from "@/lib/delivery";
 import { fazerCatalog } from "@/lib/fazercards-catalog";
+import type { LookupInput, LookupResult } from "@/lib/player-lookup";
 
 type Fetch = typeof fetch;
 type Opts = { apiKey: string; fetchImpl?: Fetch };
@@ -283,4 +284,79 @@ export async function fetchFazerAccount(opts: Opts): Promise<FazerAccount> {
     planExpiresAt: typeof m.planExpiresAt === "string" ? m.planExpiresAt : null,
     subscriptionActive: m.subscriptionActive === true,
   };
+}
+
+// ── Player name check (POST /topups/validate-id) ──────────────────────────
+
+type ValidateGame = { category_id: string; name: string; fields: Field[] };
+
+// FazerCards says the list of games it can check changes, so it is re-read hourly.
+const VALIDATE_LIST_TTL_MS = 60 * 60 * 1000;
+let validateList: { items: ValidateGame[]; expires: number } | null = null;
+
+export function resetValidateListCache() {
+  validateList = null;
+}
+
+async function validateGames(opts: Opts): Promise<ValidateGame[]> {
+  const now = Date.now();
+  if (validateList && validateList.expires > now) return validateList.items;
+  const json = await call(opts, "/topups/validate-id");
+  const items = Array.isArray(json.items)
+    ? (json.items as ValidateGame[]).filter(
+        (item) => typeof item?.category_id === "string" && typeof item?.name === "string",
+      )
+    : [];
+  validateList = { items, expires: now + VALIDATE_LIST_TTL_MS };
+  return items;
+}
+
+/**
+ * The FazerCards check for one of our games, matched by name: "Mobile Legends" finds
+ * "Mobile Legends: Bang Bang", and "Wild Rift" never borrows the League of Legends check.
+ */
+export function pickValidateGame(
+  items: ValidateGame[],
+  gameId: string,
+  gameName: string | undefined,
+): ValidateGame | null {
+  const category = fazerCatalog[gameId]?.category;
+  const wanted = [gameName, category, category?.replace(/\(.*\)/, "")]
+    .filter((s): s is string => !!s)
+    .map(norm)
+    .filter(Boolean);
+  const names = (item: ValidateGame) => [norm(item.name), norm(item.category_id)];
+  const prefix = (n: string, w: string) =>
+    n.startsWith(w) && (w.includes("wildrift") || !n.includes("wildrift"));
+  return (
+    items.find((item) => names(item).some((n) => n === norm(gameId) || wanted.includes(n))) ??
+    items.find((item) => names(item).some((n) => wanted.some((w) => prefix(n, w)))) ??
+    null
+  );
+}
+
+/** The player's in-game name from FazerCards, or "unsupported" when it can't check this game. */
+export async function validateFazerPlayer(
+  input: LookupInput,
+  opts: Opts & { gameName?: string | undefined },
+): Promise<LookupResult> {
+  try {
+    const game = pickValidateGame(await validateGames(opts), input.gameId, opts.gameName);
+    if (!game) return { status: "unsupported" };
+    const fields = buildFields(Array.isArray(game.fields) ? game.fields : [], {
+      player_id: input.primary,
+      player_zone: input.secondary ?? null,
+    });
+    const res = (await call(opts, "/topups/validate-id", {
+      method: "POST",
+      body: { category_id: game.category_id, fields },
+    })) as ApiJson & { valid?: unknown; player_name?: unknown; nickname?: unknown };
+    if (res.valid === false) return { status: "not_found" };
+    const raw = res.player_name ?? res.nickname;
+    const name = typeof raw === "string" ? raw.trim() : "";
+    return res.valid === true && name ? { status: "found", name } : { status: "unavailable" };
+  } catch (error) {
+    console.error("[player-lookup] fazercards", error instanceof Error ? error.message : error);
+    return { status: "unavailable" };
+  }
 }
