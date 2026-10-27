@@ -1,13 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { isOwner } from "@/lib/games";
+import { isVerifiedOwner } from "@/lib/owner";
 import type { PaymentState } from "@/lib/payment.server";
 
 const orderInput = z.object({ orderId: z.string().uuid() });
 
 function ownerOrSelf(claims: Record<string, unknown>, userId: string): string | null {
-  return isOwner(typeof claims["email"] === "string" ? claims["email"] : null) ? null : userId;
+  return isVerifiedOwner(claims) ? null : userId;
 }
 
 // The KHQR the customer scans for their own order.

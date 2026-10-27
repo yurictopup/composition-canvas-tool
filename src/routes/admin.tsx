@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
   Circle,
@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isOwner } from "@/lib/games";
 import { AdminPrices } from "@/components/AdminPrices";
 import { AdminImages } from "@/components/admin/AdminImages";
+import { AdminMfa } from "@/components/admin/AdminMfa";
 import { DeliveryCell } from "@/components/AdminDelivery";
 import { AdminOverview, money, orderCost, paid } from "@/components/admin/AdminOverview";
 import { AdminTopbar, type ThemeChoice } from "@/components/admin/AdminTopbar";
@@ -113,6 +114,8 @@ function AdminPage() {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
   const [allowed, setAllowed] = useState(false);
+  // The 6-digit authenticator code passed (session level aal2).
+  const [codeOk, setCodeOk] = useState(false);
   const [ownerEmail, setOwnerEmail] = useState("");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -155,13 +158,17 @@ function AdminPage() {
       if (isOwner(data.user?.email)) {
         setAllowed(true);
         setOwnerEmail(data.user?.email ?? "");
-        loadData();
       } else {
         navigate({ to: "/" });
       }
       setChecking(false);
     });
   }, [navigate]);
+
+  const onCodePassed = useCallback(() => {
+    setCodeOk(true);
+    loadData();
+  }, []);
 
   async function loadData() {
     setLoading(true);
@@ -230,6 +237,13 @@ function AdminPage() {
     );
   }
   if (!allowed) return null;
+  if (!codeOk) {
+    return (
+      <AdminLangContext.Provider value={lang}>
+        <AdminMfa onPassed={onCodePassed} dark={dark} />
+      </AdminLangContext.Provider>
+    );
+  }
 
   return (
     <AdminLangContext.Provider value={lang}>
