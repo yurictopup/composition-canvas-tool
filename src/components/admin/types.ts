@@ -1,6 +1,7 @@
 export type AdminOrder = {
   id: string;
   user_email: string;
+  game_id: string;
   game_name: string;
   package_amt: string;
   price_usd: number;

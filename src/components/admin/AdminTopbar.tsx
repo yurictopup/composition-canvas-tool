@@ -23,9 +23,9 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { AdminOrder } from "./types";
+import type { Lang } from "./i18n";
 
 export type ThemeChoice = "light" | "dark" | "system";
-export type Lang = "en" | "km";
 
 const SEEN_KEY = "yt-admin-notifications-seen";
 

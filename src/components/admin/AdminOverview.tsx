@@ -28,8 +28,11 @@ import {
   Truck,
   Users,
 } from "lucide-react";
+import { fazerCosts } from "@/lib/fazercards-costs";
 import type { AdminOrder } from "./types";
 import { StatusBadge } from "./StatusBadge";
+import { useAdminT } from "./i18n";
+import { AdminStock } from "./AdminStock";
 
 const C = {
   primary: "#2F5FE0",
@@ -55,6 +58,9 @@ export const money = (n: number) => `$${n.toFixed(2)}`;
 // Paid by Bakong counts as revenue even before the diamonds are delivered.
 export const paid = (o: AdminOrder) =>
   o.status === "completed" || (!!o.paid_at && o.status !== "refunded" && o.status !== "failed");
+/** FazerCards cost of an order's package, or null when it is delivered by hand. */
+export const orderCost = (o: Pick<AdminOrder, "game_id" | "package_amt">) =>
+  fazerCosts[`${o.game_id}|${o.package_amt}`] ?? null;
 const sum = (list: AdminOrder[]) => list.reduce((s, o) => s + Number(o.price_usd), 0);
 
 function dayKey(d: Date) {
@@ -77,7 +83,15 @@ function CardHead({ title, sub, right }: { title: string; sub?: string; right?: 
   );
 }
 
-function IconBubble({ color, children, size = 40 }: { color: string; children: ReactNode; size?: number }) {
+function IconBubble({
+  color,
+  children,
+  size = 40,
+}: {
+  color: string;
+  children: ReactNode;
+  size?: number;
+}) {
   return (
     <span
       className="inline-flex shrink-0 items-center justify-center rounded-md"
@@ -88,7 +102,16 @@ function IconBubble({ color, children, size = 40 }: { color: string; children: R
   );
 }
 
-function ChartTip({ active, payload, label }: { active?: boolean; payload?: { name: string; value: number; color: string }[]; label?: string }) {
+function ChartTip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { name: string; value: number; color: string }[];
+  label?: string;
+}) {
+  const { t } = useAdminT();
   if (!active || !payload?.length) return null;
   return (
     <div className="vx-card px-3 py-2 text-xs">
@@ -96,7 +119,7 @@ function ChartTip({ active, payload, label }: { active?: boolean; payload?: { na
       {payload.map((p) => (
         <div key={p.name} className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
-          <span>{p.name}:</span>
+          <span>{t(p.name)}:</span>
           <span className="font-medium text-[var(--vx-heading)]">
             {p.name.toLowerCase().includes("order") ? p.value : money(p.value)}
           </span>
@@ -119,10 +142,18 @@ export function AdminOverview({
   ownerName: string;
   onOpenOrders: () => void;
 }) {
+  const { t, lang } = useAdminT();
+  const locale = lang === "km" ? "km-KH" : "en";
   const revenue = sum(orders.filter(paid));
-  const grossProfit = revenue; // no cost data yet
+  const paidList = orders.filter(paid);
+  const orderCostTotal = paidList.reduce((s, o) => s + (orderCost(o) ?? 0), 0);
+  const noCost = paidList.filter((o) => orderCost(o) === null);
+  const refunds = sum(orders.filter((o) => o.status === "refunded"));
+  const grossProfit = revenue - orderCostTotal;
   const pending = orders.filter((o) => o.status === "pending" && !o.paid_at);
-  const processing = orders.filter((o) => o.status === "processing" || (o.status === "pending" && !!o.paid_at));
+  const processing = orders.filter(
+    (o) => o.status === "processing" || (o.status === "pending" && !!o.paid_at),
+  );
   const completed = orders.filter(paid);
   const failed = orders.filter((o) => o.status === "failed");
   const customers = new Set(orders.map((o) => o.user_email)).size;
@@ -133,7 +164,7 @@ export function AdminOverview({
     d.setDate(d.getDate() - (13 - i));
     const list = allOrders.filter((o) => dayKey(new Date(o.created_at)) === dayKey(d));
     return {
-      label: d.toLocaleDateString("en", { weekday: "short" }),
+      label: d.toLocaleDateString(locale, { weekday: "short" }),
       Revenue: sum(list.filter(paid)),
       Orders: list.length,
     };
@@ -144,9 +175,17 @@ export function AdminOverview({
   const weekOrders = thisWeek.reduce((s, d) => s + d.Orders, 0);
   const lastWeekOrders = days.slice(0, 7).reduce((s, d) => s + d.Orders, 0);
   const growth =
-    lastWeekRevenue > 0 ? ((weekRevenue - lastWeekRevenue) / lastWeekRevenue) * 100 : weekRevenue > 0 ? 100 : 0;
+    lastWeekRevenue > 0
+      ? ((weekRevenue - lastWeekRevenue) / lastWeekRevenue) * 100
+      : weekRevenue > 0
+        ? 100
+        : 0;
   const orderGrowth =
-    lastWeekOrders > 0 ? ((weekOrders - lastWeekOrders) / lastWeekOrders) * 100 : weekOrders > 0 ? 100 : 0;
+    lastWeekOrders > 0
+      ? ((weekOrders - lastWeekOrders) / lastWeekOrders) * 100
+      : weekOrders > 0
+        ? 100
+        : 0;
   const bestDay = thisWeek.reduce((m, d, i) => (d.Revenue > thisWeek[m]!.Revenue ? i : m), 0);
 
   // Last 12 months.
@@ -159,9 +198,11 @@ export function AdminOverview({
       return od.getMonth() === d.getMonth() && od.getFullYear() === d.getFullYear();
     });
     return {
-      label: d.toLocaleDateString("en", { month: "short" }),
+      label: d.toLocaleDateString(locale, { month: "short" }),
       Revenue: sum(list.filter(paid)),
-      Unpaid: sum(list.filter((o) => (o.status === "pending" && !o.paid_at) || o.status === "failed")),
+      Unpaid: sum(
+        list.filter((o) => (o.status === "pending" && !o.paid_at) || o.status === "failed"),
+      ),
     };
   });
   const yearRevenue = months.reduce((s, m) => s + m.Revenue, 0);
@@ -179,58 +220,116 @@ export function AdminOverview({
     if (paid(o)) g.revenue += Number(o.price_usd);
     byGame.set(o.game_name, g);
   }
-  const topGames = [...byGame.entries()].sort((a, b) => b[1].revenue - a[1].revenue || b[1].count - a[1].count).slice(0, 5);
+  const topGames = [...byGame.entries()]
+    .sort((a, b) => b[1].revenue - a[1].revenue || b[1].count - a[1].count)
+    .slice(0, 5);
   const topMax = Math.max(...topGames.map(([, g]) => g.revenue), 1);
   const gameColors = [C.primary, C.success, C.info, C.warning, C.danger];
 
   const stats = [
-    { label: "Sales", value: String(orders.length), icon: <TrendingUp size={24} />, color: C.primary },
+    {
+      label: "Sales",
+      value: String(orders.length),
+      icon: <TrendingUp size={24} />,
+      color: C.primary,
+    },
     { label: "Customers", value: String(customers), icon: <Users size={24} />, color: C.info },
-    { label: "Paid orders", value: String(completed.length), icon: <ShoppingCart size={24} />, color: C.danger },
+    {
+      label: "Paid orders",
+      value: String(completed.length),
+      icon: <ShoppingCart size={24} />,
+      color: C.danger,
+    },
     { label: "Revenue", value: money(revenue), icon: <DollarSign size={24} />, color: C.success },
   ];
 
   const alerts = [
-    { label: "Pending payments", sub: "Waiting for Bakong", count: pending.length, icon: <Clock size={20} />, color: C.warning },
-    { label: "Paid not delivered", sub: "Needs delivery", count: processing.length, icon: <Truck size={20} />, color: C.info },
-    { label: "Failed deliveries", sub: "Check and retry", count: failed.length, icon: <AlertTriangle size={20} />, color: C.danger },
-    { label: "All orders", sub: "In this period", count: orders.length, icon: <Package size={20} />, color: C.primary },
+    {
+      label: "Pending payments",
+      sub: "Waiting for Bakong",
+      count: pending.length,
+      icon: <Clock size={20} />,
+      color: C.warning,
+    },
+    {
+      label: "Paid not delivered",
+      sub: "Needs delivery",
+      count: processing.length,
+      icon: <Truck size={20} />,
+      color: C.info,
+    },
+    {
+      label: "Failed deliveries",
+      sub: "Check and retry",
+      count: failed.length,
+      icon: <AlertTriangle size={20} />,
+      color: C.danger,
+    },
+    {
+      label: "All orders",
+      sub: "In this period",
+      count: orders.length,
+      icon: <Package size={20} />,
+      color: C.primary,
+    },
   ];
 
   const profit = [
-    { label: "Revenue", sub: "From paid orders", value: revenue, color: C.success },
-    { label: "Order cost", sub: "Supplier / buy cost", value: 0, color: C.danger },
-    { label: "Gross profit", sub: "Before refunds & expense", value: grossProfit, color: C.primary },
-    { label: "Refunds", sub: "Money returned", value: 0, color: C.secondary },
-    { label: "Other income", sub: "Outside orders", value: 0, color: C.info },
-    { label: "Expense / loss", sub: "Other costs", value: 0, color: C.warning },
+    { label: "Revenue", sub: "From paid orders", value: money(revenue), color: C.success },
+    {
+      label: "Supplier cost",
+      sub: "What FazerCards charges",
+      value: `-${money(orderCostTotal)}`,
+      color: C.danger,
+    },
+    {
+      label: "Paid orders with no cost",
+      sub: "Manual delivery, check by hand",
+      value: String(noCost.length),
+      color: C.warning,
+    },
+    { label: "Refunds", sub: "Money returned", value: money(refunds), color: C.secondary },
   ];
 
   const recent = orders.slice(0, 6);
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+      <AdminStock orders={allOrders} orderCost={orderCost} />
+
       {/* Congratulations */}
       <Card className="relative overflow-hidden lg:col-span-4">
         <div className="p-6">
-          <h5 className="text-lg font-medium">Congratulations {ownerName}!</h5>
-          <p className="text-[13px]">Revenue in this period</p>
+          <h5 className="text-lg font-medium">
+            {t("Congratulations")} {ownerName}
+          </h5>
+          <p className="text-[13px]">{t("Revenue in this period")}</p>
           <h4 className="mt-5 text-2xl font-medium" style={{ color: C.primary }}>
             {money(revenue)}
           </h4>
-          <p className="mt-1 text-[13px]">{completed.length} paid orders</p>
+          <p className="mt-1 text-[13px]">
+            {completed.length} {t("paid orders")}
+          </p>
           <button onClick={onOpenOrders} className="vx-btn mt-4 px-4 py-2 text-sm font-medium">
-            View Sales
+            {t("View Sales")}
           </button>
         </div>
-        <div className="pointer-events-none absolute bottom-4 right-6 flex h-28 w-28 items-center justify-center rounded-full" style={{ background: C.primarySoft }}>
+        <div
+          className="pointer-events-none absolute bottom-4 right-6 flex h-28 w-28 items-center justify-center rounded-full"
+          style={{ background: C.primarySoft }}
+        >
           <Trophy size={56} color={C.warning} strokeWidth={1.6} />
         </div>
       </Card>
 
       {/* Statistics */}
       <Card className="flex flex-col lg:col-span-8">
-        <CardHead title="Statistics" right={<span className="text-[13px] text-[var(--vx-muted)]">Updated just now</span>} />
+        <CardHead
+          title={t("Statistics")}
+          right={
+            <span className="text-[13px] text-[var(--vx-muted)]">{t("Updated just now")}</span>
+          }
+        />
         <div className="grid flex-1 grid-cols-2 content-center gap-6 p-6 md:grid-cols-4">
           {stats.map((s) => (
             <div key={s.label} className="flex items-center gap-4">
@@ -239,7 +338,7 @@ export function AdminOverview({
               </IconBubble>
               <div>
                 <h5 className="text-lg font-medium leading-tight">{s.value}</h5>
-                <p className="text-[13px]">{s.label}</p>
+                <p className="text-[13px]">{t(s.label)}</p>
               </div>
             </div>
           ))}
@@ -248,12 +347,17 @@ export function AdminOverview({
 
       {/* Orders (small) */}
       <Card className="lg:col-span-3">
-        <CardHead title="Orders" sub="Last 7 days" />
+        <CardHead title={t("Orders")} sub={t("Last 7 days")} />
         <div className="h-24 px-4">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={thisWeek} barSize={8}>
               <Tooltip content={<ChartTip />} cursor={false} />
-              <Bar dataKey="Orders" radius={[4, 4, 4, 4]} fill={C.warning} background={{ fill: "var(--vx-track)", radius: 4 }} />
+              <Bar
+                dataKey="Orders"
+                radius={[4, 4, 4, 4]}
+                fill={C.warning}
+                background={{ fill: "var(--vx-track)", radius: 4 }}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -265,7 +369,7 @@ export function AdminOverview({
 
       {/* Sales (small) */}
       <Card className="lg:col-span-3">
-        <CardHead title="Sales" sub="Last 7 days" />
+        <CardHead title={t("Sales")} sub={t("Last 7 days")} />
         <div className="h-24 px-1">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={thisWeek} margin={{ top: 8, left: 0, right: 0, bottom: 0 }}>
@@ -276,7 +380,13 @@ export function AdminOverview({
                 </linearGradient>
               </defs>
               <Tooltip content={<ChartTip />} cursor={false} />
-              <Area type="monotone" dataKey="Revenue" stroke={C.success} strokeWidth={2} fill="url(#vxSales)" />
+              <Area
+                type="monotone"
+                dataKey="Revenue"
+                stroke={C.success}
+                strokeWidth={2}
+                fill="url(#vxSales)"
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -291,29 +401,42 @@ export function AdminOverview({
         <div className="grid h-full grid-cols-1 gap-4 p-6 sm:grid-cols-5">
           <div className="flex flex-col justify-between sm:col-span-2">
             <div>
-              <h5 className="text-lg font-medium">Revenue Growth</h5>
-              <p className="text-[13px] text-[var(--vx-muted)]">Weekly report</p>
+              <h5 className="text-lg font-medium">{t("Revenue Growth")}</h5>
+              <p className="text-[13px] text-[var(--vx-muted)]">{t("Weekly report")}</p>
             </div>
             <div className="mt-6">
-              <h4 className="text-3xl font-medium text-[var(--vx-heading)]">{money(weekRevenue)}</h4>
+              <h4 className="text-3xl font-medium text-[var(--vx-heading)]">
+                {money(weekRevenue)}
+              </h4>
               <span
                 className="mt-2 inline-block rounded px-2 py-0.5 text-[13px] font-medium"
-                style={{ color: growth >= 0 ? C.success : C.danger, background: `${growth >= 0 ? C.success : C.danger}29` }}
+                style={{
+                  color: growth >= 0 ? C.success : C.danger,
+                  background: `${growth >= 0 ? C.success : C.danger}29`,
+                }}
               >
                 {growth >= 0 ? "+" : ""}
                 {growth.toFixed(1)}%
               </span>
-              <p className="mt-2 text-[13px]">Compared to last week</p>
+              <p className="mt-2 text-[13px]">{t("Compared to last week")}</p>
             </div>
           </div>
           <div className="h-44 sm:col-span-3">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={thisWeek} barSize={26}>
-                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: C.muted, fontSize: 12 }} />
+                <XAxis
+                  dataKey="label"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: C.muted, fontSize: 12 }}
+                />
                 <Tooltip content={<ChartTip />} cursor={false} />
                 <Bar dataKey="Revenue" radius={[6, 6, 6, 6]} minPointSize={6}>
                   {thisWeek.map((_, i) => (
-                    <Cell key={i} fill={i === bestDay && weekRevenue > 0 ? C.primary : C.primarySoft} />
+                    <Cell
+                      key={i}
+                      fill={i === bestDay && weekRevenue > 0 ? C.primary : C.primarySoft}
+                    />
                   ))}
                 </Bar>
               </BarChart>
@@ -325,25 +448,38 @@ export function AdminOverview({
       {/* Revenue Report */}
       <Card className="lg:col-span-8">
         <CardHead
-          title="Revenue Report"
-          sub="Last 12 months"
+          title={t("Revenue Report")}
+          sub={t("Last 12 months")}
           right={
             <div className="text-right">
-              <div className="text-xl font-medium text-[var(--vx-heading)]">{money(yearRevenue)}</div>
-              <div className="text-[13px] text-[var(--vx-muted)]">Total revenue</div>
+              <div className="text-xl font-medium text-[var(--vx-heading)]">
+                {money(yearRevenue)}
+              </div>
+              <div className="text-[13px] text-[var(--vx-muted)]">{t("Total revenue")}</div>
             </div>
           }
         />
         <div className="flex gap-5 px-6 pt-3 text-[13px]">
-          <Legend color={C.primary} label="Revenue (paid)" />
-          <Legend color={C.warning} label="Unpaid / failed" />
+          <Legend color={C.primary} label={t("Revenue (paid)")} />
+          <Legend color={C.warning} label={t("Unpaid / failed")} />
         </div>
         <div className="h-72 px-3 pb-4 pt-2">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={months} barGap={4} barSize={10}>
               <CartesianGrid stroke={C.grid} strokeDasharray="4 4" vertical={false} />
-              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: C.muted, fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} width={44} tick={{ fill: C.muted, fontSize: 12 }} tickFormatter={(v) => `$${v}`} />
+              <XAxis
+                dataKey="label"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: C.muted, fontSize: 12 }}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                width={44}
+                tick={{ fill: C.muted, fontSize: 12 }}
+                tickFormatter={(v) => `$${v}`}
+              />
               <Tooltip content={<ChartTip />} cursor={{ fill: "rgba(47,95,224,0.06)" }} />
               <Bar dataKey="Revenue" fill={C.primary} radius={[6, 6, 0, 0]} />
               <Bar dataKey="Unpaid" fill={C.warning} radius={[6, 6, 0, 0]} />
@@ -354,17 +490,20 @@ export function AdminOverview({
 
       {/* Finance alerts */}
       <Card className="lg:col-span-4">
-        <CardHead title="Finance alerts" sub="Attention needed" />
+        <CardHead title={t("Finance alerts")} sub={t("Attention needed")} />
         <ul className="space-y-5 p-6">
           {alerts.map((a) => (
             <li key={a.label}>
               <button onClick={onOpenOrders} className="flex w-full items-center gap-4 text-left">
                 <IconBubble color={a.color}>{a.icon}</IconBubble>
                 <div className="min-w-0 flex-1">
-                  <h6 className="text-[15px] font-medium text-[var(--vx-heading)]">{a.label}</h6>
-                  <p className="text-[13px] text-[var(--vx-muted)]">{a.sub}</p>
+                  <h6 className="text-[15px] font-medium text-[var(--vx-heading)]">{t(a.label)}</h6>
+                  <p className="text-[13px] text-[var(--vx-muted)]">{t(a.sub)}</p>
                 </div>
-                <span className="font-medium" style={{ color: a.count > 0 && a.label !== "All orders" ? a.color : undefined }}>
+                <span
+                  className="font-medium"
+                  style={{ color: a.count > 0 && a.label !== "All orders" ? a.color : undefined }}
+                >
                   {a.count}
                 </span>
                 <ChevronRight size={16} className="text-[var(--vx-muted)]" />
@@ -376,11 +515,11 @@ export function AdminOverview({
 
       {/* Order statistics */}
       <Card className="lg:col-span-4">
-        <CardHead title="Order Statistics" sub={`${orders.length} total orders`} />
+        <CardHead title={t("Order Statistics")} sub={`${orders.length} ${t("total orders")}`} />
         <div className="flex items-center justify-between px-6 pt-4">
           <div>
             <h3 className="text-3xl font-medium">{completed.length}</h3>
-            <p className="text-[13px]">Completed</p>
+            <p className="text-[13px]">{t("Paid")}</p>
           </div>
           <div className="relative h-28 w-28">
             <ResponsiveContainer width="100%" height="100%">
@@ -403,15 +542,18 @@ export function AdminOverview({
               <span className="text-base font-medium text-[var(--vx-heading)]">
                 {orders.length ? Math.round((completed.length / orders.length) * 100) : 0}%
               </span>
-              <span className="text-[11px]">Paid</span>
+              <span className="text-[11px]">{t("Paid")}</span>
             </div>
           </div>
         </div>
         <ul className="space-y-4 p-6">
           {statusData.map((s) => (
             <li key={s.name} className="flex items-center gap-3">
-              <span className="h-2.5 w-2.5 rounded-full" style={{ background: STATUS_COLORS[s.name] }} />
-              <span className="flex-1 capitalize">{s.name}</span>
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ background: STATUS_COLORS[s.name] }}
+              />
+              <span className="flex-1">{t(s.name)}</span>
               <span className="font-medium text-[var(--vx-heading)]">{s.value}</span>
             </li>
           ))}
@@ -421,9 +563,13 @@ export function AdminOverview({
       {/* Profit summary */}
       <Card className="lg:col-span-4">
         <CardHead
-          title="Profit Summary"
-          sub="Net profit after all adjustments"
-          right={<span className="text-xl font-medium" style={{ color: C.primary }}>{money(grossProfit)}</span>}
+          title={t("Profit Summary")}
+          sub={t("Revenue minus FazerCards cost")}
+          right={
+            <span className="text-xl font-medium" style={{ color: C.primary }}>
+              {money(grossProfit)}
+            </span>
+          }
         />
         <ul className="space-y-4 p-6">
           {profit.map((p) => (
@@ -432,10 +578,10 @@ export function AdminOverview({
                 <CreditCard size={18} />
               </IconBubble>
               <div className="min-w-0 flex-1">
-                <h6 className="text-[15px] font-medium text-[var(--vx-heading)]">{p.label}</h6>
-                <p className="text-[13px] text-[var(--vx-muted)]">{p.sub}</p>
+                <h6 className="text-[15px] font-medium text-[var(--vx-heading)]">{t(p.label)}</h6>
+                <p className="text-[13px] text-[var(--vx-muted)]">{t(p.sub)}</p>
               </div>
-              <span className="font-medium text-[var(--vx-heading)]">{money(p.value)}</span>
+              <span className="font-medium text-[var(--vx-heading)]">{p.value}</span>
             </li>
           ))}
         </ul>
@@ -443,9 +589,9 @@ export function AdminOverview({
 
       {/* Top games */}
       <Card className="lg:col-span-4">
-        <CardHead title="Top Games" sub="By paid revenue" />
+        <CardHead title={t("Top Games")} sub={t("By paid revenue")} />
         {topGames.length === 0 ? (
-          <p className="p-6 text-[13px] text-[var(--vx-muted)]">No orders yet.</p>
+          <p className="p-6 text-[13px] text-[var(--vx-muted)]">{t("No orders yet")}</p>
         ) : (
           <ul className="space-y-5 p-6">
             {topGames.map(([name, g], i) => (
@@ -453,13 +599,16 @@ export function AdminOverview({
                 <div className="mb-1.5 flex items-center justify-between">
                   <span className="font-medium text-[var(--vx-heading)]">{name}</span>
                   <span className="text-[13px]">
-                    {money(g.revenue)} · {g.count} orders
+                    {money(g.revenue)} · {g.count} {t("orders")}
                   </span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-[var(--vx-track)]">
                   <div
                     className="h-full rounded-full"
-                    style={{ width: `${Math.max(4, (g.revenue / topMax) * 100)}%`, background: gameColors[i] }}
+                    style={{
+                      width: `${Math.max(4, (g.revenue / topMax) * 100)}%`,
+                      background: gameColors[i],
+                    }}
                   />
                 </div>
               </li>
@@ -471,25 +620,29 @@ export function AdminOverview({
       {/* Recent orders */}
       <Card className="overflow-hidden lg:col-span-12">
         <CardHead
-          title="Recent Orders"
+          title={t("Recent Orders")}
           right={
-            <button onClick={onOpenOrders} className="text-[13px] font-medium" style={{ color: C.primary }}>
-              View all
+            <button
+              onClick={onOpenOrders}
+              className="text-[13px] font-medium"
+              style={{ color: C.primary }}
+            >
+              {t("View all")}
             </button>
           }
         />
         {recent.length === 0 ? (
-          <p className="p-6 text-[13px] text-[var(--vx-muted)]">មិនទាន់មាន orders ទេ</p>
+          <p className="p-6 text-[13px] text-[var(--vx-muted)]">{t("No orders yet")}</p>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="vx-table w-full text-sm">
               <thead className="border-y border-[var(--vx-border)]">
                 <tr className="text-left">
-                  <th className="px-6 py-3">Order</th>
-                  <th className="px-6 py-3">Customer</th>
-                  <th className="px-6 py-3">Game</th>
-                  <th className="px-6 py-3">Amount</th>
-                  <th className="px-6 py-3">Status</th>
+                  <th className="px-6 py-3">{t("Order")}</th>
+                  <th className="px-6 py-3">{t("Customer")}</th>
+                  <th className="px-6 py-3">{t("Game")}</th>
+                  <th className="px-6 py-3">{t("Amount")}</th>
+                  <th className="px-6 py-3">{t("Status")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--vx-border)]">
@@ -503,7 +656,9 @@ export function AdminOverview({
                       <span className="font-medium text-[var(--vx-heading)]">{o.game_name}</span>
                       <span className="text-[var(--vx-muted)]"> · {o.package_amt}</span>
                     </td>
-                    <td className="px-6 py-3 font-medium text-[var(--vx-heading)]">{money(Number(o.price_usd))}</td>
+                    <td className="px-6 py-3 font-medium text-[var(--vx-heading)]">
+                      {money(Number(o.price_usd))}
+                    </td>
                     <td className="px-6 py-3">
                       <StatusBadge status={o.status} />
                     </td>
@@ -521,7 +676,10 @@ export function AdminOverview({
 function Trend({ value }: { value: number }) {
   const up = value >= 0;
   return (
-    <span className="flex items-center gap-0.5 text-[13px] font-medium" style={{ color: up ? C.success : C.danger }}>
+    <span
+      className="flex items-center gap-0.5 text-[13px] font-medium"
+      style={{ color: up ? C.success : C.danger }}
+    >
       {up ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
       {Math.abs(value).toFixed(1)}%
     </span>

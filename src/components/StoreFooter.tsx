@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useSiteImage } from "@/lib/site-images";
 import { Clock, Gem, Headphones, Home, Receipt, ShieldCheck, Zap } from "lucide-react";
 import { games, store } from "@/lib/games";
 import { useStorePrefs } from "@/lib/storePrefs";
@@ -68,7 +69,9 @@ function Copyright() {
    kept at 15px+ with tall line height so vowel marks don't clip. */
 export function StoreFooter() {
   const { t } = useStorePrefs();
-  const head = "mb-1.5 font-khmer text-[14px] sm:mb-3 sm:text-lg font-normal leading-[1.9] tracking-wide text-on-dark";
+  const pic = useSiteImage();
+  const head =
+    "mb-1.5 font-khmer text-[14px] sm:mb-3 sm:text-lg font-normal leading-[1.9] tracking-wide text-on-dark";
   const link =
     "flex items-center gap-2 text-xs sm:text-sm text-on-dark-muted transition-colors hover:text-brand-400";
   const khLink = `${link} font-khmer text-[13px] sm:text-[15px] leading-[1.9] tracking-wide`;
@@ -125,7 +128,11 @@ export function StoreFooter() {
             {popular.map((g) => (
               <li key={g.id}>
                 <Link to="/game/$gameId" params={{ gameId: g.id }} className={link}>
-                  <img src={g.icon} alt="" className="h-5 w-5 rounded-md object-cover sm:h-6 sm:w-6" />
+                  <img
+                    src={pic(g.icon)}
+                    alt=""
+                    className="h-5 w-5 rounded-md object-cover sm:h-6 sm:w-6"
+                  />
                   {g.name}
                 </Link>
               </li>
@@ -140,15 +147,15 @@ export function StoreFooter() {
             {t("Message us, we reply 24 hours.")}
           </p>
           <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 sm:mt-0 sm:block">
-          <div className="sm:mt-4">
-            <TelegramButton />
-          </div>
-          <div className="flex items-center gap-2 sm:mt-5 sm:block sm:border-t sm:border-[var(--store-footer-line)] sm:pt-4">
-            <p className="font-khmer text-[13px] sm:mb-2 sm:text-[15px] leading-[1.9] tracking-wide text-on-dark-muted">
-              {t("We accept")}
-            </p>
-            <KhqrBadge />
-          </div>
+            <div className="sm:mt-4">
+              <TelegramButton />
+            </div>
+            <div className="flex items-center gap-2 sm:mt-5 sm:block sm:border-t sm:border-[var(--store-footer-line)] sm:pt-4">
+              <p className="font-khmer text-[13px] sm:mb-2 sm:text-[15px] leading-[1.9] tracking-wide text-on-dark-muted">
+                {t("We accept")}
+              </p>
+              <KhqrBadge />
+            </div>
           </div>
         </div>
       </div>

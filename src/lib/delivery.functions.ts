@@ -2,8 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isOwner } from "@/lib/games";
-import type { CatalogOffer } from "@/lib/delivery";
-import type { DeliveryResponse } from "@/lib/delivery.server";
+import type { DeliveryResponse, SupplierStock } from "@/lib/delivery.server";
 
 function requireOwner(claims: Record<string, unknown>) {
   if (!isOwner(typeof claims["email"] === "string" ? claims["email"] : null)) {
@@ -13,7 +12,7 @@ function requireOwner(claims: Record<string, unknown>) {
 
 const orderInput = z.object({ orderId: z.string().uuid() });
 
-// Owner-only: buy this order's package from GamesDrop now. Orders Bakong has
+// Owner-only: buy this order's package from the supplier now. Orders Bakong has
 // not confirmed need allowUnpaid (the owner confirmed they were paid another way).
 export const deliverOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -33,12 +32,11 @@ export const refreshDelivery = createServerFn({ method: "POST" })
     return refreshPaidOrder(adminDb(), data.orderId);
   });
 
-export const findGamesDropOffers = createServerFn({ method: "POST" })
+// Owner-only: FazerCards balance and plan for the stock card on /admin.
+export const getSupplierStock = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .validator(z.object({ search: z.string().trim().min(2).max(60) }))
-  .handler(async ({ data, context }): Promise<CatalogOffer[]> => {
+  .handler(async ({ context }): Promise<SupplierStock> => {
     requireOwner(context.claims);
-    const { searchGamesDropCatalog } = await import("@/lib/delivery");
-    const { gamesDropToken } = await import("@/lib/delivery.server");
-    return searchGamesDropCatalog(data.search, { token: gamesDropToken() });
+    const { supplierStock } = await import("@/lib/delivery.server");
+    return supplierStock();
   });

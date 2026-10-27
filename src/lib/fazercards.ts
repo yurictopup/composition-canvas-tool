@@ -60,10 +60,13 @@ async function call(
   return json;
 }
 
-/** The FazerCards offer name for one of our packages, or null when it is delivered by hand. */
-export function fazerOfferFor(gameId: string, packageAmt: string) {
+/**
+ * The FazerCards offer name for one of our packages, or null when it is delivered by hand.
+ * A product the owner picked on /admin (product_prices.fazer_offer) wins over the built-in list.
+ */
+export function fazerOfferFor(gameId: string, packageAmt: string, picked?: string | null) {
   const game = fazerCatalog[gameId];
-  const offerName = game?.offers[packageAmt];
+  const offerName = picked || game?.offers[packageAmt];
   return game && offerName ? { ...game, offerName } : null;
 }
 
@@ -172,10 +175,14 @@ const REJECTED =
   /balance|insufficient|invalid|validation|not_found|unavailable|out_of_stock|unauthor|forbidden/i;
 
 export async function placeFazerOrder(
-  order: DeliveryOrder & { package_amt: string; price_usd?: number | string | null },
+  order: DeliveryOrder & {
+    package_amt: string;
+    fazer_offer?: string | null;
+    price_usd?: number | string | null;
+  },
   opts: Opts,
 ): Promise<DeliveryResult> {
-  const target = fazerOfferFor(order.game_id, order.package_amt);
+  const target = fazerOfferFor(order.game_id, order.package_amt, order.fazer_offer);
   if (!target) {
     return {
       status: "failed",
@@ -254,4 +261,26 @@ export async function checkFazerOrder(
     const message = error instanceof Error ? error.message : String(error);
     return { status: "processing", supplierStatus: "UNCONFIRMED", supplierOrderId, message };
   }
+}
+
+export type FazerAccount = {
+  balance: number;
+  currency: string;
+  plan: string | null;
+  planExpiresAt: string | null;
+  subscriptionActive: boolean;
+};
+
+/** The reseller balance and plan, for the owner's stock card. */
+export async function fetchFazerAccount(opts: Opts): Promise<FazerAccount> {
+  const [bal, me] = await Promise.all([call(opts, "/balance"), call(opts, "/me")]);
+  const b = bal as { balance?: unknown; currency?: unknown };
+  const m = me as { plan?: unknown; planExpiresAt?: unknown; subscriptionActive?: unknown };
+  return {
+    balance: Number(b.balance ?? 0),
+    currency: typeof b.currency === "string" ? b.currency : "USD",
+    plan: typeof m.plan === "string" ? m.plan : null,
+    planExpiresAt: typeof m.planExpiresAt === "string" ? m.planExpiresAt : null,
+    subscriptionActive: m.subscriptionActive === true,
+  };
 }

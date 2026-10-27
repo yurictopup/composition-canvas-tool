@@ -2,7 +2,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getIdConfig } from "@/lib/player-id";
 import { checkGamesDropOrder, placeGamesDropOrder, type DeliveryResult } from "@/lib/delivery";
-import { checkFazerOrder, placeFazerOrder } from "@/lib/fazercards";
+import {
+  checkFazerOrder,
+  fetchFazerAccount,
+  placeFazerOrder,
+  type FazerAccount,
+} from "@/lib/fazercards";
 
 export type DeliveryResponse = { ok: boolean; message: string; status?: string };
 
@@ -76,7 +81,14 @@ export async function deliverPaidOrder(
 
   const apiKey = fazerKey();
   if (apiKey) {
-    const result = await placeFazerOrder(order, { apiKey });
+    const { data: priceRow } = await db
+      .from("product_prices")
+      .select("fazer_offer")
+      .eq("game_id", order.game_id)
+      .eq("package_amt", order.package_amt)
+      .maybeSingle();
+    const fazerOffer = (priceRow as { fazer_offer?: string | null } | null)?.fazer_offer ?? null;
+    const result = await placeFazerOrder({ ...order, fazer_offer: fazerOffer }, { apiKey });
     if (result.supplierStatus === "NO_OFFER") {
       // Not sold through the API (Roblox, bundles): stays under Paid not delivered.
       await db
@@ -133,4 +145,22 @@ export async function refreshPaidOrder(
     : await checkGamesDropOrder(order.supplier_order_id, { token: gamesDropToken() });
   await saveResult(db, orderId, result);
   return describe(result);
+}
+
+export type SupplierStock =
+  ({ ok: true } & FazerAccount) | { ok: false; reason: "no_key" | "error"; message?: string };
+
+/** FazerCards balance and plan; never throws, so the dashboard always renders. */
+export async function supplierStock(): Promise<SupplierStock> {
+  const apiKey = fazerKey();
+  if (!apiKey) return { ok: false, reason: "no_key" };
+  try {
+    return { ok: true, ...(await fetchFazerAccount({ apiKey })) };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: "error",
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
 }
