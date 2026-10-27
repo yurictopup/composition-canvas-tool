@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useSiteImage } from "@/lib/site-images";
 import { useRef, useState } from "react";
 import { CurrencyIcon } from "@/components/CurrencyIcon";
 import {
@@ -58,6 +59,7 @@ function GameRoute() {
 
 function GamePage({ gameId }: { gameId: string }) {
   const { t } = useStorePrefs();
+  const pic = useSiteImage();
   const navigate = useNavigate();
   const game = findGame(gameId);
   const [uid, setUid] = useState("");
@@ -136,7 +138,7 @@ function GamePage({ gameId }: { gameId: string }) {
           className={`relative grid shrink-0 place-items-center rounded-full bg-amber-100 shadow-inner ${wide ? "mt-2 h-20 w-32 sm:w-40" : "mt-2 h-11 w-11"}`}
         >
           <img
-            src={item.img}
+            src={pic(item.img!)}
             alt={item.label}
             className={wide ? "h-16 w-28 object-contain sm:w-36" : "h-8 w-10 object-contain"}
           />
@@ -343,7 +345,7 @@ function GamePage({ gameId }: { gameId: string }) {
         <div className="card-3d mt-2 flex items-center gap-3 rounded-2xl p-3 sm:mt-3 sm:gap-4 sm:rounded-3xl sm:p-5">
           <span className="tile-clean block w-14 shrink-0 rounded-[26%] sm:w-24">
             <img
-              src={game.icon}
+              src={pic(game.icon)}
               alt={game.name}
               width={151}
               height={151}

@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
 import { Gamepad2, Inbox, Package } from "lucide-react";
 import banner from "@/assets/banner-angkor.png";
+import { useSiteImage } from "@/lib/site-images";
 import { games, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,11 +21,11 @@ export const Route = createFileRoute("/profile")({
 });
 
 const STATUS_COLOR: Record<string, string> = {
-  pending:    "bg-yellow-100 text-yellow-700 border-yellow-300",
+  pending: "bg-yellow-100 text-yellow-700 border-yellow-300",
   processing: "bg-blue-100 text-blue-700 border-blue-300",
-  completed:  "bg-green-100 text-green-700 border-green-300",
-  failed:     "bg-red-100 text-red-700 border-red-300",
-  refunded:   "bg-gray-100 text-gray-600 border-gray-300",
+  completed: "bg-green-100 text-green-700 border-green-300",
+  failed: "bg-red-100 text-red-700 border-red-300",
+  refunded: "bg-gray-100 text-gray-600 border-gray-300",
 };
 
 type Order = {
@@ -40,6 +41,7 @@ type Order = {
 };
 
 function Profile() {
+  const pic = useSiteImage();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +49,10 @@ function Profile() {
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) { navigate({ to: "/auth" }); return; }
+      if (!data.user) {
+        navigate({ to: "/auth" });
+        return;
+      }
       setUserEmail(data.user.email ?? null);
 
       const { data: orderData } = await supabase
@@ -65,8 +70,13 @@ function Profile() {
     <SiteChrome>
       <section className="w-full">
         <div className="tile-clean">
-          <img src={banner} alt="Shop banner" width={1920} height={1080}
-            className="block h-[150px] w-full object-cover sm:h-[210px]" />
+          <img
+            src={pic(banner)}
+            alt="Shop banner"
+            width={1920}
+            height={1080}
+            className="block h-[150px] w-full object-cover sm:h-[210px]"
+          />
         </div>
       </section>
 
@@ -118,15 +128,25 @@ function Profile() {
                     <tr key={o.id} className="hover:bg-muted/30 transition-colors">
                       <td className="py-3 pr-4 font-semibold">{o.game_name}</td>
                       <td className="py-3 pr-4">{o.package_amt}</td>
-                      <td className="py-3 pr-4 text-xs font-mono">{o.player_id}{o.player_zone ? ` (${o.player_zone})` : ""}</td>
-                      <td className="py-3 pr-4 font-bold text-primary">${Number(o.price_usd).toFixed(2)}</td>
+                      <td className="py-3 pr-4 text-xs font-mono">
+                        {o.player_id}
+                        {o.player_zone ? ` (${o.player_zone})` : ""}
+                      </td>
+                      <td className="py-3 pr-4 font-bold text-primary">
+                        ${Number(o.price_usd).toFixed(2)}
+                      </td>
                       <td className="py-3 pr-4">
-                        <span className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${STATUS_COLOR[o.status] ?? ""}`}>
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${STATUS_COLOR[o.status] ?? ""}`}
+                        >
                           {o.status}
                         </span>
                       </td>
                       <td className="py-3 text-xs text-muted-foreground">
-                        {new Date(o.created_at).toLocaleDateString("km-KH", { day: "2-digit", month: "short" })}
+                        {new Date(o.created_at).toLocaleDateString("km-KH", {
+                          day: "2-digit",
+                          month: "short",
+                        })}
                       </td>
                     </tr>
                   ))}
@@ -144,10 +164,21 @@ function Profile() {
           <p className="mt-1 text-sm text-muted-foreground">Tap a game to top up.</p>
           <div className="mt-6 grid grid-cols-3 gap-4 sm:grid-cols-6 sm:gap-5">
             {games.map((g, i) => (
-              <Link key={g.id} to="/game/$gameId" params={{ gameId: g.id }}
-                className="block text-center" style={{ "--shine-delay": `${i * 0.5}s` } as CSSProperties}>
+              <Link
+                key={g.id}
+                to="/game/$gameId"
+                params={{ gameId: g.id }}
+                className="block text-center"
+                style={{ "--shine-delay": `${i * 0.5}s` } as CSSProperties}
+              >
                 <span className="tile-clean block rounded-[26%]">
-                  <img src={g.icon} alt={g.name} width={151} height={151} className="block aspect-square w-full object-cover" />
+                  <img
+                    src={pic(g.icon)}
+                    alt={g.name}
+                    width={151}
+                    height={151}
+                    className="block aspect-square w-full object-cover"
+                  />
                 </span>
                 <span className="mt-2 block truncate text-[11px] font-semibold">{g.name}</span>
               </Link>

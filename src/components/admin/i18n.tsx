@@ -155,6 +155,24 @@ const KM: Record<string, string> = {
   "Add at least": "ត្រូវបញ្ចូលយ៉ាងតិច",
   "to deliver all waiting orders": "ដើម្បីបញ្ចូលការកម្មង់ទាំងអស់",
 
+  // Images tab
+  Images: "រូបភាព",
+  Banner: "បដា",
+  "Game icons": "រូបហ្គេម",
+  "Pass and card pictures": "រូប Pass និង Card",
+  "Home banner": "បដាទំព័រដើម",
+  "Pick any picture. It is cut to the size shown, so it always fits":
+    "ជ្រើសរូបណាក៏បាន ប្រព័ន្ធកាត់ឲ្យត្រូវទំហំខាងក្រោមដោយខ្លួនឯង",
+  Size: "ទំហំ",
+  "New picture": "រូបថ្មី",
+  "Change picture": "ប្តូររូប",
+  "Use the original": "ដាក់រូបដើមវិញ",
+  "Back to the original": "បានដាក់រូបដើមវិញ",
+  Saved: "បានរក្សាទុក",
+  "Couldn't save the picture": "រក្សាទុករូបមិនបាន",
+  "Use a PNG, JPG or WebP picture": "សូមប្រើរូប PNG JPG ឬ WebP",
+  "Picture is too big, max 10 MB": "រូបធំពេក យ៉ាងច្រើន 10 MB",
+
   // Delivery cell
   "Paid by Bakong": "បានបង់តាម Bakong",
   "Check payment": "ពិនិត្យការបង់ប្រាក់",

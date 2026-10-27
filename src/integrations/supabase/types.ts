@@ -137,6 +137,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      site_images: {
+        Row: {
+          slot: string;
+          updated_at: string;
+          url: string;
+        };
+        Insert: {
+          slot: string;
+          updated_at?: string;
+          url: string;
+        };
+        Update: {
+          slot?: string;
+          updated_at?: string;
+          url?: string;
+        };
+        Relationships: [];
+      };
       supplier_offers: {
         Row: {
           game_id: string;
