@@ -58,7 +58,7 @@ function TelegramButton() {
 function Copyright() {
   const { t } = useStorePrefs();
   return (
-    <p className="text-xs text-on-dark-muted">
+    <p className="text-[11px] text-on-dark-muted sm:text-xs">
       © 2026 {store.name}. {t("All rights reserved.")}
     </p>
   );
@@ -75,12 +75,12 @@ export function StoreFooter() {
   return (
     <footer id="help" className="store-footer mt-6 sm:mt-10">
       <div className="mx-auto grid w-full max-w-[1500px] grid-cols-2 gap-x-4 gap-y-6 px-4 py-7 sm:gap-x-6 sm:gap-y-10 sm:px-6 sm:py-12 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr]">
-        <div className="col-span-2 lg:col-span-1">
+        <div className="col-span-2 flex flex-col items-center border-b border-[var(--store-footer-line)] pb-6 text-center sm:block sm:border-0 sm:pb-0 sm:text-left lg:col-span-1">
           <Brand />
           <p className="mt-2 max-w-xs font-khmer text-[13px] sm:mt-4 sm:text-[15px] leading-[1.9] tracking-wide text-on-dark-muted">
             {t("Fast and safe game top-ups in Cambodia.")}
           </p>
-          <div className="mt-3 flex flex-wrap gap-1.5 sm:mt-5 sm:gap-2">
+          <div className="mt-3 flex flex-wrap justify-center gap-1.5 sm:mt-5 sm:justify-start sm:gap-2">
             {[
               { Icon: Zap, label: "1-5 min" },
               { Icon: ShieldCheck, label: "Safe payment" },
@@ -153,7 +153,7 @@ export function StoreFooter() {
         </div>
       </div>
       <div className="border-t border-[var(--store-footer-line)]">
-        <div className="mx-auto flex w-full max-w-[1500px] flex-col items-center justify-between gap-1 px-4 py-4 pb-20 sm:flex-row sm:gap-2 sm:py-5 sm:px-6 sm:pb-5 sm:pr-24">
+        <div className="mx-auto flex w-full max-w-[1500px] flex-row items-center justify-between gap-2 px-4 py-3 pb-20 sm:py-5 sm:px-6 sm:pb-5 sm:pr-24">
           <Copyright />
           <p className="font-khmer text-[13px] leading-[1.9] tracking-wide text-on-dark-muted sm:text-[15px]">
             {t("Made in Cambodia")}
