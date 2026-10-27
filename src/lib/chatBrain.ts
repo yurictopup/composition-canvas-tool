@@ -24,14 +24,11 @@ export const DEFAULT_SUGGESTIONS = [
 const GAME_ALIASES: Record<string, string[]> = {
   mlbb: ["mlbb", "mobile legends", "mobile legend", "ml", "ម៉ូបាយលេជិន", "ម៉ូបាយ", "អឹមអិល"],
   ff: ["free fire", "freefire", "ff", "ហ្វ្រីហ្វាយ"],
-  roblox: ["roblox", "robux", "រ៉ូប្លុក", "រ៉ូបុក"],
   magicchess: ["magic chess", "mcgg", "magicchess"],
   pubg: ["pubg", "pubg mobile", "uc", "ប៉ាប់ជី", "ពាប់ជី"],
   hok: ["honor of kings", "hok"],
-  codm: ["call of duty", "codm", "cod", "cp"],
   wildrift: ["wild rift", "wildrift", "league of legends", "wild cores", "riot"],
   bloodstrike: ["blood strike", "bloodstrike"],
-  coc: ["clash of clans", "coc"],
   genshin: ["genshin", "genshin impact", "genesis"],
   starrail: ["star rail", "honkai", "hsr"],
 };
@@ -243,15 +240,6 @@ export function answer(
   const game = detectGame(text);
   const topics = topScores(text);
   const has_ = (t: string) => topics.includes(t);
-
-  // Roblox works differently from every other game.
-  if (game?.id === "roblox") {
-    return {
-      text: "យើងលក់ Robux 80, 500, 1000 និង 2000 សូមបញ្ចូលឈ្មោះ Roblox (Username) ចុច Check ID ហើយបង់ប្រាក់ យើងមិនសុំលេខសម្ងាត់ទេ មានសំណួរ សូមសួរ Admin តាម Telegram",
-      actions: [telegramAction],
-      suggestions: ["ហ្គេមអ្វីខ្លះ?", "បង់ប្រាក់តាមអ្វី?"],
-    };
-  }
 
   if (has_("late") || has_("refund")) {
     return {

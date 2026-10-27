@@ -11,41 +11,33 @@ import ffMembershipBundle from "@/assets/ff-membership-bundle.png";
 import ffEvo3d from "@/assets/ff-evo-3d.png";
 import ffEvo7d from "@/assets/ff-evo-7d.png";
 import ffEvo30d from "@/assets/ff-evo-30d.png";
-import roblox from "@/assets/roblox.png";
 import magicchess from "@/assets/magicchess.png";
 import pubg from "@/assets/pubg-clean.png";
 import hok from "@/assets/hok.png";
-import codm from "@/assets/codm.jpg";
 import wildrift from "@/assets/wildrift.jpg";
 import bloodstrike from "@/assets/bloodstrike.jpg";
-import coc from "@/assets/coc.jpg";
 import genshin from "@/assets/genshin.jpg";
 import starrail from "@/assets/starrail.jpg";
 import valorant from "@/assets/valorant.jpg";
 import deltaforce from "@/assets/deltaforce.jpg";
 import arenabreakout from "@/assets/arenabreakout.jpg";
-import brawlstars from "@/assets/brawlstars.jpg";
-import clashroyale from "@/assets/clashroyale.jpg";
 import zzz from "@/assets/zzz.jpg";
 
+// Only games FazerCards can top up for Cambodian accounts. Roblox, CODM (India-only there)
+// and the Supercell games were removed on 2026-10-27; their ID rules stay in player-id.ts.
 export const games = [
   { id: "mlbb", name: "Mobile Legends", icon: mlbb, unit: "Diamonds", blurb: "Instant MLBB diamond delivery" },
   { id: "ff", name: "Free Fire", icon: freefire, unit: "Diamonds", blurb: "Free Fire diamonds at the best price" },
-  { id: "roblox", name: "Roblox", icon: roblox, unit: "Robux", blurb: "Fast Robux delivery" },
   { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess, unit: "Diamonds", blurb: "Instant Magic Chess delivery" },
   { id: "pubg", name: "PUBG Mobile", icon: pubg, unit: "UC", blurb: "Fast PUBG UC delivery" },
   { id: "hok", name: "Honor of Kings", icon: hok, unit: "Tokens", blurb: "Tokens HoK ចូលភ្លាម" },
-  { id: "codm", name: "Call of Duty: Mobile", icon: codm, unit: "CP", blurb: "Call of Duty: Mobile" },
   { id: "wildrift", name: "League of Legends: Wild Rift", icon: wildrift, unit: "Wild Cores", blurb: "League of Legends: Wild Rift" },
   { id: "bloodstrike", name: "Blood Strike", icon: bloodstrike, unit: "Gold", blurb: "Blood Strike" },
-  { id: "coc", name: "Clash of Clans", icon: coc, unit: "Gems", blurb: "Clash of Clans" },
   { id: "genshin", name: "Genshin Impact", icon: genshin, unit: "Genesis Crystals", blurb: "Genshin Impact" },
   { id: "starrail", name: "Honkai: Star Rail", icon: starrail, unit: "Oneiric Shards", blurb: "Honkai: Star Rail" },
   { id: "valorant", name: "Valorant", icon: valorant, unit: "VP", blurb: "Valorant" },
   { id: "deltaforce", name: "Delta Force", icon: deltaforce, unit: "Delta Coins", blurb: "Delta Force" },
   { id: "arenabreakout", name: "Arena Breakout", icon: arenabreakout, unit: "Bonds", blurb: "Arena Breakout" },
-  { id: "brawlstars", name: "Brawl Stars", icon: brawlstars, unit: "Gems", blurb: "Brawl Stars" },
-  { id: "clashroyale", name: "Clash Royale", icon: clashroyale, unit: "Gems", blurb: "Clash Royale" },
   { id: "zzz", name: "Zenless Zone Zero", icon: zzz, unit: "Monochrome", blurb: "Zenless Zone Zero" },
 ];
 
