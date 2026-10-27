@@ -68,7 +68,7 @@ export async function deliverPaidOrder(
     .is("supplier_order_id", null);
   if (!allowUnpaid) claim = claim.not("paid_at", "is", null);
   const { data: order } = await claim
-    .select("id, game_id, package_amt, player_id, player_zone, paid_at")
+    .select("id, game_id, package_amt, player_id, player_zone, paid_at, price_usd")
     .maybeSingle();
   if (!order) {
     return {

@@ -144,6 +144,16 @@ describe("FazerCards orders", () => {
     expect(f).not.toHaveBeenCalled();
   });
 
+  it("never buys for more than the customer paid", async () => {
+    const f = fakeFetch({ [mlbbOffers]: { body: offersBody } });
+    const result = await placeFazerOrder(
+      { ...order, price_usd: "1.10" },
+      { apiKey: "key", fetchImpl: f },
+    );
+    expect(result).toMatchObject({ supplierStatus: "COST_ABOVE_PRICE", notPlaced: true });
+    expect(f).toHaveBeenCalledTimes(1);
+  });
+
   it("can retry after a low balance", async () => {
     const f = fakeFetch({
       [mlbbOffers]: { body: offersBody },
