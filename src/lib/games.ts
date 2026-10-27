@@ -53,7 +53,7 @@ export function findGame(id: string | undefined): Game | undefined {
 }
 
 export type GamePackage = { amt: string; price: number | null; hot?: boolean; img?: string };
-export type HotItem = { label: string; price: number; img: string; note?: string; badge?: string; banner?: boolean };
+export type HotItem = { label: string; price: number; img: string; note?: string; badge?: string; group?: string };
 
 // Real in-game denominations per game. The live selling price comes from the
 // Supabase product_prices table (edited on /admin, see src/lib/prices.ts);
@@ -229,10 +229,10 @@ export const mlbbHotItems: HotItem[] = [
 
 // Free Fire membership cards, delivered by the team like the diamond packs.
 export const ffHotItems: HotItem[] = [
-  { label: "Weekly Lite", price: 0.39, img: ffWeeklyLite, note: "7 days", banner: true },
-  { label: "Weekly Card", price: 1.59, img: ffWeeklyCard, note: "7 days", banner: true },
-  { label: "Monthly Card", price: 7.59, img: ffMonthlyCard, note: "30 days", banner: true },
-  { label: "Bundle M+W+L", price: 9.57, img: ffMembershipBundle, note: "Monthly + Weekly + Lite", badge: "BUNDLE", banner: true },
+  { label: "Weekly Lite", price: 0.39, img: ffWeeklyLite, note: "7 days", group: "Membership" },
+  { label: "Weekly Card", price: 1.59, img: ffWeeklyCard, note: "7 days", group: "Membership" },
+  { label: "Monthly Card", price: 7.59, img: ffMonthlyCard, note: "30 days", group: "Membership" },
+  { label: "Bundle M+W+L", price: 9.57, img: ffMembershipBundle, note: "Monthly + Weekly + Lite", badge: "HOT", group: "Bundle" },
 ];
 
 const hotItemsByGame: Record<string, HotItem[]> = { mlbb: mlbbHotItems, ff: ffHotItems };

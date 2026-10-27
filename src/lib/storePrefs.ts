@@ -108,6 +108,8 @@ const KM: Record<string, string> = {
   "Hot Items": "ពេញនិយម",
   "7 days": "៧ ថ្ងៃ",
   "30 days": "៣០ ថ្ងៃ",
+  "Membership": "កាតសមាជិក",
+  "Bundle": "កញ្ចប់រួម",
   "No packages available yet.": "មិនទាន់មានកញ្ចប់ទេ",
   Game: "ហ្គេម",
   "Player ID": "Player ID",

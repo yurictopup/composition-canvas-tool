@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import { lookupPlayer } from "@/lib/player-lookup.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowUp, Check, CircleAlert, CircleCheck, Flame, Receipt, ShoppingCart, Wallet } from "lucide-react";
+import { ArrowUp, Check, CircleAlert, CircleCheck, Receipt, ShoppingCart, Wallet } from "lucide-react";
 import { livePrice, packageKey, useLivePrices } from "@/lib/prices";
 
 export const Route = createFileRoute("/game/$gameId")({
@@ -73,6 +73,12 @@ function GamePage({ gameId }: { gameId: string }) {
     ...item,
     price: livePrice(prices, gameId, packageKey(item.label, game.unit), item.price),
   }));
+  // Hot items are shown in titled groups (e.g. "Membership", "Bundle").
+  const hotGroups = new Map<string, { item: (typeof hotItems)[number]; i: number }[]>();
+  hotItems.forEach((item, i) => {
+    const group = item.group ?? "Hot Items";
+    hotGroups.set(group, [...(hotGroups.get(group) ?? []), { item, i }]);
+  });
   const selected =
     hotPkg !== null
       ? { amt: hotItems[hotPkg]!.label, price: hotItems[hotPkg]!.price }
@@ -287,47 +293,31 @@ function GamePage({ gameId }: { gameId: string }) {
             {t("Choose a package")}
           </h2>
 
-          {hotItems.length > 0 && (
-            <div className="mb-5">
-              <p className="mb-3 flex items-center gap-2 text-sm font-bold text-rose-500"><Flame className="h-4 w-4" /> {t("Hot Items")}</p>
-              {hotItems.some((item) => item.banner) ? (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {hotItems.map((item, i) => (
-                    <button key={item.label} onClick={() => selectHot(i)}
-                      className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-white text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg ${hotPkg === i ? "border-rose-400 ring-2 ring-rose-400 shadow-[0_0_18px_rgba(244,63,94,0.35)]" : "border-border/60"}`}>
-                      <span className="relative block aspect-video w-full overflow-hidden bg-[radial-gradient(ellipse_at_center,#1e1b4b_0%,#05060c_75%)]">
-                        <img src={item.img} alt={item.label} className="h-full w-full object-contain p-1.5 transition-transform duration-300 group-hover:scale-105" />
-                        {item.badge && <span className="absolute left-0 top-0 rounded-br-xl bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[10px] font-bold tracking-wide text-white">{item.badge}</span>}
-                        {hotPkg === i && <span className="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full bg-rose-500 text-white shadow"><Check className="h-3.5 w-3.5" strokeWidth={3} /></span>}
-                      </span>
-                      <span className={`flex flex-1 flex-col gap-1 p-3 ${hotPkg === i ? "bg-rose-50" : ""}`}>
-                        <span className={`text-sm font-bold leading-tight ${hotPkg === i ? "text-rose-600" : "text-card-foreground"}`}>{item.label}</span>
-                        {item.note && <span className="text-[11px] font-medium text-muted-foreground">{t(item.note)}</span>}
-                        <span className="mt-auto pt-1 text-base font-extrabold text-rose-500">{item.price !== null ? `$${item.price.toFixed(2)}` : "—"}</span>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  {hotItems.map((item, i) => (
-                    <button key={item.label} onClick={() => selectHot(i)}
-                      className={`group relative flex items-center gap-3 overflow-hidden rounded-2xl border p-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-md ${hotPkg === i ? "border-rose-400 bg-gradient-to-br from-rose-100 to-orange-50 ring-2 ring-rose-300 shadow-[0_0_14px_rgba(244,63,94,0.25)]" : "border-rose-100 bg-gradient-to-br from-rose-50 to-white"}`}>
-                      <span className="relative grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-white/80 shadow-sm ring-1 ring-rose-100">
-                        {hotPkg === i && <span className="absolute -left-1.5 -top-1.5 z-10 grid h-5 w-5 place-items-center rounded-full bg-rose-500 text-white shadow"><Check className="h-3 w-3" strokeWidth={3} /></span>}
-                        <img src={item.img} alt={item.label} className={`h-12 w-12 object-contain transition-transform group-hover:scale-105 ${hotPkg === i ? "scale-110" : ""}`} />
-                      </span>
-                      <div className="min-w-0">
-                        <div className={`text-sm font-bold leading-tight ${hotPkg === i ? "text-rose-600" : "text-card-foreground"}`}>{item.label}</div>
-                        {item.note && <div className="mt-0.5 text-[11px] font-medium text-muted-foreground">{t(item.note)}</div>}
-                        <div className="mt-1 inline-block rounded-full bg-rose-500 px-2 py-0.5 text-xs font-bold text-white">{item.price !== null ? `$${item.price.toFixed(2)}` : "—"}</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
+          {[...hotGroups].map(([group, items]) => (
+            <div key={group} className="mb-5">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="h-4 w-1 rounded-full bg-amber-500" />
+                <span className="text-xs font-bold uppercase tracking-wide text-card-foreground">{t(group)}</span>
+                <span className="h-px flex-1 bg-border" />
+                <span className="text-xs text-muted-foreground">{items.length}</span>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {items.map(({ item, i }) => (
+                  <button key={item.label} onClick={() => selectHot(i)}
+                    className={`relative flex items-center gap-3 rounded-2xl border bg-white px-4 py-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-md ${hotPkg === i ? "border-amber-500 ring-1 ring-amber-500" : "border-border/70"}`}>
+                    {item.badge && <span className="absolute -top-2 left-3 rounded-full bg-amber-500 px-2 text-[10px] font-bold text-white">{item.badge}</span>}
+                    {hotPkg === i && <span className="absolute -right-2 -top-2 grid h-5 w-5 place-items-center rounded-full bg-amber-500 text-white shadow"><Check className="h-3 w-3" strokeWidth={3} /></span>}
+                    <img src={item.img} alt={item.label} className="h-11 w-16 shrink-0 object-contain" />
+                    <div className="min-w-0">
+                      <div className="text-lg font-extrabold leading-tight text-amber-500">{item.price !== null ? `$${item.price.toFixed(2)}` : "—"}</div>
+                      <div className="truncate text-sm font-semibold text-card-foreground">{item.label}</div>
+                      {item.note && <div className="truncate text-[11px] text-muted-foreground">{t(item.note)}</div>}
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
-          )}
+          ))}
 
           {availablePackages.length > 0 ? (
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
