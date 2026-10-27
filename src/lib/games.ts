@@ -22,9 +22,13 @@ import valorant from "@/assets/valorant.jpg";
 import deltaforce from "@/assets/deltaforce.jpg";
 import arenabreakout from "@/assets/arenabreakout.jpg";
 import zzz from "@/assets/zzz.jpg";
+import eafc from "@/assets/eafc.jpg";
+import lol from "@/assets/lol.jpg";
+import hi3 from "@/assets/hi3.jpg";
 
 // Only games FazerCards can top up for Cambodian accounts. Roblox, CODM (India-only there)
 // and the Supercell games were removed on 2026-10-27; their ID rules stay in player-id.ts.
+// EAFC Mobile, League of Legends and Honkai Impact 3rd use FazerCards' Cambodia-region packs.
 export const games = [
   { id: "mlbb", name: "Mobile Legends", icon: mlbb, unit: "Diamonds", blurb: "Instant MLBB diamond delivery" },
   { id: "ff", name: "Free Fire", icon: freefire, unit: "Diamonds", blurb: "Free Fire diamonds at the best price" },
@@ -39,6 +43,9 @@ export const games = [
   { id: "deltaforce", name: "Delta Force", icon: deltaforce, unit: "Delta Coins", blurb: "Delta Force" },
   { id: "arenabreakout", name: "Arena Breakout", icon: arenabreakout, unit: "Bonds", blurb: "Arena Breakout" },
   { id: "zzz", name: "Zenless Zone Zero", icon: zzz, unit: "Monochrome", blurb: "Zenless Zone Zero" },
+  { id: "eafc", name: "EA SPORTS FC Mobile", icon: eafc, unit: "FC Points", blurb: "EA SPORTS FC Mobile" },
+  { id: "lol", name: "League of Legends", icon: lol, unit: "RP", blurb: "League of Legends (PC)" },
+  { id: "hi3", name: "Honkai Impact 3rd", icon: hi3, unit: "Crystals", blurb: "Honkai Impact 3rd" },
 ];
 
 export type Game = (typeof games)[number];
@@ -201,6 +208,32 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "1980 + 260", price: 29.99 },
     { amt: "3280 + 600", price: 49.99, hot: true },
     { amt: "6480 + 1600", price: 99.99 },
+  ],
+  // Cambodia-region packs at FazerCards (EAFC Mobile KH, League of Legends KH, Honkai Impact 3rd KH).
+  eafc: [
+    { amt: "40", price: 0.45 },
+    { amt: "100", price: 1.09 },
+    { amt: "520", price: 5.39 },
+    { amt: "1070", price: 10.79, hot: true },
+    { amt: "2200", price: 21.49 },
+    { amt: "5750", price: 53.49 },
+    { amt: "12000", price: 106.99 },
+  ],
+  lol: [
+    { amt: "575", price: 5.19 },
+    { amt: "1380", price: 11.39, hot: true },
+    { amt: "2800", price: 22.69 },
+    { amt: "4500", price: 35.99 },
+    { amt: "6500", price: 51.49 },
+    { amt: "13500", price: 102.99 },
+  ],
+  hi3: [
+    { amt: "65", price: 1.15 },
+    { amt: "330", price: 5.59 },
+    { amt: "660", price: 11.19, hot: true },
+    { amt: "1320", price: 22.39 },
+    { amt: "3300", price: 55.99 },
+    { amt: "6600", price: 111.99 },
   ],
   // Robux are sent by the team to the buyer's Roblox username.
   roblox: [

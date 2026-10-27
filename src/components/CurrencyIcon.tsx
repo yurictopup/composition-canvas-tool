@@ -103,6 +103,12 @@ function art(gameId: string) {
       return <Coin fill="#f97316" ring="#9a3412" text="CP" />;
     case "valorant":
       return <Coin fill="#ef4444" ring="#7f1d1d" text="VP" />;
+    case "eafc":
+      return <Coin fill="#10b981" ring="#065f46" text="FC" />;
+    case "lol":
+      return <Coin fill="#c8aa6e" ring="#785a28" text="RP" />;
+    case "hi3":
+      return <Crystal top="#bae6fd" bottom="#0284c7" />;
     case "deltaforce":
       return <Coin fill="#22c55e" ring="#14532d" text="Δ" />;
     case "arenabreakout":
