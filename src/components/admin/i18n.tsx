@@ -188,6 +188,17 @@ const KM: Record<string, string> = {
     "Bakong មិនទាន់ឃើញការបង់ទេ បន្តតែបើអតិថិជនបង់តាមផ្លូវផ្សេង ទិញពី FazerCards ឥឡូវ?",
   "Buy this package from FazerCards now? It uses your FazerCards balance.":
     "ទិញពី FazerCards ឥឡូវ? វាកាត់លុយ FazerCards",
+
+  // 6-digit code check
+  "Owner sign-in check": "ផ្ទៀងផ្ទាត់ម្ចាស់ហាង",
+  "Could not start the code check.": "មិនអាចចាប់ផ្ដើមពិនិត្យលេខកូដបាន",
+  "Open Google Authenticator, tap +, then scan this QR code.":
+    "បើក Google Authenticator ចុច + ហើយស្កេន QR នេះ",
+  "Can't scan? Enter this key in the app:": "ស្កេនមិនបាន? វាយលេខនេះក្នុង app:",
+  "Enter the 6-digit code from the app": "វាយលេខកូដ 6 ខ្ទង់ពី app",
+  "Wrong or expired code. Try the new code.": "លេខកូដខុស ឬហួសពេល សាកលេខកូដថ្មី",
+  Confirm: "បញ្ជាក់",
+  "Sign out": "ចាកចេញ",
 };
 
 export function translate(lang: Lang, s: string) {

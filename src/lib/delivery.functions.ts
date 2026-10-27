@@ -1,12 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { isOwner } from "@/lib/games";
+import { isVerifiedOwner } from "@/lib/owner";
 import type { DeliveryResponse, SupplierStock } from "@/lib/delivery.server";
 
 function requireOwner(claims: Record<string, unknown>) {
-  if (!isOwner(typeof claims["email"] === "string" ? claims["email"] : null)) {
-    throw new Error("Only the shop owner can do this.");
+  if (!isVerifiedOwner(claims)) {
+    throw new Error("Only the shop owner can do this (sign in with the 6-digit code).");
   }
 }
 
