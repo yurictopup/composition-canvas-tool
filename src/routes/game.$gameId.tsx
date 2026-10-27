@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import { lookupPlayer } from "@/lib/player-lookup.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowUp, CircleAlert, CircleCheck, Flame, Receipt, ShoppingCart, Wallet } from "lucide-react";
+import { ArrowUp, Check, CircleAlert, CircleCheck, Flame, Receipt, ShoppingCart, Wallet } from "lucide-react";
 import { livePrice, packageKey, useLivePrices } from "@/lib/prices";
 
 export const Route = createFileRoute("/game/$gameId")({
@@ -293,12 +293,17 @@ function GamePage({ gameId }: { gameId: string }) {
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {hotItems.map((item, i) => (
                   <button key={item.label} onClick={() => selectHot(i)}
-                    className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition-all hover:-translate-y-0.5 ${hotPkg === i ? "border-rose-400 bg-rose-100 ring-2 ring-rose-300 shadow-[0_0_14px_rgba(244,63,94,0.25)]" : "border-rose-100 bg-rose-50"}`}>
-                    <div>
-                      <div className={`text-sm font-bold ${hotPkg === i ? "text-rose-600" : "text-card-foreground"}`}>{item.label}</div>
-                      <div className="text-sm font-bold text-rose-500">{item.price !== null ? `$${item.price.toFixed(2)}` : "—"}</div>
+                    className={`group relative flex items-center gap-3 overflow-hidden rounded-2xl border p-3 text-left ${item.badge ? "col-span-2 sm:col-span-3" : ""} transition-all hover:-translate-y-0.5 hover:shadow-md ${hotPkg === i ? "border-rose-400 bg-gradient-to-br from-rose-100 to-orange-50 ring-2 ring-rose-300 shadow-[0_0_14px_rgba(244,63,94,0.25)]" : "border-rose-100 bg-gradient-to-br from-rose-50 to-white"}`}>
+                    {item.badge && <span className="absolute right-0 top-0 rounded-bl-xl bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[10px] font-bold tracking-wide text-white">{item.badge}</span>}
+                    <span className="relative grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-white/80 shadow-sm ring-1 ring-rose-100">
+                      {hotPkg === i && <span className="absolute -left-1.5 -top-1.5 z-10 grid h-5 w-5 place-items-center rounded-full bg-rose-500 text-white shadow"><Check className="h-3 w-3" strokeWidth={3} /></span>}
+                      <img src={item.img} alt={item.label} className={`h-12 w-12 object-contain transition-transform group-hover:scale-105 ${hotPkg === i ? "scale-110" : ""}`} />
+                    </span>
+                    <div className="min-w-0">
+                      <div className={`text-sm font-bold leading-tight ${hotPkg === i ? "text-rose-600" : "text-card-foreground"}`}>{item.label}</div>
+                      {item.note && <div className="mt-0.5 text-[11px] font-medium text-muted-foreground">{t(item.note)}</div>}
+                      <div className="mt-1 inline-block rounded-full bg-rose-500 px-2 py-0.5 text-xs font-bold text-white">{item.price !== null ? `$${item.price.toFixed(2)}` : "—"}</div>
                     </div>
-                    <img src={item.img} alt={item.label} className={`h-12 w-12 shrink-0 rounded-full object-cover transition-transform ${hotPkg === i ? "scale-110" : ""}`} />
                   </button>
                 ))}
               </div>
