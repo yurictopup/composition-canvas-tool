@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import { lookupPlayer } from "@/lib/player-lookup.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowUp, Check, CircleAlert, CircleCheck, Receipt, ShoppingCart, Wallet } from "lucide-react";
+import { ArrowUp, Check, CircleAlert, CircleCheck, Receipt, ShoppingCart, Sparkles, Star, Wallet } from "lucide-react";
 import { livePrice, packageKey, useLivePrices } from "@/lib/prices";
 
 export const Route = createFileRoute("/game/$gameId")({
@@ -73,12 +73,6 @@ function GamePage({ gameId }: { gameId: string }) {
     ...item,
     price: livePrice(prices, gameId, packageKey(item.label, game.unit), item.price),
   }));
-  // Hot items are shown in titled groups (e.g. "Membership", "Bundle").
-  const hotGroups = new Map<string, { item: (typeof hotItems)[number]; i: number }[]>();
-  hotItems.forEach((item, i) => {
-    const group = item.group ?? "Hot Items";
-    hotGroups.set(group, [...(hotGroups.get(group) ?? []), { item, i }]);
-  });
   const selected =
     hotPkg !== null
       ? { amt: hotItems[hotPkg]!.label, price: hotItems[hotPkg]!.price }
@@ -293,31 +287,30 @@ function GamePage({ gameId }: { gameId: string }) {
             {t("Choose a package")}
           </h2>
 
-          {[...hotGroups].map(([group, items]) => (
-            <div key={group} className="mb-5">
-              <div className="mb-3 flex items-center gap-2">
-                <span className="h-4 w-1 rounded-full bg-amber-500" />
-                <span className="text-xs font-bold uppercase tracking-wide text-card-foreground">{t(group)}</span>
-                <span className="h-px flex-1 bg-border" />
-                <span className="text-xs text-muted-foreground">{items.length}</span>
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {items.map(({ item, i }) => (
+          {hotItems.length > 0 && (
+            <div className="mb-5">
+              <p className="mb-3 flex items-center gap-2 text-sm font-bold text-amber-600"><Sparkles className="h-4 w-4" /> {t("Recommended for You")}</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {hotItems.map((item, i) => (
                   <button key={item.label} onClick={() => selectHot(i)}
-                    className={`relative flex items-center gap-3 rounded-2xl border bg-white px-4 py-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-md ${hotPkg === i ? "border-amber-500 ring-1 ring-amber-500" : "border-border/70"}`}>
-                    {item.badge && <span className="absolute -top-2 left-3 rounded-full bg-amber-500 px-2 text-[10px] font-bold text-white">{item.badge}</span>}
-                    {hotPkg === i && <span className="absolute -right-2 -top-2 grid h-5 w-5 place-items-center rounded-full bg-amber-500 text-white shadow"><Check className="h-3 w-3" strokeWidth={3} /></span>}
-                    <img src={item.img} alt={item.label} className="h-11 w-16 shrink-0 object-contain" />
+                    className={`relative flex items-center justify-between gap-2 overflow-hidden rounded-2xl border-2 bg-gradient-to-br from-amber-50 via-white to-amber-50/60 py-4 pl-4 pr-3 text-left shadow-[0_4px_14px_rgba(245,158,11,0.15)] transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(245,158,11,0.3)] ${hotPkg === i ? "border-amber-400 ring-2 ring-amber-300" : "border-amber-200"}`}>
+                    <span className="absolute right-0 top-0 flex items-center gap-1 rounded-bl-xl bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                      <Star className="h-3 w-3 fill-current" /> {item.badge ?? "TOP"}
+                    </span>
                     <div className="min-w-0">
-                      <div className="text-lg font-extrabold leading-tight text-amber-500">{item.price !== null ? `$${item.price.toFixed(2)}` : "—"}</div>
-                      <div className="truncate text-sm font-semibold text-card-foreground">{item.label}</div>
-                      {item.note && <div className="truncate text-[11px] text-muted-foreground">{t(item.note)}</div>}
+                      <div className={`text-sm font-bold leading-tight sm:text-base ${hotPkg === i ? "text-amber-700" : "text-card-foreground"}`}>{item.label}</div>
+                      {item.note && <div className="mt-0.5 hidden text-[11px] text-muted-foreground sm:block">{t(item.note)}</div>}
+                      <div className="mt-1 text-sm font-bold text-amber-600">{item.price !== null ? `$${item.price.toFixed(2)}` : "—"}</div>
                     </div>
+                    <span className="relative mt-3 grid h-14 w-14 shrink-0 place-items-center rounded-full bg-amber-100 shadow-inner">
+                      <img src={item.img} alt={item.label} className="h-10 w-12 object-contain" />
+                      {hotPkg === i && <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full bg-amber-500 text-white shadow"><Check className="h-3 w-3" strokeWidth={3} /></span>}
+                    </span>
                   </button>
                 ))}
               </div>
             </div>
-          ))}
+          )}
 
           {availablePackages.length > 0 ? (
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
