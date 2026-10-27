@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { CurrencyIcon } from "@/components/CurrencyIcon";
-import { baseGameId, findGame, gameServers, getHotItems, getPackages, payments, robloxGamePassPrice, store } from "@/lib/games";
+import { baseGameId, findGame, getHotItems, getPackages, payments, robloxGamePassPrice, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { useStorePrefs } from "@/lib/storePrefs";
 import { OrderPayment } from "@/components/OrderPayment";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import { lookupPlayer } from "@/lib/player-lookup.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowUp, Check, CircleAlert, CircleCheck, Globe, Package, Receipt, ShoppingCart, Sparkles, Star, Ticket, Wallet } from "lucide-react";
+import { ArrowUp, Check, CircleAlert, CircleCheck, Package, Receipt, ShoppingCart, Sparkles, Star, Ticket, Wallet } from "lucide-react";
 import { livePrice, packageKey, useLivePrices } from "@/lib/prices";
 
 export const Route = createFileRoute("/game/$gameId")({
@@ -66,7 +66,6 @@ function GamePage({ gameId }: { gameId: string }) {
 
   // Server variants (e.g. MLBB Philippines) share the main game's ID rules and name check.
   const idGameId = baseGameId(gameId);
-  const servers = gameServers[idGameId];
   const idConfig = getIdConfig(idGameId);
   const availablePackages = getPackages(gameId).map((p) => ({
     ...p,
@@ -251,19 +250,6 @@ function GamePage({ gameId }: { gameId: string }) {
           </div>
         </div>
 
-        {servers && (
-          <nav aria-label={t("Choose your server")} className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
-            <p className="mb-2 flex items-center gap-2 text-sm font-bold sm:mb-3"><Globe className="h-4 w-4 text-primary" /> {t("Choose your server")}</p>
-            <div className="grid grid-cols-3 gap-2">
-              {servers.map((s) => (
-                <Link key={s.id} to="/game/$gameId" params={{ gameId: s.id }} replace
-                  className={`rounded-xl border px-2 py-2 text-center text-xs font-bold sm:px-3 sm:py-2.5 sm:text-sm transition-colors ${s.id === gameId ? "border-primary bg-primary text-primary-foreground" : "border-border/60 bg-white hover:border-primary"}`}>
-                  {t(s.label)}
-                </Link>
-              ))}
-            </div>
-          </nav>
-        )}
 
         {/* Step 1 — Player ID */}
         <section className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
