@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { CurrencyIcon } from "@/components/CurrencyIcon";
-import { findGame, getPackages, mlbbHotItems, payments, store } from "@/lib/games";
+import { findGame, getHotItems, getPackages, payments, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { useStorePrefs } from "@/lib/storePrefs";
 import { OrderPayment } from "@/components/OrderPayment";
@@ -69,7 +69,7 @@ function GamePage({ gameId }: { gameId: string }) {
     ...p,
     price: livePrice(prices, gameId, packageKey(p.amt, game.unit), p.price),
   }));
-  const hotItems = (gameId === "mlbb" ? mlbbHotItems : []).map((item) => ({
+  const hotItems = getHotItems(gameId).map((item) => ({
     ...item,
     price: livePrice(prices, gameId, packageKey(item.label, game.unit), item.price),
   }));

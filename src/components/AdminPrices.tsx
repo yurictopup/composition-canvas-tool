@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { games, getPackages, mlbbHotItems } from "@/lib/games";
+import { games, getHotItems, getPackages } from "@/lib/games";
 import { fetchPrices, packageKey, type PriceMap } from "@/lib/prices";
 import { GamesDropOfferSearch } from "@/components/GamesDropOfferSearch";
 
@@ -10,7 +10,7 @@ type Row = { gameId: string; gameName: string; key: string; fallback: number | n
 
 function allRows(): Row[] {
   return games.flatMap((g) => {
-    const hot = g.id === "mlbb" ? mlbbHotItems.map((h) => ({ amt: h.label, price: h.price })) : [];
+    const hot = getHotItems(g.id).map((h) => ({ amt: h.label, price: h.price }));
     return [...hot, ...getPackages(g.id)].map((p) => ({
       gameId: g.id,
       gameName: g.name,

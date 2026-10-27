@@ -4,6 +4,9 @@ import mlbbWeeklyX3 from "@/assets/mlbb-weekly-x3.png";
 import mlbb165Weekly from "@/assets/mlbb-165-weekly.png";
 import mlbbTwilight from "@/assets/mlbb-twilight.png";
 import freefire from "@/assets/freefire.png";
+import ffWeeklyLite from "@/assets/ff-weekly-lite.png";
+import ffWeeklyCard from "@/assets/ff-weekly-card.png";
+import ffMonthlyCard from "@/assets/ff-monthly-card.png";
 import roblox from "@/assets/roblox.png";
 import magicchess from "@/assets/magicchess.png";
 import pubg from "@/assets/pubg-clean.png";
@@ -222,6 +225,19 @@ export const mlbbHotItems: HotItem[] = [
   { label: "Weekly + 223💎", price: 6.59, img: mlbb165Weekly },
   { label: "Twilight Pass", price: 8.39, img: mlbbTwilight },
 ];
+
+// Free Fire membership cards, delivered by the team like the diamond packs.
+export const ffHotItems: HotItem[] = [
+  { label: "Weekly Lite", price: 0.39, img: ffWeeklyLite },
+  { label: "Weekly Card", price: 1.59, img: ffWeeklyCard },
+  { label: "Monthly Card", price: 7.59, img: ffMonthlyCard },
+];
+
+const hotItemsByGame: Record<string, HotItem[]> = { mlbb: mlbbHotItems, ff: ffHotItems };
+
+export function getHotItems(gameId: string): HotItem[] {
+  return hotItemsByGame[gameId] ?? [];
+}
 
 export const payments = ["Bakong"];
 
