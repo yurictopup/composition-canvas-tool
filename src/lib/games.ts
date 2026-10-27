@@ -52,17 +52,22 @@ export type Game = (typeof games)[number];
 // Other servers of a game. Each is its own game id (own packages, prices and FazerCards
 // category) but is reached from the main game's page through the server tabs.
 export const serverGames: (Game & { base: string; server: string })[] = [
-  { id: "mlbb_ph", name: "Mobile Legends (Philippines)", icon: mlbb, unit: "Diamonds", blurb: "MLBB Philippines server", base: "mlbb", server: "Philippines" },
-  { id: "mlbb_my", name: "Mobile Legends (Malaysia)", icon: mlbb, unit: "Diamonds", blurb: "MLBB Malaysia server", base: "mlbb", server: "Malaysia" },
+  { id: "mlbb_ph", name: "Mobile Legends PH", icon: mlbb, unit: "Diamonds", blurb: "MLBB Philippines server", base: "mlbb", server: "Philippines" },
+  { id: "mlbb_my", name: "Mobile Legends MY", icon: mlbb, unit: "Diamonds", blurb: "MLBB Malaysia server", base: "mlbb", server: "Malaysia" },
+  { id: "ff_sg", name: "Free Fire SG", icon: freefire, unit: "Diamonds", blurb: "Free Fire Singapore server", base: "ff", server: "Singapore" },
+  { id: "ff_ph", name: "Free Fire PH", icon: freefire, unit: "Diamonds", blurb: "Free Fire Philippines server", base: "ff", server: "Philippines" },
+  { id: "ff_vn", name: "Free Fire VN", icon: freefire, unit: "Diamonds", blurb: "Free Fire Vietnam server", base: "ff", server: "Vietnam" },
+  { id: "ff_id", name: "Free Fire ID", icon: freefire, unit: "Diamonds", blurb: "Free Fire Indonesia server", base: "ff", server: "Indonesia" },
 ];
 
 /** Server tabs shown on a game page; the first is the main game. */
-export const gameServers: Record<string, { id: string; label: string }[]> = {
-  mlbb: [
-    { id: "mlbb", label: "Cambodia / Global" },
-    ...serverGames.filter((g) => g.base === "mlbb").map((g) => ({ id: g.id, label: g.server })),
-  ],
-};
+const mainServer: Record<string, string> = { mlbb: "Cambodia / Global", ff: "Malaysia / Singapore" };
+export const gameServers: Record<string, { id: string; label: string }[]> = Object.fromEntries(
+  Object.entries(mainServer).map(([base, label]) => [
+    base,
+    [{ id: base, label }, ...serverGames.filter((g) => g.base === base).map((g) => ({ id: g.id, label: g.server }))],
+  ]),
+);
 
 export function findGame(id: string | undefined): Game | undefined {
   return games.find((g) => g.id === id) ?? serverGames.find((g) => g.id === id);
@@ -153,6 +158,48 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "2180", price: 19.49 },
     { amt: "5600", price: 48.99 },
     { amt: "11500", price: 97.59 },
+  ],
+  ff_sg: [
+    { amt: "25", price: 0.39 },
+    { amt: "100", price: 1.19 },
+    { amt: "310", price: 3.19 },
+    { amt: "520", price: 5.29 },
+    { amt: "1060", price: 10.19 },
+    { amt: "2180", price: 20.39 },
+    { amt: "5600", price: 49.99 },
+    { amt: "11500", price: 99.99 },
+  ],
+  ff_ph: [
+    { amt: "20", price: 0.29 },
+    { amt: "40", price: 0.49 },
+    { amt: "100", price: 1.29 },
+    { amt: "205", price: 2.19 },
+    { amt: "420", price: 4.29 },
+    { amt: "650", price: 6.69 },
+    { amt: "1100", price: 11.19 },
+    { amt: "2250", price: 21.89 },
+  ],
+  ff_vn: [
+    { amt: "25", price: 0.29 },
+    { amt: "51", price: 0.49 },
+    { amt: "113", price: 0.99 },
+    { amt: "283", price: 2.09 },
+    { amt: "566", price: 4.19 },
+    { amt: "1132", price: 8.09 },
+    { amt: "2830", price: 20.09 },
+  ],
+  ff_id: [
+    { amt: "5", price: 0.19 },
+    { amt: "12", price: 0.19 },
+    { amt: "50", price: 0.49 },
+    { amt: "70", price: 0.69 },
+    { amt: "140", price: 1.29 },
+    { amt: "355", price: 2.69 },
+    { amt: "720", price: 5.39 },
+    { amt: "1450", price: 10.39 },
+    { amt: "2180", price: 15.59 },
+    { amt: "3640", price: 25.49 },
+    { amt: "7290", price: 50.99 },
   ],
   pubg: [
     { amt: "60", price: 0.95 },
@@ -406,6 +453,33 @@ export const hotItemsByGame: Record<string, HotItem[]> = {
     { label: "Level Up Pack Lv20", price: 0.79 },
     { label: "Level Up Pack Lv25", price: 0.79 },
     { label: "Level Up Pack Lv30", price: 1.19 },
+  ],
+  ff_sg: [
+    { label: "Weekly Lite", price: 0.39, img: ffWeeklyLite, note: "7 days" },
+    { label: "Weekly Card", price: 1.89, img: ffWeeklyCard, note: "7 days" },
+    { label: "Monthly Card", price: 8.19, img: ffMonthlyCard, note: "30 days" },
+    { label: "Level Up Pack Lv6", price: 0.39 },
+    { label: "Level Up Pack Lv10", price: 0.89 },
+    { label: "Level Up Pack Lv15", price: 0.89 },
+    { label: "Level Up Pack Lv20", price: 0.89 },
+    { label: "Level Up Pack Lv25", price: 0.89 },
+    { label: "Level Up Pack Lv30", price: 1.19 },
+  ],
+  ff_vn: [
+    { label: "Weekly Lite", price: 0.59, img: ffWeeklyLite, note: "7 days" },
+    { label: "Weekly Card", price: 2.19, img: ffWeeklyCard, note: "7 days" },
+    { label: "Monthly Card", price: 9.19, img: ffMonthlyCard, note: "30 days" },
+  ],
+  ff_id: [
+    { label: "Weekly Card", price: 1.69, img: ffWeeklyCard, note: "7 days" },
+    { label: "Monthly Card", price: 4.89, img: ffMonthlyCard, note: "30 days" },
+    { label: "BP Card", price: 2.69 },
+    { label: "Level Up Pack Lv6", price: 0.39 },
+    { label: "Level Up Pack Lv10", price: 0.59 },
+    { label: "Level Up Pack Lv15", price: 0.59 },
+    { label: "Level Up Pack Lv20", price: 0.59 },
+    { label: "Level Up Pack Lv25", price: 0.59 },
+    { label: "Level Up Pack Lv30", price: 0.99 },
   ],
   pubg: [
     { label: "First Purchase Pack", price: 1.19 },

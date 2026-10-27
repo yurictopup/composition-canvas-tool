@@ -86,13 +86,14 @@ describe("Roblox Game Pass price", () => {
   });
 });
 
-describe("MLBB servers", () => {
+describe("Game servers", () => {
   it("has a tab, packages and a FazerCards category per server", async () => {
     const { gameServers, getPackages, baseGameId } = await import("@/lib/games");
     const { fazerCatalog } = await import("@/lib/fazercards-catalog");
     expect(gameServers["mlbb"]!.map((s) => s.id)).toEqual(["mlbb", "mlbb_ph", "mlbb_my"]);
-    for (const { id } of gameServers["mlbb"]!) {
-      expect(baseGameId(id)).toBe("mlbb");
+    expect(gameServers["ff"]!.map((s) => s.id)).toEqual(["ff", "ff_sg", "ff_ph", "ff_vn", "ff_id"]);
+    for (const { id } of [...gameServers["mlbb"]!, ...gameServers["ff"]!]) {
+      expect(baseGameId(id)).toBe(id.split("_")[0]);
       expect(getPackages(id).length).toBeGreaterThan(5);
       expect(fazerCatalog[id]).toBeDefined();
     }
