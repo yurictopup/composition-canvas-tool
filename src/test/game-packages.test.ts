@@ -85,3 +85,16 @@ describe("Roblox Game Pass price", () => {
     expect(Math.floor(robloxGamePassPrice(500) * 0.7)).toBeGreaterThanOrEqual(500);
   });
 });
+
+describe("MLBB servers", () => {
+  it("has a tab, packages and a FazerCards category per server", async () => {
+    const { gameServers, getPackages, baseGameId } = await import("@/lib/games");
+    const { fazerCatalog } = await import("@/lib/fazercards-catalog");
+    expect(gameServers["mlbb"]!.map((s) => s.id)).toEqual(["mlbb", "mlbb_ph", "mlbb_my"]);
+    for (const { id } of gameServers["mlbb"]!) {
+      expect(baseGameId(id)).toBe("mlbb");
+      expect(getPackages(id).length).toBeGreaterThan(5);
+      expect(fazerCatalog[id]).toBeDefined();
+    }
+  });
+});

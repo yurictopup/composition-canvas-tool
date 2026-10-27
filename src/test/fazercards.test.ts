@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { gamePackages, games, hotItemsByGame } from "@/lib/games";
+import { findGame, gamePackages, hotItemsByGame } from "@/lib/games";
 import { packageKey } from "@/lib/prices";
 import { fazerCatalog } from "@/lib/fazercards-catalog";
 import { buildFields, checkFazerOrder, mapFazerStatus, placeFazerOrder } from "@/lib/fazercards";
@@ -44,7 +44,7 @@ const offersBody = {
 describe("FazerCards catalog", () => {
   it("only names packages the store sells", () => {
     for (const [gameId, game] of Object.entries(fazerCatalog)) {
-      const unit = games.find((g) => g.id === gameId)!.unit;
+      const unit = findGame(gameId)!.unit;
       const ours = new Set([
         ...(gamePackages[gameId] ?? []).map((p) => packageKey(p.amt, unit)),
         ...(hotItemsByGame[gameId] ?? []).map((h) => packageKey(h.label, unit)),

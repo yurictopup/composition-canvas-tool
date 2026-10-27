@@ -49,8 +49,28 @@ export const games = [
 
 export type Game = (typeof games)[number];
 
+// Other servers of a game. Each is its own game id (own packages, prices and FazerCards
+// category) but is reached from the main game's page through the server tabs.
+export const serverGames: (Game & { base: string; server: string })[] = [
+  { id: "mlbb_ph", name: "Mobile Legends (Philippines)", icon: mlbb, unit: "Diamonds", blurb: "MLBB Philippines server", base: "mlbb", server: "Philippines" },
+  { id: "mlbb_my", name: "Mobile Legends (Malaysia)", icon: mlbb, unit: "Diamonds", blurb: "MLBB Malaysia server", base: "mlbb", server: "Malaysia" },
+];
+
+/** Server tabs shown on a game page; the first is the main game. */
+export const gameServers: Record<string, { id: string; label: string }[]> = {
+  mlbb: [
+    { id: "mlbb", label: "Cambodia / Global" },
+    ...serverGames.filter((g) => g.base === "mlbb").map((g) => ({ id: g.id, label: g.server })),
+  ],
+};
+
 export function findGame(id: string | undefined): Game | undefined {
-  return games.find((g) => g.id === id);
+  return games.find((g) => g.id === id) ?? serverGames.find((g) => g.id === id);
+}
+
+/** The main game of a server variant (same Player ID rules and name check). */
+export function baseGameId(id: string): string {
+  return serverGames.find((g) => g.id === id)?.base ?? id;
 }
 
 export type GamePackage = { amt: string; price: number | null; hot?: boolean; img?: string };
@@ -96,6 +116,33 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "5532", price: 74.29 },
     { amt: "7502", price: 121.59 },
     { amt: "9288", price: 124.49 },
+  ],
+  mlbb_ph: [
+    { amt: "11", price: 0.29 },
+    { amt: "22", price: 0.49 },
+    { amt: "56", price: 1.09 },
+    { amt: "112", price: 1.89 },
+    { amt: "168", price: 2.99 },
+    { amt: "223", price: 3.69 },
+    { amt: "336", price: 5.49 },
+    { amt: "570", price: 8.89, hot: true },
+    { amt: "1163", price: 17.69 },
+    { amt: "2398", price: 34.59 },
+    { amt: "6042", price: 86.39 },
+  ],
+  mlbb_my: [
+    { amt: "14", price: 0.39 },
+    { amt: "42", price: 0.89 },
+    { amt: "70", price: 1.29 },
+    { amt: "140", price: 2.59 },
+    { amt: "284", price: 5.19 },
+    { amt: "355", price: 6.29 },
+    { amt: "429", price: 7.49 },
+    { amt: "716", price: 12.49, hot: true },
+    { amt: "1084", price: 18.59 },
+    { amt: "1446", price: 23.29 },
+    { amt: "2976", price: 48.19 },
+    { amt: "7502", price: 119.19 },
   ],
   ff: [
     { amt: "25", price: 0.29 },
@@ -329,6 +376,24 @@ export const hotItemsByGame: Record<string, HotItem[]> = {
     { label: "First Top-Up 150 + 15", price: 2.49 },
     { label: "First Top-Up 250 + 25", price: 3.89 },
     { label: "First Top-Up 500 + 65", price: 7.69 },
+  ],
+  mlbb_ph: [
+    { label: "Weekly Pass", price: 1.99, img: mlbbWeeklyPass },
+    { label: "Twilight Pass", price: 9.09, img: mlbbTwilight },
+    { label: "First Top-Up 50 + 5", price: 1.09 },
+    { label: "First Top-Up 150 + 15", price: 2.69 },
+    { label: "First Top-Up 250 + 25", price: 4.49 },
+    { label: "First Top-Up 500 + 65", price: 8.79 },
+  ],
+  mlbb_my: [
+    { label: "Weekly Pass", price: 2.19, img: mlbbWeeklyPass },
+    { label: "Weekly Elite Pack", price: 1.19, img: mlbbWeeklyX3 },
+    { label: "Monthly Elite Pack", price: 5.09 },
+    { label: "Twilight Pass", price: 9.19, img: mlbbTwilight },
+    { label: "First Top-Up 50 + 5", price: 1.19 },
+    { label: "First Top-Up 150 + 15", price: 3.09 },
+    { label: "First Top-Up 250 + 25", price: 5.09 },
+    { label: "First Top-Up 500 + 65", price: 9.89 },
   ],
   ff: [
     { label: "Weekly Lite", price: 0.39, img: ffWeeklyLite, note: "7 days" },
