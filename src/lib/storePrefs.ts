@@ -110,6 +110,7 @@ const KM: Record<string, string> = {
   "7 days": "៧ ថ្ងៃ",
   "30 days": "៣០ ថ្ងៃ",
   "Recommended for You": "ណែនាំសម្រាប់អ្នក",
+  "More items": "កញ្ចប់ និង Pass ផ្សេងៗ",
   "No packages available yet.": "មិនទាន់មានកញ្ចប់ទេ",
   Game: "ហ្គេម",
   "Player ID": "Player ID",

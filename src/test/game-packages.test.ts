@@ -2,17 +2,10 @@ import { describe, expect, it } from "vitest";
 import { gamePackages, getPackages } from "@/lib/games";
 
 describe("Per-game packages", () => {
-  it("MLBB lists real diamond denominations", () => {
-    expect(getPackages("mlbb").map((p) => p.amt)).toEqual([
-      "86",
-      "172",
-      "257",
-      "706",
-      "2195",
-      "3688",
-      "5532",
-      "9288",
-    ]);
+  it("MLBB keeps the Cambodian reseller packs among the FazerCards denominations", () => {
+    const amts = getPackages("mlbb").map((p) => p.amt);
+    for (const amt of ["86", "172", "257", "706", "2195", "3688", "5532", "9288"]) expect(amts).toContain(amt);
+    expect(amts.map(Number)).toEqual([...amts.map(Number)].sort((x, y) => x - y));
   });
 
   it("Free Fire lists real diamond denominations", () => {
@@ -24,6 +17,7 @@ describe("Per-game packages", () => {
       "1060",
       "2180",
       "5600",
+      "11500",
     ]);
   });
 
@@ -45,10 +39,11 @@ describe("Per-game packages", () => {
       "240",
       "400",
       "560",
-      "800",
-      "1200",
-      "2400",
-      "4000",
+      "830",
+      "1245",
+      "2508",
+      "4180",
+      "8360",
     ]);
   });
 

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import { lookupPlayer } from "@/lib/player-lookup.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowUp, Check, CircleAlert, CircleCheck, Receipt, ShoppingCart, Sparkles, Star, Wallet } from "lucide-react";
+import { ArrowUp, Check, CircleAlert, CircleCheck, Package, Receipt, ShoppingCart, Sparkles, Star, Wallet } from "lucide-react";
 import { livePrice, packageKey, useLivePrices } from "@/lib/prices";
 
 export const Route = createFileRoute("/game/$gameId")({
@@ -74,7 +74,10 @@ function GamePage({ gameId }: { gameId: string }) {
     price: livePrice(prices, gameId, packageKey(item.label, game.unit), item.price),
   }));
   // Badged items (the bundle) run full width on top; the rest sit in centred rows below.
-  const featuredHot = hotItems.filter((item) => item.badge);
+  const featuredHot = hotItems.filter((item) => item.img && item.badge);
+  const pictureHot = hotItems.filter((item) => item.img && !item.badge);
+  // Passes and packs without artwork list as plain cards under "More items".
+  const moreItems = hotItems.filter((item) => !item.img);
   function renderHot(item: (typeof hotItems)[number], wide = false) {
     const i = hotItems.indexOf(item);
     return (
@@ -309,14 +312,14 @@ function GamePage({ gameId }: { gameId: string }) {
             {t("Choose a package")}
           </h2>
 
-          {hotItems.length > 0 && (
+          {featuredHot.length + pictureHot.length > 0 && (
             <div className="mb-5">
               <p className="mb-3 flex items-center gap-2 text-sm font-bold text-amber-600"><Sparkles className="h-4 w-4" /> {t("Recommended for You")}</p>
               {featuredHot.length > 0 && (
                 <div className="mb-3 space-y-3">{featuredHot.map((item) => renderHot(item, true))}</div>
               )}
               <div className="mb-3 flex flex-wrap justify-center gap-3">
-                {hotItems.filter((item) => !item.badge).map((item) => (
+                {pictureHot.map((item) => (
                   <div key={item.label} className="w-[calc(50%-0.375rem)] sm:w-[calc((100%-1.5rem)/3)]">{renderHot(item)}</div>
                 ))}
               </div>
@@ -342,6 +345,28 @@ function GamePage({ gameId }: { gameId: string }) {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">{t("No packages available yet.")}</p>
+          )}
+
+          {moreItems.length > 0 && (
+            <div className="mt-6">
+              <p className="mb-3 flex items-center gap-2 text-sm font-bold text-primary"><Package className="h-4 w-4" /> {t("More items")}</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {moreItems.map((item) => {
+                  const i = hotItems.indexOf(item);
+                  const on = hotPkg === i;
+                  return (
+                    <button key={item.label} type="button" onClick={() => selectHot(i)}
+                      className={`flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${on ? "border-primary bg-primary/10 ring-2 ring-primary" : "border-border/60 bg-white"}`}>
+                      <div className="min-w-0">
+                        <div className={`text-sm font-bold leading-tight ${on ? "text-primary" : "text-card-foreground"}`}>{item.label}</div>
+                        <div className={`mt-1 text-sm font-bold ${on ? "text-primary" : "text-primary/70"}`}>{item.price !== null ? `$${item.price.toFixed(2)}` : "—"}</div>
+                      </div>
+                      <CurrencyIcon gameId={game.id} className={`h-8 w-8 shrink-0 transition-transform ${on ? "scale-125" : ""}`} />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           )}
         </section>
 

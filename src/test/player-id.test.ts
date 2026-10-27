@@ -51,7 +51,7 @@ describe("Game-specific player identifiers", () => {
     }
   });
   it("single-ID games do not ask for a zone", () => {
-    for (const id of ["ff", "pubg", "hok"]) {
+    for (const id of ["ff", "pubg", "hok", "eafc", "hi3"]) {
       expect(getIdConfig(id).secondary).toBeUndefined();
       expect(validatePlayerId(id, "12345678")).toBeNull();
       expect(validatePlayerId(id, "abc")).not.toBeNull();
@@ -61,5 +61,10 @@ describe("Game-specific player identifiers", () => {
     expect(getIdConfig("roblox").primary.numeric).not.toBe(true);
     expect(validatePlayerId("roblox", "Yuric_Player")).toBeNull();
     expect(validatePlayerId("roblox", "")).not.toBeNull();
+  });
+  it("League of Legends takes a Riot ID and tagline like Valorant", () => {
+    expect(getIdConfig("lol").secondary?.label).toBe("Tagline");
+    expect(validatePlayerId("lol", "Yuric", "#KH1")).toBeNull();
+    expect(validatePlayerId("lol", "Yuric#KH1")).not.toBeNull();
   });
 });

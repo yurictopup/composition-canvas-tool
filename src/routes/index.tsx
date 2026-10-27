@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const gameTabs = [
   { id: "all", label: "All", items: games },
-  ...["mlbb", "ff", "roblox", "pubg"].map((id) => ({
+  ...["mlbb", "ff", "pubg"].map((id) => ({
     id,
     label: games.find((game) => game.id === id)?.name ?? id,
     items: games.filter((game) => game.id === id),
@@ -18,7 +18,7 @@ const gameTabs = [
   {
     id: "other",
     label: "Others",
-    items: games.filter((game) => !["mlbb", "ff", "roblox", "pubg"].includes(game.id)),
+    items: games.filter((game) => !["mlbb", "ff", "pubg"].includes(game.id)),
   },
 ];
 
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "បញ្ចូលពេជ្រ Mobile Legends, Free Fire, Roblox, PUBG UC — លឿន សុវត្ថិភាព តាម Bakong",
+          "បញ្ចូលពេជ្រ Mobile Legends, Free Fire, PUBG UC — លឿន សុវត្ថិភាព តាម Bakong",
       },
       { property: "og:title", content: "Yuric Topup — បញ្ចូលពេជ្រហ្គេម 3D" },
       {

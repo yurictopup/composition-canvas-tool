@@ -25,6 +25,9 @@ export const idConfigs: Record<string, IdConfig> = {
   valorant: { primary: { label: "Riot ID", placeholder: "Riot ID" }, secondary: { label: "Tagline", placeholder: "#XXXX" }, requiresLookup: true },
   deltaforce: { primary: { label: "Player ID", placeholder: "Player ID", numeric: true }, requiresLookup: true },
   arenabreakout: { primary: { label: "Player ID", placeholder: "Player ID", numeric: true }, requiresLookup: true },
+  eafc: { primary: { label: "Player ID", placeholder: "Player ID", numeric: true }, requiresLookup: true },
+  lol: { primary: { label: "Riot ID", placeholder: "Riot ID" }, secondary: { label: "Tagline", placeholder: "#XXXX" }, requiresLookup: true },
+  hi3: { primary: { label: "UID", placeholder: "UID", numeric: true }, requiresLookup: true },
   brawlstars: { primary: { label: "Player Tag", placeholder: "#XXXXXX" }, requiresLookup: true },
   clashroyale: { primary: { label: "Player Tag", placeholder: "#XXXXXX" }, requiresLookup: true },
 };
@@ -47,7 +50,7 @@ export function validatePlayerId(gameId: string, primary: string, secondary = ""
     if (!/^\d+$/.test(id)) return "User ID must be numeric.";
     return /^\d+$/.test(secondary.trim()) ? null : "Please enter a numeric Zone ID.";
   }
-  if (gameId === "wildrift" || gameId === "valorant") {
+  if (gameId === "wildrift" || gameId === "valorant" || gameId === "lol") {
     if (!id || id.includes("#")) return "Enter your Riot ID and put the tagline in the second field.";
     if (!/^#?[a-zA-Z0-9]+$/.test(secondary.trim())) return "Enter a tagline like #XXXX.";
     return null;
@@ -55,7 +58,7 @@ export function validatePlayerId(gameId: string, primary: string, secondary = ""
   if (["coc", "brawlstars", "clashroyale"].includes(gameId)) {
     return /^#[A-Z0-9]+$/i.test(id) ? null : "Player Tag must start with #.";
   }
-  if (["codm", "bloodstrike", "ff", "pubg", "hok", "deltaforce", "arenabreakout"].includes(gameId)) {
+  if (["codm", "bloodstrike", "ff", "pubg", "hok", "deltaforce", "arenabreakout", "eafc", "hi3"].includes(gameId)) {
     return /^\d+$/.test(id) ? null : "ID must be numeric.";
   }
   return /^\d{4,12}$/.test(id) ? null : "ID must be 4-12 digits.";
