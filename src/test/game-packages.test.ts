@@ -77,6 +77,20 @@ describe("Per-game packages", () => {
   });
 });
 
+describe("Package prices", () => {
+  it("never get cheaper as the amount goes up", () => {
+    for (const [gameId, packages] of Object.entries(gamePackages)) {
+      const priced = packages
+        .filter((p) => /^\d+$/.test(p.amt) && p.price !== null)
+        .sort((a, b) => Number(a.amt) - Number(b.amt));
+      for (let i = 1; i < priced.length; i++) {
+        const [a, b] = [priced[i - 1]!, priced[i]!];
+        expect(b.price!, `${gameId}: ${a.amt} costs ${a.price}, ${b.amt} costs ${b.price}`).toBeGreaterThan(a.price!);
+      }
+    }
+  });
+});
+
 describe("Roblox Game Pass price", () => {
   it("grosses up for Roblox's 30% cut so the buyer receives the package amount", async () => {
     const { robloxGamePassPrice } = await import("@/lib/games");
