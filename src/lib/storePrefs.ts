@@ -106,6 +106,7 @@ const KM: Record<string, string> = {
   "Check ID": "ពិនិត្យ ID",
   "Checking…": "កំពុងពិនិត្យ…",
   "Hot Items": "ពេញនិយម",
+  "3 days": "៣ ថ្ងៃ",
   "7 days": "៧ ថ្ងៃ",
   "30 days": "៣០ ថ្ងៃ",
   "Recommended for You": "ណែនាំសម្រាប់អ្នក",

@@ -8,6 +8,9 @@ import ffWeeklyLite from "@/assets/ff-weekly-lite.png";
 import ffWeeklyCard from "@/assets/ff-weekly-card.png";
 import ffMonthlyCard from "@/assets/ff-monthly-card.png";
 import ffMembershipBundle from "@/assets/ff-membership-bundle.png";
+import ffEvo3d from "@/assets/ff-evo-3d.png";
+import ffEvo7d from "@/assets/ff-evo-7d.png";
+import ffEvo30d from "@/assets/ff-evo-30d.png";
 import roblox from "@/assets/roblox.png";
 import magicchess from "@/assets/magicchess.png";
 import pubg from "@/assets/pubg-clean.png";
@@ -227,11 +230,14 @@ export const mlbbHotItems: HotItem[] = [
   { label: "Twilight Pass", price: 8.39, img: mlbbTwilight },
 ];
 
-// Free Fire membership cards, delivered by the team like the diamond packs.
+// Free Fire membership cards and Evo Access, delivered by the team like the diamond packs.
 export const ffHotItems: HotItem[] = [
   { label: "Weekly Lite", price: 0.39, img: ffWeeklyLite, note: "7 days" },
   { label: "Weekly Card", price: 1.59, img: ffWeeklyCard, note: "7 days" },
   { label: "Monthly Card", price: 7.59, img: ffMonthlyCard, note: "30 days" },
+  { label: "Evo 3 Days", price: 0.59, img: ffEvo3d, note: "3 days" },
+  { label: "Evo 7 Days", price: 1.09, img: ffEvo7d, note: "7 days" },
+  { label: "Evo 30 Days", price: 2.99, img: ffEvo30d, note: "30 days" },
   { label: "Bundle M+W+L", price: 9.57, img: ffMembershipBundle, note: "Monthly + Weekly + Lite", badge: "HOT" },
 ];
 
