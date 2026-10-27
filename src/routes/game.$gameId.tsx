@@ -73,6 +73,28 @@ function GamePage({ gameId }: { gameId: string }) {
     ...item,
     price: livePrice(prices, gameId, packageKey(item.label, game.unit), item.price),
   }));
+  // Badged items (the bundle) sit alone on top; each row is centred.
+  const featuredHot = hotItems.filter((item) => item.badge);
+  function renderHot(item: (typeof hotItems)[number]) {
+    const i = hotItems.indexOf(item);
+    return (
+      <button key={item.label} type="button" onClick={() => selectHot(i)}
+        className={`relative flex w-full items-center justify-between gap-2 overflow-hidden rounded-2xl border-2 bg-gradient-to-br from-amber-50 via-white to-amber-50/60 py-4 pl-4 pr-3 text-left shadow-[0_4px_14px_rgba(245,158,11,0.15)] transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(245,158,11,0.3)] ${hotPkg === i ? "border-amber-400 ring-2 ring-amber-300" : "border-amber-200"}`}>
+        <span className="absolute right-0 top-0 flex items-center gap-1 rounded-bl-xl bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[10px] font-bold text-white">
+          <Star className="h-3 w-3 fill-current" /> {item.badge ?? "TOP"}
+        </span>
+        <div className="min-w-0">
+          <div className={`text-sm font-bold leading-tight sm:text-base ${hotPkg === i ? "text-amber-700" : "text-card-foreground"}`}>{item.label}</div>
+          {item.note && <div className="mt-0.5 hidden text-[11px] text-muted-foreground sm:block">{t(item.note)}</div>}
+          <div className="mt-1 text-sm font-bold text-amber-600">{item.price !== null ? `$${item.price.toFixed(2)}` : "—"}</div>
+        </div>
+        <span className="relative mt-3 grid h-14 w-14 shrink-0 place-items-center rounded-full bg-amber-100 shadow-inner">
+          <img src={item.img} alt={item.label} className="h-10 w-12 object-contain" />
+          {hotPkg === i && <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full bg-amber-500 text-white shadow"><Check className="h-3 w-3" strokeWidth={3} /></span>}
+        </span>
+      </button>
+    );
+  }
   const selected =
     hotPkg !== null
       ? { amt: hotItems[hotPkg]!.label, price: hotItems[hotPkg]!.price }
@@ -290,25 +312,13 @@ function GamePage({ gameId }: { gameId: string }) {
           {hotItems.length > 0 && (
             <div className="mb-5">
               <p className="mb-3 flex items-center gap-2 text-sm font-bold text-amber-600"><Sparkles className="h-4 w-4" /> {t("Recommended for You")}</p>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {hotItems.map((item, i) => (
-                  <button key={item.label} onClick={() => selectHot(i)}
-                    className={`relative flex items-center justify-between gap-2 overflow-hidden rounded-2xl border-2 bg-gradient-to-br from-amber-50 via-white to-amber-50/60 py-4 pl-4 pr-3 text-left shadow-[0_4px_14px_rgba(245,158,11,0.15)] transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(245,158,11,0.3)] ${hotPkg === i ? "border-amber-400 ring-2 ring-amber-300" : "border-amber-200"}`}>
-                    <span className="absolute right-0 top-0 flex items-center gap-1 rounded-bl-xl bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[10px] font-bold text-white">
-                      <Star className="h-3 w-3 fill-current" /> {item.badge ?? "TOP"}
-                    </span>
-                    <div className="min-w-0">
-                      <div className={`text-sm font-bold leading-tight sm:text-base ${hotPkg === i ? "text-amber-700" : "text-card-foreground"}`}>{item.label}</div>
-                      {item.note && <div className="mt-0.5 hidden text-[11px] text-muted-foreground sm:block">{t(item.note)}</div>}
-                      <div className="mt-1 text-sm font-bold text-amber-600">{item.price !== null ? `$${item.price.toFixed(2)}` : "—"}</div>
-                    </div>
-                    <span className="relative mt-3 grid h-14 w-14 shrink-0 place-items-center rounded-full bg-amber-100 shadow-inner">
-                      <img src={item.img} alt={item.label} className="h-10 w-12 object-contain" />
-                      {hotPkg === i && <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full bg-amber-500 text-white shadow"><Check className="h-3 w-3" strokeWidth={3} /></span>}
-                    </span>
-                  </button>
-                ))}
-              </div>
+              {[featuredHot, hotItems.filter((item) => !item.badge)].map((row, r) => row.length > 0 && (
+                <div key={r} className="mb-3 flex flex-wrap justify-center gap-3">
+                  {row.map((item) => (
+                    <div key={item.label} className="w-[calc(50%-0.375rem)] sm:w-[calc((100%-1.5rem)/3)]">{renderHot(item)}</div>
+                  ))}
+                </div>
+              ))}
             </div>
           )}
 
