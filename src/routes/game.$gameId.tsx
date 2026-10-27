@@ -238,26 +238,26 @@ function GamePage({ gameId }: { gameId: string }) {
   // ── Main Order Form ───────────────────────────────────────────────────
   return (
     <SiteChrome>
-      <main className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6">
-        <Link to="/" hash="games" className="text-sm text-on-dark-muted transition-colors hover:text-on-dark">← {t("Back to games")}</Link>
+      <main className="mx-auto w-full max-w-[1200px] px-3 py-4 sm:px-6 sm:py-8">
+        <Link to="/" hash="games" className="text-xs text-on-dark-muted transition-colors hover:text-on-dark sm:text-sm">← {t("Back to games")}</Link>
 
-        <div className="card-3d mt-3 flex items-center gap-4 rounded-3xl p-5">
-          <span className="tile-clean block w-20 shrink-0 rounded-[26%] sm:w-24">
+        <div className="card-3d mt-2 flex items-center gap-3 rounded-2xl p-3 sm:mt-3 sm:gap-4 sm:rounded-3xl sm:p-5">
+          <span className="tile-clean block w-14 shrink-0 rounded-[26%] sm:w-24">
             <img src={game.icon} alt={game.name} width={151} height={151} className="block aspect-square w-full object-cover" />
           </span>
           <div>
-            <h1 className="font-display text-2xl font-black">{game.name}</h1>
-            <p className="text-sm text-muted-foreground">{game.blurb} · {t("Delivered in 1-5 minutes")}</p>
+            <h1 className="font-display text-lg font-black sm:text-2xl">{game.name}</h1>
+            <p className="text-xs text-muted-foreground sm:text-sm">{game.blurb} · {t("Delivered in 1-5 minutes")}</p>
           </div>
         </div>
 
         {servers && (
-          <nav aria-label={t("Choose your server")} className="card-3d mt-5 rounded-3xl p-5">
-            <p className="mb-3 flex items-center gap-2 text-sm font-bold"><Globe className="h-4 w-4 text-primary" /> {t("Choose your server")}</p>
+          <nav aria-label={t("Choose your server")} className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
+            <p className="mb-2 flex items-center gap-2 text-sm font-bold sm:mb-3"><Globe className="h-4 w-4 text-primary" /> {t("Choose your server")}</p>
             <div className="grid grid-cols-3 gap-2">
               {servers.map((s) => (
                 <Link key={s.id} to="/game/$gameId" params={{ gameId: s.id }} replace
-                  className={`rounded-xl border px-3 py-2.5 text-center text-sm font-bold transition-colors ${s.id === gameId ? "border-primary bg-primary text-primary-foreground" : "border-border/60 bg-white hover:border-primary"}`}>
+                  className={`rounded-xl border px-2 py-2 text-center text-xs font-bold sm:px-3 sm:py-2.5 sm:text-sm transition-colors ${s.id === gameId ? "border-primary bg-primary text-primary-foreground" : "border-border/60 bg-white hover:border-primary"}`}>
                   {t(s.label)}
                 </Link>
               ))}
@@ -266,27 +266,27 @@ function GamePage({ gameId }: { gameId: string }) {
         )}
 
         {/* Step 1 — Player ID */}
-        <section className="card-3d mt-5 rounded-3xl p-5">
-          <h2 className="mb-4 flex items-center gap-3 font-khmer text-lg">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">1</span>
+        <section className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
+          <h2 className="mb-3 flex items-center gap-2.5 font-khmer text-base sm:mb-4 sm:gap-3 sm:text-lg">
+            <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground sm:h-8 sm:w-8">1</span>
             {t("Enter Player ID")}
           </h2>
           <form onSubmit={(e) => { e.preventDefault(); void runCheck(); }}
             className={`grid items-end gap-3 ${idConfig.secondary ? "sm:grid-cols-[1fr_1fr_auto]" : "sm:grid-cols-[1fr_auto]"}`}>
-            <label className="grid min-w-0 gap-2 text-sm font-semibold">
+            <label className="grid min-w-0 gap-1.5 text-sm font-semibold sm:gap-2">
               {idConfig.primary.label}
               <input value={uid} onChange={(e) => { setUid(e.target.value); resetCheck(); }}
                 placeholder={idConfig.primary.placeholder}
                 inputMode={idConfig.primary.numeric ? "numeric" : "text"}
                 autoComplete="off" spellCheck={false}
-                className={`min-w-0 rounded-lg border bg-input px-4 py-3 font-normal outline-none focus:border-primary ${check && !check.ok ? "border-red-500" : ""}`} />
+                className={`min-w-0 rounded-lg border bg-input px-3 py-2 font-normal sm:px-4 sm:py-3 outline-none focus:border-primary ${check && !check.ok ? "border-red-500" : ""}`} />
             </label>
             {idConfig.secondary && (
-              <label className="grid min-w-0 gap-2 text-sm font-semibold">
+              <label className="grid min-w-0 gap-1.5 text-sm font-semibold sm:gap-2">
                 {idConfig.secondary.label}
                 {idConfig.secondary.options ? (
                   <select value={zone} onChange={(e) => { setZone(e.target.value); resetCheck(); }}
-                    className={`h-12 min-w-0 rounded-lg border bg-input px-4 font-normal outline-none focus:border-primary ${check && !check.ok ? "border-red-500" : ""}`}>
+                    className={`h-11 min-w-0 rounded-lg border bg-input px-3 font-normal sm:h-12 sm:px-4 outline-none focus:border-primary ${check && !check.ok ? "border-red-500" : ""}`}>
                     <option value="">{idConfig.secondary.placeholder}</option>
                     {idConfig.secondary.options.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
@@ -295,11 +295,11 @@ function GamePage({ gameId }: { gameId: string }) {
                     placeholder={idConfig.secondary.placeholder}
                     inputMode={idConfig.secondary.numeric ? "numeric" : "text"}
                     autoComplete="off" spellCheck={false}
-                    className={`min-w-0 rounded-lg border bg-input px-4 py-3 font-normal outline-none focus:border-primary ${check && !check.ok ? "border-red-500" : ""}`} />
+                    className={`min-w-0 rounded-lg border bg-input px-3 py-2 font-normal sm:px-4 sm:py-3 outline-none focus:border-primary ${check && !check.ok ? "border-red-500" : ""}`} />
                 )}
               </label>
             )}
-            <Button type="submit" disabled={checking} className="h-12 px-6 font-bold">{checking ? t("Checking…") : t("Check ID")}</Button>
+            <Button type="submit" disabled={checking} className="h-10 px-6 font-bold sm:h-12">{checking ? t("Checking…") : t("Check ID")}</Button>
           </form>
           {check && (
             <p
@@ -320,9 +320,9 @@ function GamePage({ gameId }: { gameId: string }) {
         </section>
 
         {/* Step 2 — Package */}
-        <section className="card-3d mt-5 rounded-3xl p-5">
-          <h2 className="mb-4 flex items-center gap-3 font-khmer text-lg">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">2</span>
+        <section className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
+          <h2 className="mb-3 flex items-center gap-2.5 font-khmer text-base sm:mb-4 sm:gap-3 sm:text-lg">
+            <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground sm:h-8 sm:w-8">2</span>
             {t("Choose a package")}
           </h2>
 
@@ -341,19 +341,19 @@ function GamePage({ gameId }: { gameId: string }) {
           )}
 
           {availablePackages.length > 0 ? (
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3">
               {availablePackages.map((p, i) => (
                 <button key={p.amt} onClick={() => selectPkg(i)}
-                  className={`relative flex items-center justify-between rounded-2xl border px-4 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${pkg === i && hotPkg === null ? "border-primary bg-primary/10 ring-2 ring-primary shadow-[0_0_16px_oklch(0.42_0.19_266/0.35)]" : "border-border/60 bg-white"}`}>
+                  className={`relative flex items-center justify-between rounded-xl border px-2.5 py-2 text-left sm:rounded-2xl sm:px-4 sm:py-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${pkg === i && hotPkg === null ? "border-primary bg-primary/10 ring-2 ring-primary shadow-[0_0_16px_oklch(0.42_0.19_266/0.35)]" : "border-border/60 bg-white"}`}>
                   {p.hot && <span className="absolute -top-2 right-2 rounded-full bg-accent px-2 text-[10px] font-bold text-accent-foreground">HOT</span>}
                   <div>
-                    <div className={`text-base font-bold ${pkg === i && hotPkg === null ? "text-primary" : "text-card-foreground"}`}>{p.amt}</div>
+                    <div className={`text-sm font-bold sm:text-base ${pkg === i && hotPkg === null ? "text-primary" : "text-card-foreground"}`}>{p.amt}</div>
                     <div className="text-xs text-muted-foreground">{game.unit}</div>
                     <div className={`mt-1 text-sm font-bold ${pkg === i && hotPkg === null ? "text-primary" : "text-primary/70"}`}>
                       {p.price !== null ? `$${p.price.toFixed(2)}` : "—"}
                     </div>
                   </div>
-                  <CurrencyIcon gameId={idGameId} className={`h-9 w-9 shrink-0 transition-transform ${pkg === i && hotPkg === null ? "scale-125" : ""}`} />
+                  <CurrencyIcon gameId={idGameId} className={`h-7 w-7 shrink-0 transition-transform sm:h-9 sm:w-9 ${pkg === i && hotPkg === null ? "scale-125" : ""}`} />
                 </button>
               ))}
             </div>
@@ -387,9 +387,9 @@ function GamePage({ gameId }: { gameId: string }) {
         </section>
 
         {/* Step 3 — Payment */}
-        <section className="card-3d mt-5 rounded-3xl p-5">
-          <h2 className="mb-4 flex items-center gap-3 font-khmer text-lg">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">3</span>
+        <section className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
+          <h2 className="mb-3 flex items-center gap-2.5 font-khmer text-base sm:mb-4 sm:gap-3 sm:text-lg">
+            <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground sm:h-8 sm:w-8">3</span>
             {t("Choose a payment method")}
           </h2>
           <div className="flex flex-wrap gap-3">
@@ -399,7 +399,7 @@ function GamePage({ gameId }: { gameId: string }) {
                 type="button"
                 onClick={() => setPay(m)}
                 aria-pressed={pay === m}
-                className={`relative flex aspect-square w-44 flex-col items-center justify-center gap-2.5 rounded-2xl border-2 bg-white px-4 text-center text-[#142650] transition ${
+                className={`relative flex aspect-square w-36 flex-col items-center justify-center gap-2 sm:w-44 sm:gap-2.5 rounded-2xl border-2 bg-white px-4 text-center text-[#142650] transition ${
                   pay === m
                     ? "border-[#2f5fe0] shadow-[0_6px_18px_rgb(47_95_224/0.25)]"
                     : "border-[#dfe8f6] hover:border-[#2f5fe0]/50"
@@ -421,8 +421,8 @@ function GamePage({ gameId }: { gameId: string }) {
         </section>
 
         {/* Summary */}
-        <aside className="card-3d mt-5 rounded-3xl p-5">
-          <h3 className="font-khmer text-lg">{t("Order summary")}</h3>
+        <aside className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
+          <h3 className="font-khmer text-base sm:text-lg">{t("Order summary")}</h3>
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between"><dt className="text-muted-foreground">{t("Game")}</dt><dd>{game.name}</dd></div>
             <div className="flex justify-between"><dt className="text-muted-foreground">{t("Player ID")}</dt><dd>{uid || "—"}{zone && ` (${zone})`}</dd></div>
@@ -431,7 +431,7 @@ function GamePage({ gameId }: { gameId: string }) {
           </dl>
           <div className="mt-4 flex items-end justify-between border-t pt-4">
             <span className="text-muted-foreground">{t("Total")}</span>
-            <span className="font-display text-3xl font-black text-accent">
+            <span className="font-display text-2xl font-black text-accent sm:text-3xl">
               {selected?.price != null ? `$${selected.price.toFixed(2)}` : "—"}
             </span>
           </div>
@@ -443,7 +443,7 @@ function GamePage({ gameId }: { gameId: string }) {
           <button
             disabled={!canBuy}
             onClick={handleBuy}
-            className="btn-3d glow-pulse mt-5 w-full rounded-xl py-4 font-display font-bold disabled:opacity-40"
+            className="btn-3d glow-pulse mt-4 w-full rounded-xl py-3 sm:mt-5 sm:py-4 font-display font-bold disabled:opacity-40"
           >
             {busy ? t("Processing…") : <span className="inline-flex items-center gap-2"><ShoppingCart className="h-4 w-4" />{t("Place Order")}</span>}
           </button>
@@ -462,7 +462,7 @@ function GamePage({ gameId }: { gameId: string }) {
 // Red KHQR badge, the mark Cambodian bank apps show for Bakong QR payments.
 function KhqrMark() {
   return (
-    <span className="flex h-16 w-24 shrink-0 flex-col items-center justify-center rounded-[3px] bg-[#E1232E] text-white shadow-[0_3px_10px_rgb(225_35_46/0.35)]">
+    <span className="flex h-12 w-20 shrink-0 sm:h-16 sm:w-24 flex-col items-center justify-center rounded-[3px] bg-[#E1232E] text-white shadow-[0_3px_10px_rgb(225_35_46/0.35)]">
       <span className="text-xl font-extrabold leading-none tracking-wide">KHQR</span>
       <span className="mt-1.5 h-[3px] w-12 rounded bg-white/70" />
     </span>

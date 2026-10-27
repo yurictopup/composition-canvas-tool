@@ -78,6 +78,12 @@
 @layer base {
   * { border-color: var(--color-border); }
   html { background: var(--color-background); }
+  /* Phones: the storefront runs one notch smaller (rem sizes scale down 12.5%).
+     Form fields stay 16px so iOS Safari does not zoom in on focus. */
+  @media (max-width: 639px) {
+    html:has(.store-chrome) { font-size: 14px; }
+    .store-chrome :is(input, select, textarea) { font-size: 16px; }
+  }
   body {
     background: transparent;
     color: var(--color-foreground);

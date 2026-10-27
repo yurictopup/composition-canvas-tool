@@ -19,10 +19,10 @@ function TelegramIcon({ size = 18 }: { size?: number }) {
 function Brand() {
   return (
     <Link to="/" className="flex items-center gap-2.5">
-      <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand-400 to-brand-700 text-white shadow-[0_6px_18px_rgb(47_95_224/0.45)]">
-        <Gem size={20} strokeWidth={2.2} />
+      <span className="grid h-8 w-8 place-items-center rounded-lg sm:h-10 sm:w-10 sm:rounded-xl bg-gradient-to-br from-brand-400 to-brand-700 text-white shadow-[0_6px_18px_rgb(47_95_224/0.45)]">
+        <Gem className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2.2} />
       </span>
-      <span className="font-display text-xl font-black tracking-wide text-on-dark">
+      <span className="font-display text-base font-black tracking-wide text-on-dark sm:text-xl">
         YURIC<span className="text-brand-400"> TOPUP</span>
       </span>
     </Link>
@@ -47,7 +47,7 @@ function TelegramButton() {
       href={telegramUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="store-footer-chip px-4 py-2 text-sm hover:border-brand-400 hover:text-brand-400"
+      className="store-footer-chip px-3 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm hover:border-brand-400 hover:text-brand-400"
     >
       <TelegramIcon size={15} />
       Telegram
@@ -58,7 +58,7 @@ function TelegramButton() {
 function Copyright() {
   const { t } = useStorePrefs();
   return (
-    <p className="text-xs text-on-dark-muted">
+    <p className="text-[11px] text-on-dark-muted sm:text-xs">
       © 2026 {store.name}. {t("All rights reserved.")}
     </p>
   );
@@ -68,19 +68,19 @@ function Copyright() {
    kept at 15px+ with tall line height so vowel marks don't clip. */
 export function StoreFooter() {
   const { t } = useStorePrefs();
-  const head = "mb-3 font-khmer text-lg font-normal leading-[1.9] tracking-wide text-on-dark";
+  const head = "mb-1.5 font-khmer text-[14px] sm:mb-3 sm:text-lg font-normal leading-[1.9] tracking-wide text-on-dark";
   const link =
-    "flex items-center gap-2 text-sm text-on-dark-muted transition-colors hover:text-brand-400";
-  const khLink = `${link} font-khmer text-[15px] leading-[1.9] tracking-wide`;
+    "flex items-center gap-2 text-xs sm:text-sm text-on-dark-muted transition-colors hover:text-brand-400";
+  const khLink = `${link} font-khmer text-[13px] sm:text-[15px] leading-[1.9] tracking-wide`;
   return (
-    <footer id="help" className="store-footer mt-10">
-      <div className="mx-auto grid w-full max-w-[1500px] grid-cols-2 gap-x-6 gap-y-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr]">
-        <div className="col-span-2 lg:col-span-1">
+    <footer id="help" className="store-footer mt-6 sm:mt-10">
+      <div className="mx-auto grid w-full max-w-[1500px] grid-cols-2 gap-x-4 gap-y-6 px-4 py-7 sm:gap-x-6 sm:gap-y-10 sm:px-6 sm:py-12 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr]">
+        <div className="col-span-2 flex flex-col items-center border-b border-[var(--store-footer-line)] pb-6 text-center sm:block sm:border-0 sm:pb-0 sm:text-left lg:col-span-1">
           <Brand />
-          <p className="mt-4 max-w-xs font-khmer text-[15px] leading-[1.9] tracking-wide text-on-dark-muted">
+          <p className="mt-2 max-w-xs font-khmer text-[13px] sm:mt-4 sm:text-[15px] leading-[1.9] tracking-wide text-on-dark-muted">
             {t("Fast and safe game top-ups in Cambodia.")}
           </p>
-          <div className="mt-5 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap justify-center gap-1.5 sm:mt-5 sm:justify-start sm:gap-2">
             {[
               { Icon: Zap, label: "1-5 min" },
               { Icon: ShieldCheck, label: "Safe payment" },
@@ -88,9 +88,9 @@ export function StoreFooter() {
             ].map(({ Icon, label }) => (
               <span
                 key={label}
-                className="store-footer-chip font-khmer text-[14px] leading-[1.9] tracking-wide"
+                className="store-footer-chip font-khmer text-[12px] leading-[1.9] tracking-wide sm:text-[14px]"
               >
-                <Icon size={14} className="text-brand-400" />
+                <Icon className="h-3 w-3 text-brand-400 sm:h-3.5 sm:w-3.5" />
                 {t(label)}
               </span>
             ))}
@@ -98,7 +98,7 @@ export function StoreFooter() {
         </div>
         <div>
           <h3 className={head}>{t("Menu")}</h3>
-          <ul className="space-y-3">
+          <ul className="space-y-1.5 sm:space-y-3">
             <li>
               <Link to="/" className={khLink}>
                 <Home size={15} />
@@ -121,39 +121,41 @@ export function StoreFooter() {
         </div>
         <div>
           <h3 className={head}>{t("Popular games")}</h3>
-          <ul className="space-y-2.5">
+          <ul className="space-y-2 sm:space-y-2.5">
             {popular.map((g) => (
               <li key={g.id}>
                 <Link to="/game/$gameId" params={{ gameId: g.id }} className={link}>
-                  <img src={g.icon} alt="" className="h-6 w-6 rounded-md object-cover" />
+                  <img src={g.icon} alt="" className="h-5 w-5 rounded-md object-cover sm:h-6 sm:w-6" />
                   {g.name}
                 </Link>
               </li>
             ))}
           </ul>
         </div>
-        <div className="store-footer-card col-span-2 p-5 lg:col-span-1">
-          <h3 className="font-khmer text-xl font-normal leading-[1.9] tracking-wide text-on-dark">
+        <div className="store-footer-card col-span-2 p-4 sm:p-5 lg:col-span-1">
+          <h3 className="font-khmer text-[15px] sm:text-xl font-normal leading-[1.9] tracking-wide text-on-dark">
             {t("Need help?")}
           </h3>
-          <p className="mt-1 font-khmer text-[15px] leading-[1.9] tracking-wide text-on-dark-muted">
+          <p className="mt-0.5 font-khmer text-[13px] sm:mt-1 sm:text-[15px] leading-[1.9] tracking-wide text-on-dark-muted">
             {t("Message us, we reply 24 hours.")}
           </p>
-          <div className="mt-4">
+          <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 sm:mt-0 sm:block">
+          <div className="sm:mt-4">
             <TelegramButton />
           </div>
-          <div className="mt-5 border-t border-[var(--store-footer-line)] pt-4">
-            <p className="mb-2 font-khmer text-[15px] leading-[1.9] tracking-wide text-on-dark-muted">
+          <div className="flex items-center gap-2 sm:mt-5 sm:block sm:border-t sm:border-[var(--store-footer-line)] sm:pt-4">
+            <p className="font-khmer text-[13px] sm:mb-2 sm:text-[15px] leading-[1.9] tracking-wide text-on-dark-muted">
               {t("We accept")}
             </p>
             <KhqrBadge />
           </div>
+          </div>
         </div>
       </div>
       <div className="border-t border-[var(--store-footer-line)]">
-        <div className="mx-auto flex w-full max-w-[1500px] flex-col items-center justify-between gap-2 px-4 py-5 pb-20 sm:flex-row sm:px-6 sm:pb-5 sm:pr-24">
+        <div className="mx-auto flex w-full max-w-[1500px] flex-row items-center justify-between gap-2 px-4 py-3 pb-20 sm:py-5 sm:px-6 sm:pb-5 sm:pr-24">
           <Copyright />
-          <p className="font-khmer text-[15px] leading-[1.9] tracking-wide text-on-dark-muted">
+          <p className="font-khmer text-[13px] leading-[1.9] tracking-wide text-on-dark-muted sm:text-[15px]">
             {t("Made in Cambodia")}
           </p>
         </div>
