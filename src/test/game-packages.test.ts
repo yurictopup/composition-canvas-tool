@@ -98,4 +98,13 @@ describe("Game servers", () => {
       expect(fazerCatalog[id]).toBeDefined();
     }
   });
+
+  it("sells on each server page only that server's own FazerCards diamonds", async () => {
+    const { gameServers, getPackages } = await import("@/lib/games");
+    const { fazerCatalog } = await import("@/lib/fazercards-catalog");
+    for (const { id } of [...gameServers["mlbb"]!, ...gameServers["ff"]!]) {
+      const offers = Object.keys(fazerCatalog[id]!.offers);
+      for (const p of getPackages(id)) expect(offers, `${id} ${p.amt}`).toContain(`${p.amt} Diamonds`);
+    }
+  });
 });
