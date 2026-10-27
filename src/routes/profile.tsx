@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
+import { Gamepad2, Inbox, Package } from "lucide-react";
 import banner from "@/assets/banner-angkor.png";
 import { games, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
@@ -85,13 +86,15 @@ function Profile() {
 
         {/* My Orders */}
         <section className="card-3d mt-5 rounded-3xl p-5 sm:p-7">
-          <h2 className="font-display text-xl font-bold mb-4">📦 My Orders</h2>
+          <h2 className="mb-4 flex items-center gap-2 font-display text-xl font-bold">
+            <Package className="h-5 w-5 text-primary" aria-hidden="true" /> My Orders
+          </h2>
 
           {loading ? (
             <p className="text-center text-muted-foreground py-8">Loading orders…</p>
           ) : orders.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border/60 p-8 text-center text-muted-foreground text-sm">
-              <div className="text-3xl mb-2">📭</div>
+              <Inbox className="mx-auto mb-2 h-8 w-8" aria-hidden="true" />
               <p>មិនទាន់មាន orders ទេ</p>
               <Link to="/" className="mt-3 inline-block text-primary font-semibold hover:underline">
                 ← ទៅ Top Up ឥឡូវ
@@ -135,7 +138,9 @@ function Profile() {
 
         {/* All Games */}
         <section className="card-3d mt-5 rounded-3xl p-5 sm:p-7">
-          <h2 className="font-display text-xl font-bold">🎮 All Games</h2>
+          <h2 className="flex items-center gap-2 font-display text-xl font-bold">
+            <Gamepad2 className="h-5 w-5 text-primary" aria-hidden="true" /> All Games
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">Tap a game to top up.</p>
           <div className="mt-6 grid grid-cols-3 gap-4 sm:grid-cols-6 sm:gap-5">
             {games.map((g, i) => (

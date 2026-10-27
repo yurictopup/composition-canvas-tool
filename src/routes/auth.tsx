@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { AlertTriangle, CheckCircle2, Eye, EyeOff, Gem, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteChrome } from "@/components/SiteChrome";
 import { Button } from "@/components/ui/button";
@@ -92,7 +93,7 @@ function AuthPage() {
       <main className="mx-auto flex w-full max-w-[480px] flex-1 items-center px-4 py-10 sm:px-6">
         <section className="card-3d w-full rounded-3xl p-6 sm:p-8">
           <div className="mb-6 text-center">
-            <div className="text-3xl mb-2">💎</div>
+            <Gem className="mx-auto mb-2 h-8 w-8 text-primary" aria-hidden="true" />
             <h1 className="font-display text-2xl font-black">
               {mode === "login" ? "Sign In" : "Sign Up"}
             </h1>
@@ -134,7 +135,7 @@ function AuthPage() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-lg text-muted-foreground hover:text-foreground"
                   aria-label={showPw ? "Hide password" : "Show password"}
                 >
-                  {showPw ? "🙈" : "👁️"}
+                  {showPw ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </label>
@@ -164,13 +165,19 @@ function AuthPage() {
 
           {msg && (
             <p role="status" className={`mt-4 text-center text-sm font-semibold ${msg.ok ? "text-primary" : "text-destructive"}`}>
-              {msg.ok ? "✅" : "⚠️"} {msg.text}
+              {msg.ok ? (
+                <CheckCircle2 className="mr-1 inline h-4 w-4 align-[-3px]" aria-hidden="true" />
+              ) : (
+                <AlertTriangle className="mr-1 inline h-4 w-4 align-[-3px]" aria-hidden="true" />
+              )}
+              {msg.text}
             </p>
           )}
 
           {/* Security note */}
           <div className="mt-5 rounded-xl bg-muted/50 px-4 py-3 text-xs text-muted-foreground text-center">
-            🔒 ព័ត៌មានរបស់អ្នកមានសុវត្តិភាព — encrypted ដោយ Supabase
+            <Lock className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+            ព័ត៌មានរបស់អ្នកមានសុវត្តិភាព — encrypted ដោយ Supabase
           </div>
 
           <p className="mt-5 text-center text-sm text-muted-foreground">

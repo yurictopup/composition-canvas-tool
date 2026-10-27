@@ -7,7 +7,7 @@ import { StoreGuestMenu, StoreSettingsMenu, StoreUserMenu } from "@/components/S
 import { useStorePrefs } from "@/lib/storePrefs";
 import { ChatWidget } from "@/components/ChatWidget";
 import { StoreFooter } from "@/components/StoreFooter";
-import { BadgeDollarSign, Headphones, ShieldCheck, Zap } from "lucide-react";
+import { BadgeDollarSign, Gem, Headphones, ShieldCheck, Zap } from "lucide-react";
 
 const tickerItems = [
   { Icon: Zap, label: "Instant delivery in 1-5 minutes", tone: "bg-amber-400 text-amber-950" },
@@ -38,8 +38,9 @@ export function SiteChrome({ children }: { children: ReactNode }) {
     <div className={`page-gradient flex min-h-screen flex-col ${light ? "store-light" : ""}`}>
       <header className="store-header sticky top-0 z-20 border-b backdrop-blur">
         <div className="mx-auto flex w-full max-w-[1500px] items-center justify-between px-4 py-3 sm:px-6">
-          <Link to="/" className="font-display text-xl font-black text-glow">
-            💎 YURIC<span className="text-brand-400"> TOPUP</span>
+          <Link to="/" className="flex items-center gap-2 font-display text-xl font-black text-glow">
+            <Gem className="h-5 w-5 text-brand-400" aria-hidden="true" />
+            YURIC<span className="text-brand-400"> TOPUP</span>
           </Link>
           <nav className="flex items-center gap-1 text-sm">
             <StoreSettingsMenu />
