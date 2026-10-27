@@ -137,6 +137,24 @@ const KM: Record<string, string> = {
   "New package, e.g. 86": "កញ្ចប់ថ្មី ឧ. 86",
   "Amount is a number, like 86 or 78 + 8": "ចំនួនត្រូវជាលេខ ឧ. 86 ឬ 78 + 8",
 
+  // Stock card
+  Stock: "ស្តុក",
+  "FazerCards money for auto delivery": "លុយ FazerCards សម្រាប់បញ្ចូលពេជ្រស្វ័យប្រវត្តិ",
+  "FazerCards balance": "លុយនៅ FazerCards",
+  "Low, please top up": "ជិតអស់ សូមបញ្ចូលលុយ",
+  "Ready for auto delivery": "គ្រប់សម្រាប់បញ្ចូលពេជ្រ",
+  "Orders waiting": "ត្រូវចំណាយ",
+  "orders to deliver": "ការកម្មង់ត្រូវបញ្ចូល",
+  Plan: "គម្រោង",
+  Expired: "ផុតកំណត់",
+  Ends: "ផុត",
+  days: "ថ្ងៃ",
+  "Top up": "បញ្ចូលលុយ",
+  "FazerCards API key is not set": "មិនទាន់ដាក់ FazerCards API key",
+  "Couldn't read FazerCards, try Refresh": "អាន FazerCards មិនបាន សូមចុចផ្ទុកឡើងវិញ",
+  "Add at least": "ត្រូវបញ្ចូលយ៉ាងតិច",
+  "to deliver all waiting orders": "ដើម្បីបញ្ចូលការកម្មង់ទាំងអស់",
+
   // Delivery cell
   "Paid by Bakong": "បានបង់តាម Bakong",
   "Check payment": "ពិនិត្យការបង់ប្រាក់",

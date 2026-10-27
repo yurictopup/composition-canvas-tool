@@ -247,3 +247,25 @@ export async function checkFazerOrder(
     return { status: "processing", supplierStatus: "UNCONFIRMED", supplierOrderId, message };
   }
 }
+
+export type FazerAccount = {
+  balance: number;
+  currency: string;
+  plan: string | null;
+  planExpiresAt: string | null;
+  subscriptionActive: boolean;
+};
+
+/** The reseller balance and plan, for the owner's stock card. */
+export async function fetchFazerAccount(opts: Opts): Promise<FazerAccount> {
+  const [bal, me] = await Promise.all([call(opts, "/balance"), call(opts, "/me")]);
+  const b = bal as { balance?: unknown; currency?: unknown };
+  const m = me as { plan?: unknown; planExpiresAt?: unknown; subscriptionActive?: unknown };
+  return {
+    balance: Number(b.balance ?? 0),
+    currency: typeof b.currency === "string" ? b.currency : "USD",
+    plan: typeof m.plan === "string" ? m.plan : null,
+    planExpiresAt: typeof m.planExpiresAt === "string" ? m.planExpiresAt : null,
+    subscriptionActive: m.subscriptionActive === true,
+  };
+}

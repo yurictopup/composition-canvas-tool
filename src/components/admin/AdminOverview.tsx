@@ -32,6 +32,7 @@ import { fazerCosts } from "@/lib/fazercards-costs";
 import type { AdminOrder } from "./types";
 import { StatusBadge } from "./StatusBadge";
 import { useAdminT } from "./i18n";
+import { AdminStock } from "./AdminStock";
 
 const C = {
   primary: "#2F5FE0",
@@ -82,7 +83,15 @@ function CardHead({ title, sub, right }: { title: string; sub?: string; right?: 
   );
 }
 
-function IconBubble({ color, children, size = 40 }: { color: string; children: ReactNode; size?: number }) {
+function IconBubble({
+  color,
+  children,
+  size = 40,
+}: {
+  color: string;
+  children: ReactNode;
+  size?: number;
+}) {
   return (
     <span
       className="inline-flex shrink-0 items-center justify-center rounded-md"
@@ -93,7 +102,15 @@ function IconBubble({ color, children, size = 40 }: { color: string; children: R
   );
 }
 
-function ChartTip({ active, payload, label }: { active?: boolean; payload?: { name: string; value: number; color: string }[]; label?: string }) {
+function ChartTip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { name: string; value: number; color: string }[];
+  label?: string;
+}) {
   const { t } = useAdminT();
   if (!active || !payload?.length) return null;
   return (
@@ -134,7 +151,9 @@ export function AdminOverview({
   const refunds = sum(orders.filter((o) => o.status === "refunded"));
   const grossProfit = revenue - orderCostTotal;
   const pending = orders.filter((o) => o.status === "pending" && !o.paid_at);
-  const processing = orders.filter((o) => o.status === "processing" || (o.status === "pending" && !!o.paid_at));
+  const processing = orders.filter(
+    (o) => o.status === "processing" || (o.status === "pending" && !!o.paid_at),
+  );
   const completed = orders.filter(paid);
   const failed = orders.filter((o) => o.status === "failed");
   const customers = new Set(orders.map((o) => o.user_email)).size;
@@ -156,9 +175,17 @@ export function AdminOverview({
   const weekOrders = thisWeek.reduce((s, d) => s + d.Orders, 0);
   const lastWeekOrders = days.slice(0, 7).reduce((s, d) => s + d.Orders, 0);
   const growth =
-    lastWeekRevenue > 0 ? ((weekRevenue - lastWeekRevenue) / lastWeekRevenue) * 100 : weekRevenue > 0 ? 100 : 0;
+    lastWeekRevenue > 0
+      ? ((weekRevenue - lastWeekRevenue) / lastWeekRevenue) * 100
+      : weekRevenue > 0
+        ? 100
+        : 0;
   const orderGrowth =
-    lastWeekOrders > 0 ? ((weekOrders - lastWeekOrders) / lastWeekOrders) * 100 : weekOrders > 0 ? 100 : 0;
+    lastWeekOrders > 0
+      ? ((weekOrders - lastWeekOrders) / lastWeekOrders) * 100
+      : weekOrders > 0
+        ? 100
+        : 0;
   const bestDay = thisWeek.reduce((m, d, i) => (d.Revenue > thisWeek[m]!.Revenue ? i : m), 0);
 
   // Last 12 months.
@@ -173,7 +200,9 @@ export function AdminOverview({
     return {
       label: d.toLocaleDateString(locale, { month: "short" }),
       Revenue: sum(list.filter(paid)),
-      Unpaid: sum(list.filter((o) => (o.status === "pending" && !o.paid_at) || o.status === "failed")),
+      Unpaid: sum(
+        list.filter((o) => (o.status === "pending" && !o.paid_at) || o.status === "failed"),
+      ),
     };
   });
   const yearRevenue = months.reduce((s, m) => s + m.Revenue, 0);
@@ -191,28 +220,74 @@ export function AdminOverview({
     if (paid(o)) g.revenue += Number(o.price_usd);
     byGame.set(o.game_name, g);
   }
-  const topGames = [...byGame.entries()].sort((a, b) => b[1].revenue - a[1].revenue || b[1].count - a[1].count).slice(0, 5);
+  const topGames = [...byGame.entries()]
+    .sort((a, b) => b[1].revenue - a[1].revenue || b[1].count - a[1].count)
+    .slice(0, 5);
   const topMax = Math.max(...topGames.map(([, g]) => g.revenue), 1);
   const gameColors = [C.primary, C.success, C.info, C.warning, C.danger];
 
   const stats = [
-    { label: "Sales", value: String(orders.length), icon: <TrendingUp size={24} />, color: C.primary },
+    {
+      label: "Sales",
+      value: String(orders.length),
+      icon: <TrendingUp size={24} />,
+      color: C.primary,
+    },
     { label: "Customers", value: String(customers), icon: <Users size={24} />, color: C.info },
-    { label: "Paid orders", value: String(completed.length), icon: <ShoppingCart size={24} />, color: C.danger },
+    {
+      label: "Paid orders",
+      value: String(completed.length),
+      icon: <ShoppingCart size={24} />,
+      color: C.danger,
+    },
     { label: "Revenue", value: money(revenue), icon: <DollarSign size={24} />, color: C.success },
   ];
 
   const alerts = [
-    { label: "Pending payments", sub: "Waiting for Bakong", count: pending.length, icon: <Clock size={20} />, color: C.warning },
-    { label: "Paid not delivered", sub: "Needs delivery", count: processing.length, icon: <Truck size={20} />, color: C.info },
-    { label: "Failed deliveries", sub: "Check and retry", count: failed.length, icon: <AlertTriangle size={20} />, color: C.danger },
-    { label: "All orders", sub: "In this period", count: orders.length, icon: <Package size={20} />, color: C.primary },
+    {
+      label: "Pending payments",
+      sub: "Waiting for Bakong",
+      count: pending.length,
+      icon: <Clock size={20} />,
+      color: C.warning,
+    },
+    {
+      label: "Paid not delivered",
+      sub: "Needs delivery",
+      count: processing.length,
+      icon: <Truck size={20} />,
+      color: C.info,
+    },
+    {
+      label: "Failed deliveries",
+      sub: "Check and retry",
+      count: failed.length,
+      icon: <AlertTriangle size={20} />,
+      color: C.danger,
+    },
+    {
+      label: "All orders",
+      sub: "In this period",
+      count: orders.length,
+      icon: <Package size={20} />,
+      color: C.primary,
+    },
   ];
 
   const profit = [
     { label: "Revenue", sub: "From paid orders", value: money(revenue), color: C.success },
-    { label: "Supplier cost", sub: "What FazerCards charges", value: `-${money(orderCostTotal)}`, color: C.danger },
-    { label: "Paid orders with no cost", sub: "Manual delivery, check by hand", value: String(noCost.length), color: C.warning },
+    {
+      label: "Supplier cost",
+      sub: "What FazerCards charges",
+      value: `-${money(orderCostTotal)}`,
+      color: C.danger,
+    },
+    {
+      label: "Paid orders with no cost",
+      sub: "Manual delivery, check by hand",
+      value: String(noCost.length),
+      color: C.warning,
+    },
     { label: "Refunds", sub: "Money returned", value: money(refunds), color: C.secondary },
   ];
 
@@ -220,27 +295,41 @@ export function AdminOverview({
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+      <AdminStock orders={allOrders} orderCost={orderCost} />
+
       {/* Congratulations */}
       <Card className="relative overflow-hidden lg:col-span-4">
         <div className="p-6">
-          <h5 className="text-lg font-medium">{t("Congratulations")} {ownerName}</h5>
+          <h5 className="text-lg font-medium">
+            {t("Congratulations")} {ownerName}
+          </h5>
           <p className="text-[13px]">{t("Revenue in this period")}</p>
           <h4 className="mt-5 text-2xl font-medium" style={{ color: C.primary }}>
             {money(revenue)}
           </h4>
-          <p className="mt-1 text-[13px]">{completed.length} {t("paid orders")}</p>
+          <p className="mt-1 text-[13px]">
+            {completed.length} {t("paid orders")}
+          </p>
           <button onClick={onOpenOrders} className="vx-btn mt-4 px-4 py-2 text-sm font-medium">
             {t("View Sales")}
           </button>
         </div>
-        <div className="pointer-events-none absolute bottom-4 right-6 flex h-28 w-28 items-center justify-center rounded-full" style={{ background: C.primarySoft }}>
+        <div
+          className="pointer-events-none absolute bottom-4 right-6 flex h-28 w-28 items-center justify-center rounded-full"
+          style={{ background: C.primarySoft }}
+        >
           <Trophy size={56} color={C.warning} strokeWidth={1.6} />
         </div>
       </Card>
 
       {/* Statistics */}
       <Card className="flex flex-col lg:col-span-8">
-        <CardHead title={t("Statistics")} right={<span className="text-[13px] text-[var(--vx-muted)]">{t("Updated just now")}</span>} />
+        <CardHead
+          title={t("Statistics")}
+          right={
+            <span className="text-[13px] text-[var(--vx-muted)]">{t("Updated just now")}</span>
+          }
+        />
         <div className="grid flex-1 grid-cols-2 content-center gap-6 p-6 md:grid-cols-4">
           {stats.map((s) => (
             <div key={s.label} className="flex items-center gap-4">
@@ -263,7 +352,12 @@ export function AdminOverview({
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={thisWeek} barSize={8}>
               <Tooltip content={<ChartTip />} cursor={false} />
-              <Bar dataKey="Orders" radius={[4, 4, 4, 4]} fill={C.warning} background={{ fill: "var(--vx-track)", radius: 4 }} />
+              <Bar
+                dataKey="Orders"
+                radius={[4, 4, 4, 4]}
+                fill={C.warning}
+                background={{ fill: "var(--vx-track)", radius: 4 }}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -286,7 +380,13 @@ export function AdminOverview({
                 </linearGradient>
               </defs>
               <Tooltip content={<ChartTip />} cursor={false} />
-              <Area type="monotone" dataKey="Revenue" stroke={C.success} strokeWidth={2} fill="url(#vxSales)" />
+              <Area
+                type="monotone"
+                dataKey="Revenue"
+                stroke={C.success}
+                strokeWidth={2}
+                fill="url(#vxSales)"
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -305,10 +405,15 @@ export function AdminOverview({
               <p className="text-[13px] text-[var(--vx-muted)]">{t("Weekly report")}</p>
             </div>
             <div className="mt-6">
-              <h4 className="text-3xl font-medium text-[var(--vx-heading)]">{money(weekRevenue)}</h4>
+              <h4 className="text-3xl font-medium text-[var(--vx-heading)]">
+                {money(weekRevenue)}
+              </h4>
               <span
                 className="mt-2 inline-block rounded px-2 py-0.5 text-[13px] font-medium"
-                style={{ color: growth >= 0 ? C.success : C.danger, background: `${growth >= 0 ? C.success : C.danger}29` }}
+                style={{
+                  color: growth >= 0 ? C.success : C.danger,
+                  background: `${growth >= 0 ? C.success : C.danger}29`,
+                }}
               >
                 {growth >= 0 ? "+" : ""}
                 {growth.toFixed(1)}%
@@ -319,11 +424,19 @@ export function AdminOverview({
           <div className="h-44 sm:col-span-3">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={thisWeek} barSize={26}>
-                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: C.muted, fontSize: 12 }} />
+                <XAxis
+                  dataKey="label"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: C.muted, fontSize: 12 }}
+                />
                 <Tooltip content={<ChartTip />} cursor={false} />
                 <Bar dataKey="Revenue" radius={[6, 6, 6, 6]} minPointSize={6}>
                   {thisWeek.map((_, i) => (
-                    <Cell key={i} fill={i === bestDay && weekRevenue > 0 ? C.primary : C.primarySoft} />
+                    <Cell
+                      key={i}
+                      fill={i === bestDay && weekRevenue > 0 ? C.primary : C.primarySoft}
+                    />
                   ))}
                 </Bar>
               </BarChart>
@@ -339,7 +452,9 @@ export function AdminOverview({
           sub={t("Last 12 months")}
           right={
             <div className="text-right">
-              <div className="text-xl font-medium text-[var(--vx-heading)]">{money(yearRevenue)}</div>
+              <div className="text-xl font-medium text-[var(--vx-heading)]">
+                {money(yearRevenue)}
+              </div>
               <div className="text-[13px] text-[var(--vx-muted)]">{t("Total revenue")}</div>
             </div>
           }
@@ -352,8 +467,19 @@ export function AdminOverview({
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={months} barGap={4} barSize={10}>
               <CartesianGrid stroke={C.grid} strokeDasharray="4 4" vertical={false} />
-              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: C.muted, fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} width={44} tick={{ fill: C.muted, fontSize: 12 }} tickFormatter={(v) => `$${v}`} />
+              <XAxis
+                dataKey="label"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: C.muted, fontSize: 12 }}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                width={44}
+                tick={{ fill: C.muted, fontSize: 12 }}
+                tickFormatter={(v) => `$${v}`}
+              />
               <Tooltip content={<ChartTip />} cursor={{ fill: "rgba(47,95,224,0.06)" }} />
               <Bar dataKey="Revenue" fill={C.primary} radius={[6, 6, 0, 0]} />
               <Bar dataKey="Unpaid" fill={C.warning} radius={[6, 6, 0, 0]} />
@@ -374,7 +500,10 @@ export function AdminOverview({
                   <h6 className="text-[15px] font-medium text-[var(--vx-heading)]">{t(a.label)}</h6>
                   <p className="text-[13px] text-[var(--vx-muted)]">{t(a.sub)}</p>
                 </div>
-                <span className="font-medium" style={{ color: a.count > 0 && a.label !== "All orders" ? a.color : undefined }}>
+                <span
+                  className="font-medium"
+                  style={{ color: a.count > 0 && a.label !== "All orders" ? a.color : undefined }}
+                >
                   {a.count}
                 </span>
                 <ChevronRight size={16} className="text-[var(--vx-muted)]" />
@@ -420,7 +549,10 @@ export function AdminOverview({
         <ul className="space-y-4 p-6">
           {statusData.map((s) => (
             <li key={s.name} className="flex items-center gap-3">
-              <span className="h-2.5 w-2.5 rounded-full" style={{ background: STATUS_COLORS[s.name] }} />
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ background: STATUS_COLORS[s.name] }}
+              />
               <span className="flex-1">{t(s.name)}</span>
               <span className="font-medium text-[var(--vx-heading)]">{s.value}</span>
             </li>
@@ -433,7 +565,11 @@ export function AdminOverview({
         <CardHead
           title={t("Profit Summary")}
           sub={t("Revenue minus FazerCards cost")}
-          right={<span className="text-xl font-medium" style={{ color: C.primary }}>{money(grossProfit)}</span>}
+          right={
+            <span className="text-xl font-medium" style={{ color: C.primary }}>
+              {money(grossProfit)}
+            </span>
+          }
         />
         <ul className="space-y-4 p-6">
           {profit.map((p) => (
@@ -469,7 +605,10 @@ export function AdminOverview({
                 <div className="h-2 overflow-hidden rounded-full bg-[var(--vx-track)]">
                   <div
                     className="h-full rounded-full"
-                    style={{ width: `${Math.max(4, (g.revenue / topMax) * 100)}%`, background: gameColors[i] }}
+                    style={{
+                      width: `${Math.max(4, (g.revenue / topMax) * 100)}%`,
+                      background: gameColors[i],
+                    }}
                   />
                 </div>
               </li>
@@ -483,7 +622,11 @@ export function AdminOverview({
         <CardHead
           title={t("Recent Orders")}
           right={
-            <button onClick={onOpenOrders} className="text-[13px] font-medium" style={{ color: C.primary }}>
+            <button
+              onClick={onOpenOrders}
+              className="text-[13px] font-medium"
+              style={{ color: C.primary }}
+            >
               {t("View all")}
             </button>
           }
@@ -513,7 +656,9 @@ export function AdminOverview({
                       <span className="font-medium text-[var(--vx-heading)]">{o.game_name}</span>
                       <span className="text-[var(--vx-muted)]"> · {o.package_amt}</span>
                     </td>
-                    <td className="px-6 py-3 font-medium text-[var(--vx-heading)]">{money(Number(o.price_usd))}</td>
+                    <td className="px-6 py-3 font-medium text-[var(--vx-heading)]">
+                      {money(Number(o.price_usd))}
+                    </td>
                     <td className="px-6 py-3">
                       <StatusBadge status={o.status} />
                     </td>
@@ -531,7 +676,10 @@ export function AdminOverview({
 function Trend({ value }: { value: number }) {
   const up = value >= 0;
   return (
-    <span className="flex items-center gap-0.5 text-[13px] font-medium" style={{ color: up ? C.success : C.danger }}>
+    <span
+      className="flex items-center gap-0.5 text-[13px] font-medium"
+      style={{ color: up ? C.success : C.danger }}
+    >
       {up ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
       {Math.abs(value).toFixed(1)}%
     </span>

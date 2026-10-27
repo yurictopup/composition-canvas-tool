@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isOwner } from "@/lib/games";
-import type { DeliveryResponse } from "@/lib/delivery.server";
+import type { DeliveryResponse, SupplierStock } from "@/lib/delivery.server";
 
 function requireOwner(claims: Record<string, unknown>) {
   if (!isOwner(typeof claims["email"] === "string" ? claims["email"] : null)) {
@@ -30,4 +30,13 @@ export const refreshDelivery = createServerFn({ method: "POST" })
     requireOwner(context.claims);
     const { adminDb, refreshPaidOrder } = await import("@/lib/delivery.server");
     return refreshPaidOrder(adminDb(), data.orderId);
+  });
+
+// Owner-only: FazerCards balance and plan for the stock card on /admin.
+export const getSupplierStock = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<SupplierStock> => {
+    requireOwner(context.claims);
+    const { supplierStock } = await import("@/lib/delivery.server");
+    return supplierStock();
   });
