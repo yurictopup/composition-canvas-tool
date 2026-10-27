@@ -16,9 +16,12 @@ export default defineConfig({
     cloudflare: {
       // Cloudflare Workers Builds runs `wrangler preview` for non-main branches,
       // which requires a `previews` block in the generated wrangler.json.
+      // The store is served only on store.yurictopup.com (custom domain set in the
+      // dashboard), so the public workers.dev address stays off on every deploy;
+      // `preview_urls` keeps PR preview links working anyway.
       // `ai` binds Workers AI (free daily quota) for Yuric Bot, see src/lib/chat.functions.ts.
       // @ts-expect-error nitro reads `wrangler` at build time, but its types don't list it yet.
-      wrangler: { previews: {}, ai: { binding: "AI" } },
+      wrangler: { previews: {}, workers_dev: false, preview_urls: true, ai: { binding: "AI" } },
     },
   },
 });
