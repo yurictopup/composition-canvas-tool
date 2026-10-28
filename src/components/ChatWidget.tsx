@@ -49,7 +49,7 @@ export type ChatFaq = { q: string; a: string; icon?: Icon; telegram?: boolean };
 export const defaultFaqs: ChatFaq[] = [
   {
     q: "តើបញ្ចូលពេជ្រហ្គេមដោយរបៀបណា?",
-    a: "ជ្រើសហ្គេមនៅទំព័រដើម បញ្ចូល Player ID រួចចុច Check ID បន្ទាប់មកជ្រើសកញ្ចប់ និងវិធីបង់ប្រាក់ ហើយចុច Buy Now ពេជ្រនឹងចូលទៅគណនីហ្គេមរបស់អ្នក",
+    a: "ជ្រើសហ្គេមនៅទំព័រដើម បញ្ចូល Player ID រួចចុច Check ID បន្ទាប់មកជ្រើសកញ្ចប់ និងវិធីបង់ប្រាក់ ហើយចុច បញ្ជាទិញ ពេជ្រនឹងចូលទៅគណនីហ្គេមរបស់អ្នក",
     icon: Gamepad2,
   },
   {

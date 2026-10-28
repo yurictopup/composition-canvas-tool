@@ -230,10 +230,26 @@ const gameAction = (g: Game, href: (id: string) => string): BotAction => ({
 });
 const telegramAction: BotAction = { label: `ជជែកតាម Telegram · ${TELEGRAM}`, href: TELEGRAM_URL };
 
-/** True when a message is about paying or an order that hasn't arrived. */
+// "How do I pay?" or "can I pay with ABA?" asks for the steps, not for the customer's orders.
+const HOW_WORDS = [
+  "how",
+  "can i",
+  "which",
+  "what",
+  "របៀប",
+  "ធ្វើម៉េច",
+  "ធ្វើយ៉ាងម៉េច",
+  "អាច",
+  "បានទេ",
+  "អ្វី",
+];
+
+/** True when a message is about a payment or an order that hasn't arrived. */
 export function isOrderQuestion(raw: string): boolean {
-  const topics = topScores(raw.toLowerCase().replace(/\s+/g, " ").trim());
-  return ["late", "payment", "refund", "wrongId"].some((t) => topics.includes(t));
+  const text = raw.toLowerCase().replace(/\s+/g, " ").trim();
+  const topics = topScores(text);
+  if (["late", "refund", "wrongId"].some((t) => topics.includes(t))) return true;
+  return topics.includes("payment") && !HOW_WORDS.some((w) => has(text, w));
 }
 
 export function answer(
@@ -292,7 +308,7 @@ export function answer(
   if (game && (has_("topup") || topics.length === 0)) {
     const pk = packagesLine(game);
     return {
-      text: `${game.name} ប្រើ ${game.unit} ${idHelp(game)} ${pk} ជំហាន៖ បញ្ចូល ID → ជ្រើសកញ្ចប់ → ជ្រើសវិធីបង់ប្រាក់ → Buy Now`,
+      text: `${game.name} ប្រើ ${game.unit} ${idHelp(game)} ${pk} ជំហាន៖ បញ្ចូល ID → ជ្រើសកញ្ចប់ → ជ្រើសវិធីបង់ប្រាក់ → បញ្ជាទិញ`,
       actions: [gameAction(game, gameHref)],
       suggestions: [`តម្លៃ ${game.name}`, "បង់ប្រាក់តាមអ្វី?", "ប៉ុន្មាននាទីចូល?"],
     };
@@ -312,7 +328,7 @@ export function answer(
       };
     case "topup":
       return {
-        text: "ងាយស្រួលណាស់៖ ១. ជ្រើសហ្គេមនៅទំព័រដើម ២. បញ្ចូល Player ID ហើយចុច Check ID ៣. ជ្រើសកញ្ចប់ ៤. ជ្រើសវិធីបង់ប្រាក់ ៥. ចុច Buy Now ពេជ្រនឹងចូលគណនីហ្គេមរបស់អ្នក ប្រាប់ឈ្មោះហ្គេម ខ្ញុំនឹងប្រាប់លម្អិត",
+        text: "ងាយស្រួលណាស់៖ ១. ជ្រើសហ្គេមនៅទំព័រដើម ២. បញ្ចូល Player ID ហើយចុច Check ID ៣. ជ្រើសកញ្ចប់ ៤. ជ្រើសវិធីបង់ប្រាក់ ៥. ចុច បញ្ជាទិញ ពេជ្រនឹងចូលគណនីហ្គេមរបស់អ្នក ប្រាប់ឈ្មោះហ្គេម ខ្ញុំនឹងប្រាប់លម្អិត",
         suggestions: ["Mobile Legends", "Free Fire", "PUBG Mobile"],
       };
     case "delivery":
@@ -322,7 +338,7 @@ export function answer(
       };
     case "payment":
       return {
-        text: `យើងទទួលការបង់ប្រាក់តាម ${payments.join(", ")} សូមជ្រើសវិធីបង់ប្រាក់នៅជំហានទី ៣ លើទំព័រហ្គេម មុនពេលចុច Buy Now`,
+        text: `យើងទទួលការបង់ប្រាក់តាម ${payments.join(", ")} សូមជ្រើសវិធីបង់ប្រាក់នៅជំហានទី ៣ លើទំព័រហ្គេម មុនពេលចុច បញ្ជាទិញ`,
         suggestions: ["របៀបបញ្ចូលពេជ្រ", "ប៉ុន្មាននាទីចូល?"],
       };
     case "playerId":
