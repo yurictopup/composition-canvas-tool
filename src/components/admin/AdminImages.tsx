@@ -1,22 +1,46 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ImageUp, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { CurrencyIcon } from "@/components/CurrencyIcon";
+import { baseGameId, findGame, getPackages } from "@/lib/games";
+import { fetchPrices, packageSize, type PriceMap } from "@/lib/prices";
 import {
   SITE_IMAGES_BUCKET,
   cropToSize,
   imageSlots,
   loadSiteImages,
+  packageGameIds,
+  packageSlot,
   setSiteImageOverride,
   siteImageOverrides,
+  type CropPlacement,
   type ImageSlot,
 } from "@/lib/site-images";
+import { CropEditor } from "./CropEditor";
 import { useAdminT } from "./i18n";
 
 const GROUPS: { id: ImageSlot["group"]; label: string }[] = [
   { id: "banner", label: "Banner" },
   { id: "game", label: "Game icons" },
+  { id: "package", label: "Package pictures" },
   { id: "item", label: "Pass and card pictures" },
 ];
+
+/** Built-in packages of a game plus the ones the owner added on the Prices tab. */
+function gamePackageSlots(gameId: string, prices: PriceMap | null): ImageSlot[] {
+  const game = findGame(gameId);
+  if (!game) return [];
+  const amts = new Set(getPackages(gameId).map((p) => p.amt));
+  const suffix = ` ${game.unit}`;
+  for (const row of prices?.values() ?? []) {
+    if (row.game_id === gameId && row.package_amt.endsWith(suffix)) {
+      amts.add(row.package_amt.slice(0, -suffix.length));
+    }
+  }
+  return [...amts]
+    .sort((a, b) => packageSize(a) - packageSize(b))
+    .map((amt) => packageSlot(gameId, amt));
+}
 const MAX_UPLOAD = 10 * 1024 * 1024;
 
 // Owner-only picture editor. Any picture is cropped to the slot's size in the
@@ -27,12 +51,18 @@ export function AdminImages() {
   const [current, setCurrent] = useState<Record<string, string>>(siteImageOverrides());
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [editing, setEditing] = useState<{ slot: ImageSlot; file: File } | null>(null);
+  const [pkgGame, setPkgGame] = useState(packageGameIds[0] ?? "mlbb");
+  const [itemGame, setItemGame] = useState("all");
+  const [prices, setPrices] = useState<PriceMap | null>(null);
 
   useEffect(() => {
     void loadSiteImages(true).then(() => setCurrent(siteImageOverrides()));
+    void fetchPrices().then(setPrices);
   }, []);
 
-  async function upload(slot: ImageSlot, file: File) {
+  // Checks the file, then opens the crop editor; saving happens from there.
+  function pick(slot: ImageSlot, file: File) {
     setMsg(null);
     if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
       setMsg({ ok: false, text: t("Use a PNG, JPG or WebP picture") });
@@ -42,9 +72,13 @@ export function AdminImages() {
       setMsg({ ok: false, text: t("Picture is too big, max 10 MB") });
       return;
     }
+    setEditing({ slot, file });
+  }
+
+  async function upload(slot: ImageSlot, file: File, placement: CropPlacement) {
     setBusy(slot.key);
     try {
-      const blob = await cropToSize(file, slot.width, slot.height);
+      const blob = await cropToSize(file, slot.width, slot.height, placement);
       const path = `${slot.key.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-${Date.now()}.webp`;
       const up = await supabase.storage
         .from(SITE_IMAGES_BUCKET)
@@ -58,6 +92,7 @@ export function AdminImages() {
       setSiteImageOverride(slot.key, url);
       setCurrent(siteImageOverrides());
       setMsg({ ok: true, text: `${t("Saved")}: ${t(slot.name)}` });
+      setEditing(null);
     } catch (error) {
       setMsg({
         ok: false,
@@ -82,14 +117,28 @@ export function AdminImages() {
     setMsg({ ok: true, text: `${t("Back to the original")}: ${t(slot.name)}` });
   }
 
-  const slots = imageSlots.filter((s) => s.group === group);
+  const itemSlots = imageSlots.filter((s) => s.group === "item");
+  const itemGames = [...new Set(itemSlots.map((s) => s.gameId!))];
+  const packageSlots = useMemo(() => gamePackageSlots(pkgGame, prices), [pkgGame, prices]);
+  const slots =
+    group === "package"
+      ? packageSlots
+      : group === "item"
+        ? itemSlots.filter((s) => itemGame === "all" || s.gameId === itemGame)
+        : imageSlots.filter((s) => s.group === group);
+  const gamePicker =
+    group === "package"
+      ? { value: pkgGame, set: setPkgGame, ids: packageGameIds, all: false }
+      : group === "item"
+        ? { value: itemGame, set: setItemGame, ids: itemGames, all: true }
+        : null;
 
   return (
     <div className="vx-card overflow-hidden">
       <div className="p-6 pb-4">
         <h5 className="text-lg font-medium">{t("Images")}</h5>
         <p className="mt-1 text-[13px] text-[var(--vx-muted)]">
-          {t("Pick any picture. It is cut to the size shown, so it always fits")}
+          {t("Pick any picture, then drag and zoom it to fit the frame how you like")}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           {GROUPS.map((g) => (
@@ -106,6 +155,28 @@ export function AdminImages() {
             </button>
           ))}
         </div>
+        {gamePicker && (
+          <label className="mt-4 flex flex-wrap items-center gap-2 text-[13px] text-[var(--vx-body)]">
+            {t("Game")}
+            <select
+              value={gamePicker.value}
+              onChange={(e) => gamePicker.set(e.target.value)}
+              className="rounded-md border border-[var(--vx-border)] bg-[var(--vx-card)] px-2 py-1.5 text-[13px] text-[var(--vx-heading)]"
+            >
+              {gamePicker.all && <option value="all">{t("All games")}</option>}
+              {gamePicker.ids.map((id) => (
+                <option key={id} value={id}>
+                  {findGame(id)?.name ?? id}
+                </option>
+              ))}
+            </select>
+            {group === "package" && (
+              <span className="text-[12px] text-[var(--vx-muted)]">
+                {t("No picture yet shows the game currency icon")}
+              </span>
+            )}
+          </label>
+        )}
         {msg && (
           <p
             className={`mt-4 rounded-md px-3 py-2 text-[13px] ${
@@ -120,7 +191,7 @@ export function AdminImages() {
         className={`grid gap-4 px-6 pb-6 ${
           group === "banner"
             ? "grid-cols-1"
-            : group === "game"
+            : group === "game" || group === "package"
               ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
               : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
         }`}
@@ -133,11 +204,22 @@ export function AdminImages() {
             changed={!!current[slot.key]}
             busy={busy === slot.key}
             disabled={busy !== null}
-            onPick={(f) => void upload(slot, f)}
+            onPick={(f) => pick(slot, f)}
             onReset={() => void reset(slot)}
           />
         ))}
       </div>
+      {editing && (
+        <CropEditor
+          file={editing.file}
+          name={editing.slot.name}
+          width={editing.slot.width}
+          height={editing.slot.height}
+          saving={busy === editing.slot.key}
+          onCancel={() => setEditing(null)}
+          onSave={(p) => void upload(editing.slot, editing.file, p)}
+        />
+      )}
     </div>
   );
 }
@@ -167,14 +249,24 @@ function SlotCard({
         className="overflow-hidden rounded-md bg-[var(--vx-track)]"
         style={{ aspectRatio: `${slot.width} / ${slot.height}` }}
       >
-        <img
-          src={src}
-          alt={slot.name}
-          className={`h-full w-full object-cover ${busy ? "opacity-40" : ""}`}
-        />
+        {src ? (
+          <img
+            src={src}
+            alt={slot.name}
+            className={`h-full w-full object-cover ${busy ? "opacity-40" : ""}`}
+          />
+        ) : (
+          <div className="grid h-full w-full place-items-center">
+            <CurrencyIcon
+              gameId={baseGameId(slot.gameId ?? "")}
+              className="h-1/2 w-1/2 opacity-80"
+            />
+          </div>
+        )}
       </div>
       <p className="mt-2 truncate text-[14px] font-medium text-[var(--vx-heading)]">
-        {t(slot.name)}
+        {/* The game is picked above, so item and package cards only need their own name. */}
+        {slot.gameId ? slot.name.split(" · ").pop() : t(slot.name)}
       </p>
       <p className="text-[12px] text-[var(--vx-muted)]">
         {t("Size")} {slot.width} x {slot.height} px
