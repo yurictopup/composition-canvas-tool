@@ -5,6 +5,7 @@ import { fetchPrices, packageKey, packageSize, type PriceMap } from "@/lib/price
 import { fazerCosts, fazerOffers } from "@/lib/fazercards-costs";
 import { fazerCatalog } from "@/lib/fazercards-catalog";
 import { useAdminT } from "@/components/admin/i18n";
+import { AdminSales } from "@/components/admin/AdminSales";
 
 // Owner-only price editor. Each row is one package from games.ts; saving
 // writes it to product_prices, which the database charges and the shop shows.
@@ -162,6 +163,8 @@ export function AdminPrices() {
 
   return (
     <div className="space-y-4">
+      <AdminSales />
+
       <div className="vx-card p-5 text-sm text-gray-600">
         {t(
           "These are the prices customers see and pay. A saved price works for new orders right away. Switch a package off to hide it from sale.",

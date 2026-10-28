@@ -100,7 +100,7 @@ export function PaymentView({
   if (!state.qr) {
     return (
       <div className="rounded-2xl bg-muted/50 p-5 text-sm text-muted-foreground">
-        {state.message ?? t("KHQR is not available for this order.")}
+        {state.message ? t(state.message) : t("KHQR is not available for this order.")}
       </div>
     );
   }

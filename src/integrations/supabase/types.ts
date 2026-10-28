@@ -155,6 +155,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      store_settings: {
+        Row: {
+          hidden_games: string[];
+          id: number;
+          sales_open: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          hidden_games?: string[];
+          id?: number;
+          sales_open?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          hidden_games?: string[];
+          id?: number;
+          sales_open?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       supplier_offers: {
         Row: {
           game_id: string;

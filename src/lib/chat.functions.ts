@@ -37,12 +37,14 @@ async function livePrices(gameIds: string[]): Promise<Record<string, LivePrice[]
   const focus: Record<string, LivePrice[]> = Object.fromEntries(gameIds.map((id) => [id, []]));
   if (!gameIds.length) return focus;
   const { supabase } = await import("@/integrations/supabase/client");
+  const { fetchStoreStatus, gameOnSale } = await import("@/lib/store-status");
+  const status = await fetchStoreStatus(supabase);
   const { data } = await supabase
     .from("product_prices")
     .select("game_id, package_amt, price_usd, active")
     .in("game_id", gameIds);
   for (const row of data ?? []) {
-    if (!row.active) continue;
+    if (!row.active || !gameOnSale(status, row.game_id)) continue;
     const unit = findGame(row.game_id)?.unit ?? "";
     const amt = row.package_amt.endsWith(` ${unit}`)
       ? row.package_amt.slice(0, -unit.length - 1)

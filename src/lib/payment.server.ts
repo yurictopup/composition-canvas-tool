@@ -7,6 +7,7 @@ import {
   type BakongConfig,
 } from "@/lib/bakong";
 import { deliverPaidOrder } from "@/lib/delivery.server";
+import { salesOpenFor } from "@/lib/store-status";
 
 export type PaymentState = {
   available: boolean;
@@ -33,6 +34,7 @@ export function bakongConfig(): BakongConfig | null {
 type PayOrder = {
   id: string;
   user_id: string | null;
+  game_id: string;
   status: string;
   price_usd: number | string;
   payment_qr: string | null;
@@ -47,7 +49,9 @@ export type OrderScope = string | null;
 async function loadOrder(db: SupabaseClient, orderId: string, scope: OrderScope) {
   let query = db
     .from("orders")
-    .select("id, user_id, status, price_usd, payment_qr, payment_md5, payment_expires_at, paid_at")
+    .select(
+      "id, user_id, game_id, status, price_usd, payment_qr, payment_md5, payment_expires_at, paid_at",
+    )
     .eq("id", orderId);
   if (scope === "guest") query = query.is("user_id", null);
   else if (scope) query = query.eq("user_id", scope);
@@ -98,6 +102,15 @@ export async function startOrderPayment(
   if (order.payment_md5) {
     const settled = await settlePayment(db, cfg, order, order.payment_md5);
     if (settled.paid) return settled;
+  }
+
+  // Sales paused on /admin: no new KHQR for old unpaid orders either.
+  if (!(await salesOpenFor(db, order.game_id))) {
+    return {
+      available: true,
+      paid: false,
+      message: "Sales are paused right now. Please come back soon.",
+    };
   }
 
   const qr = await createPaymentQr(cfg, { amount, billNumber: order.id.slice(0, 8).toUpperCase() });

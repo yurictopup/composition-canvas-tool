@@ -20,6 +20,7 @@ const { startOrderPayment } = await import("@/lib/payment.server");
 const expiredOrder = {
   id: "0b8c1d2e-0000-4000-8000-000000000001",
   user_id: null,
+  game_id: "mlbb",
   status: "pending",
   price_usd: "1.25",
   payment_qr: "old-qr",
@@ -28,11 +29,12 @@ const expiredOrder = {
   paid_at: null,
 };
 
-function fakeDb() {
+function fakeDb(salesOpen = true) {
   const updates: Record<string, unknown>[] = [];
   const db = {
-    from() {
-      let row: unknown = expiredOrder;
+    from(table: string) {
+      let row: unknown =
+        table === "store_settings" ? { sales_open: salesOpen, hidden_games: [] } : expiredOrder;
       const chain: Record<string, unknown> = {};
       for (const m of ["select", "eq", "is"]) chain[m] = () => chain;
       chain["update"] = (values: Record<string, unknown>) => {
@@ -78,5 +80,15 @@ describe("expired KHQR", () => {
     const state = await startOrderPayment(db, expiredOrder.id, "guest");
     expect(state).toMatchObject({ paid: false, qr: "new-qr" });
     expect(updates[0]).toMatchObject({ payment_md5: "new-md5" });
+  });
+
+  it("makes no new QR while the owner has sales switched off", async () => {
+    checkBakongPayment.mockResolvedValue({ status: "unpaid" });
+    const { db, updates } = fakeDb(false);
+    const state = await startOrderPayment(db, expiredOrder.id, "guest");
+    expect(state).toMatchObject({ paid: false });
+    expect(state.qr).toBeUndefined();
+    expect(createPaymentQr).not.toHaveBeenCalled();
+    expect(updates).toHaveLength(0);
   });
 });
