@@ -93,6 +93,13 @@ export async function startOrderPayment(
     };
   }
 
+  // The old QR may have been paid just before it expired (or the customer came
+  // back later): ask Bakong about it before its md5 is replaced and forgotten.
+  if (order.payment_md5) {
+    const settled = await settlePayment(db, cfg, order, order.payment_md5);
+    if (settled.paid) return settled;
+  }
+
   const qr = await createPaymentQr(cfg, { amount, billNumber: order.id.slice(0, 8).toUpperCase() });
   const expiresAt = new Date(qr.expiresAt).toISOString();
   await db
@@ -105,7 +112,7 @@ export async function startOrderPayment(
 
 /**
  * Asks Bakong whether the order's KHQR was paid; the first caller to see it
- * paid marks the order and starts the GamesDrop delivery.
+ * paid marks the order and starts the FazerCards delivery.
  * scope null = the owner checking any order.
  */
 export async function checkOrderPayment(
@@ -121,7 +128,17 @@ export async function checkOrderPayment(
   if (!order.payment_md5)
     return { available: true, paid: false, message: "No KHQR for this order yet." };
 
-  const check = await checkBakongPayment(cfg, order.payment_md5);
+  return settlePayment(db, cfg, order, order.payment_md5);
+}
+
+/** Asks Bakong about the order's current KHQR; when paid, marks it and starts the delivery. */
+async function settlePayment(
+  db: SupabaseClient,
+  cfg: BakongConfig,
+  order: PayOrder,
+  md5: string,
+): Promise<PaymentState> {
+  const check = await checkBakongPayment(cfg, md5);
   if (check.status === "unavailable")
     return { available: true, paid: false, message: check.message };
   if (check.status === "unpaid") return { available: true, paid: false };

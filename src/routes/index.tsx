@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
 import { QrCode } from "lucide-react";
-import banner from "@/assets/banner-angkor.png";
+import banner from "@/assets/banner-angkor.webp";
 import { useSiteImage } from "@/lib/site-images";
-import mascot from "@/assets/mascot-cut.png";
+import mascot from "@/assets/mascot-cut.webp";
 import { games, serverGames } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { useStorePrefs } from "@/lib/storePrefs";
@@ -67,6 +67,7 @@ function Index() {
           <img
             src={pic(banner)}
             alt="រូបបដាហ្គេម ពេជ្រភ្លឺភ្លឹបភ្ល្លែត"
+            fetchPriority="high"
             width={1280}
             height={725}
             className="absolute inset-0 block h-full w-full object-cover object-[50%_22%]"
@@ -141,6 +142,8 @@ function Index() {
                     <span className="tile-clean block rounded-[26%]">
                       <img
                         src={pic(g.icon)}
+                        loading="lazy"
+                        decoding="async"
                         alt={g.name}
                         width={151}
                         height={151}

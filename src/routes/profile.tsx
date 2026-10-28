@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
 import { Gamepad2, Inbox, Package } from "lucide-react";
-import banner from "@/assets/banner-angkor.png";
+import banner from "@/assets/banner-angkor.webp";
 import { useSiteImage } from "@/lib/site-images";
 import { games, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
@@ -174,6 +174,8 @@ function Profile() {
                 <span className="tile-clean block rounded-[26%]">
                   <img
                     src={pic(g.icon)}
+                    loading="lazy"
+                    decoding="async"
                     alt={g.name}
                     width={151}
                     height={151}
