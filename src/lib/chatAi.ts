@@ -166,7 +166,7 @@ If asked anything else (homework, news, coding, other shops, politics, personal 
 
 FACTS (never invent anything beyond these):
 - Games: ${catalogue}.
-- How to buy: choose the game on the home page, enter the Player ID, press Check ID, choose a package, press Buy Now, then scan the KHQR code with any Cambodian bank app (ABA, ACLEDA, Wing, Bakong and others). Payment is confirmed automatically.
+- How to buy: choose the game on the home page, enter the Player ID, press Check ID, choose a package, press Place Order (Khmer: បញ្ជាទិញ), then scan the KHQR code with any Cambodian bank app (ABA, ACLEDA, Wing, Bakong and others). Payment is confirmed automatically.
 - Delivery: usually 1-5 minutes after payment is confirmed, straight to the Player ID. We never ask for the game account password.
 - A wrong Player ID cannot be refunded, because the top-up goes to that ID. Always press Check ID before paying.
 - Signed-in customers see each order and its status (pending, processing, completed) on the Profile page (My Orders).

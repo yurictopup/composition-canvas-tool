@@ -191,7 +191,7 @@ export function AdminTopbar({
                   <Link to="/">{body}</Link>
                 </DM.Item>
               ) : (
-                <DM.Item key={s.label} onSelect={s.run} className={cls}>
+                <DM.Item key={s.label} onSelect={() => s.run?.()} className={cls}>
                   {body}
                 </DM.Item>
               );

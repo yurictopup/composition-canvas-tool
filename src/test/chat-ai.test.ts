@@ -69,6 +69,14 @@ describe("order questions", () => {
     expect(reply.actions?.[0]?.href).toContain("t.me");
   });
 
+  it("answers 'how do I pay' with the steps, not the customer's orders", () => {
+    expect(isOrderQuestion("how to pay?")).toBe(false);
+    expect(isOrderQuestion("របៀបបង់ប្រាក់")).toBe(false);
+    expect(isOrderQuestion("can i pay with aba")).toBe(false);
+    expect(isOrderQuestion("បង់ប្រាក់ហើយ តែមិនទាន់ចូល")).toBe(true);
+    expect(isOrderQuestion("khqr payment")).toBe(true);
+  });
+
   it("tells the AI whether the money arrived for each order", () => {
     const base = {
       game: "Mobile Legends",
