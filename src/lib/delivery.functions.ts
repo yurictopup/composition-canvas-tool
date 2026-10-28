@@ -13,14 +13,24 @@ function requireOwner(claims: Record<string, unknown>) {
 const orderInput = z.object({ orderId: z.string().uuid() });
 
 // Owner-only: buy this order's package from the supplier now. Orders Bakong has
-// not confirmed need allowUnpaid (the owner confirmed they were paid another way).
+// not confirmed need allowUnpaid (the owner confirmed they were paid another way);
+// orders whose supplier result is UNKNOWN need confirmedNotPlaced (the owner
+// checked the FazerCards panel and the order is not there).
 export const deliverOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator(orderInput.extend({ allowUnpaid: z.boolean().optional() }))
+  .validator(
+    orderInput.extend({
+      allowUnpaid: z.boolean().optional(),
+      confirmedNotPlaced: z.boolean().optional(),
+    }),
+  )
   .handler(async ({ data, context }): Promise<DeliveryResponse> => {
     requireOwner(context.claims);
     const { adminDb, deliverPaidOrder } = await import("@/lib/delivery.server");
-    return deliverPaidOrder(adminDb(), data.orderId, { allowUnpaid: data.allowUnpaid === true });
+    return deliverPaidOrder(adminDb(), data.orderId, {
+      allowUnpaid: data.allowUnpaid === true,
+      confirmedNotPlaced: data.confirmedNotPlaced === true,
+    });
   });
 
 export const refreshDelivery = createServerFn({ method: "POST" })

@@ -211,6 +211,9 @@ const KM: Record<string, string> = {
     "Bakong មិនទាន់ឃើញការបង់ទេ បន្តតែបើអតិថិជនបង់តាមផ្លូវផ្សេង ទិញពី FazerCards ឥឡូវ?",
   "Buy this package from FazerCards now? It uses your FazerCards balance.":
     "ទិញពី FazerCards ឥឡូវ? វាកាត់លុយ FazerCards",
+  "FazerCards may already have this order (the last try got no answer). Open the FazerCards panel > Orders first. Only continue if this order is NOT there. Buy it again now?":
+    "FazerCards ប្រហែលមាន order នេះរួចហើយ (លើកមុនគ្មានចម្លើយ) សូមបើក FazerCards panel > Orders ជាមុន បន្តតែបើរកមិនឃើញ order នេះ ទិញម្តងទៀតឥឡូវ?",
+  "Buy again (check first)": "ទិញម្តងទៀត (ពិនិត្យសិន)",
 
   // 6-digit code check
   "Owner sign-in check": "ផ្ទៀងផ្ទាត់ម្ចាស់ហាង",

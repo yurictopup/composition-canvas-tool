@@ -178,7 +178,7 @@ describe("FazerCards orders", () => {
       },
     });
     const result = await placeFazerOrder(order, { apiKey: "key", fetchImpl: f });
-    expect(result).toMatchObject({ status: "processing", supplierStatus: "UNCONFIRMED" });
+    expect(result).toMatchObject({ status: "processing", supplierStatus: "UNKNOWN" });
     expect(result.notPlaced).toBeUndefined();
   });
 
