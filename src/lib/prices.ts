@@ -11,8 +11,6 @@ export type PriceRow = {
   game_name: string;
   price_usd: number;
   active: boolean;
-  /** FazerCards product the owner picked on /admin; null uses the built-in list. */
-  fazer_offer?: string | null;
 };
 
 export type PriceMap = Map<string, PriceRow>;
@@ -22,7 +20,9 @@ export function packageKey(amt: string, unit: string): string {
 }
 
 export async function fetchPrices(gameId?: string): Promise<PriceMap | null> {
-  let query = supabase.from("product_prices").select("*");
+  let query = supabase
+    .from("product_prices")
+    .select("game_id, package_amt, game_name, price_usd, active");
   if (gameId) query = query.eq("game_id", gameId);
   const { data, error } = await query;
   if (error || !data) return null;
@@ -31,6 +31,18 @@ export async function fetchPrices(gameId?: string): Promise<PriceMap | null> {
     map.set(`${row.game_id}|${row.package_amt}`, { ...row, price_usd: Number(row.price_usd) });
   }
   return map;
+}
+
+/**
+ * The FazerCards product the owner picked for each package ("<game_id>|<package_amt>").
+ * Owner-only table: anyone else gets nothing, and null means it couldn't be read.
+ */
+export async function fetchOffers(): Promise<Map<string, string> | null> {
+  const { data, error } = await supabase
+    .from("package_offers")
+    .select("game_id, package_amt, fazer_offer");
+  if (error || !data) return null;
+  return new Map(data.map((o) => [`${o.game_id}|${o.package_amt}`, o.fazer_offer]));
 }
 
 // Prices already read this visit, so going back to a game shows them at once

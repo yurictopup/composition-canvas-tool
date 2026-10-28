@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { games, getHotItems, getPackages, serverGames } from "@/lib/games";
-import { fetchPrices, packageKey, packageSize, type PriceMap } from "@/lib/prices";
+import { fetchOffers, fetchPrices, packageKey, packageSize, type PriceMap } from "@/lib/prices";
 import { fazerCosts, fazerOffers } from "@/lib/fazercards-costs";
 import { fazerCatalog } from "@/lib/fazercards-catalog";
 import { useAdminT } from "@/components/admin/i18n";
@@ -33,6 +33,7 @@ export function AdminPrices() {
   const { t } = useAdminT();
   const builtIn = allRows();
   const [prices, setPrices] = useState<PriceMap | null>(null);
+  const [picked, setPicked] = useState<Map<string, string>>(new Map());
   const [loadErr, setLoadErr] = useState(false);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<string | null>(null);
@@ -43,9 +44,11 @@ export function AdminPrices() {
   const [newOffer, setNewOffer] = useState("");
 
   async function load() {
-    const map = await fetchPrices();
+    const [map, offerMap] = await Promise.all([fetchPrices(), fetchOffers()]);
     setLoadErr(!map);
     setPrices(map);
+    setPicked(offerMap ?? new Map());
+    if (!offerMap) setMsg(t("Couldn't read the FazerCards picks (package_offers table)."));
   }
 
   useEffect(() => {
@@ -58,7 +61,7 @@ export function AdminPrices() {
   const offerCost = (name: string | null | undefined) => offers.find((o) => o.name === name)?.cost;
   // FazerCards product a package is bought as: the owner's pick, else the built-in list.
   const offerOf = (key: string) =>
-    prices?.get(`${gameFilter}|${key}`)?.fazer_offer || fazerCatalog[gameFilter]?.offers[key] || "";
+    picked.get(`${gameFilter}|${key}`) || fazerCatalog[gameFilter]?.offers[key] || "";
 
   // Packages the owner added here (not in the built-in list) show up as rows too.
   const known = new Set(builtIn.filter((r) => r.gameId === gameFilter).map((r) => r.key));
@@ -73,19 +76,25 @@ export function AdminPrices() {
     }));
   const rows = [...builtIn, ...added];
 
+  // The owner's pick lives in package_offers (owner-only); none uses the built-in list.
+  async function saveOffer(gameId: string, key: string, offer: string) {
+    const table = supabase.from("package_offers");
+    const { error } = offer
+      ? await table.upsert({
+          game_id: gameId,
+          package_amt: key,
+          fazer_offer: offer,
+          updated_at: new Date().toISOString(),
+        })
+      : await table.delete().eq("game_id", gameId).eq("package_amt", key);
+    return error;
+  }
+
   async function setOffer(row: Row, offer: string) {
     const id = `${row.gameId}|${row.key}`;
-    const current = prices?.get(id);
     setSaving(id);
     setMsg(null);
-    const { error } = await supabase.from("product_prices").upsert({
-      game_id: row.gameId,
-      package_amt: row.key,
-      game_name: row.gameName,
-      price_usd: current?.price_usd ?? row.fallback ?? 0,
-      active: current?.active ?? false,
-      fazer_offer: offer || null,
-    });
+    const error = await saveOffer(row.gameId, row.key, offer);
     setMsg(error ? `${row.key}: ${error.message}` : `${row.key}: ${offer || t("Manual")}`);
     if (!error) await load();
     setSaving(null);
@@ -111,10 +120,10 @@ export function AdminPrices() {
       game_name: game.name,
       price_usd: Math.round(price * 100) / 100,
       active: true,
-      fazer_offer: newOffer || null,
     });
-    if (error) {
-      setMsg(`${key}: ${error.message}`);
+    const offerError = !error && newOffer ? await saveOffer(game.id, key, newOffer) : null;
+    if (error || offerError) {
+      setMsg(`${key}: ${(error ?? offerError)!.message}`);
     } else {
       setMsg(`${t("Added")}: ${game.name} — ${key} $${price.toFixed(2)}`);
       setNewAmt("");
@@ -143,7 +152,6 @@ export function AdminPrices() {
       game_name: row.gameName,
       price_usd: Math.round(price * 100) / 100,
       active,
-      fazer_offer: current?.fazer_offer ?? null,
     });
     if (error) {
       setMsg(`${row.key}: ${error.message}`);

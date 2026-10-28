@@ -86,10 +86,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      package_offers: {
+        Row: {
+          fazer_offer: string;
+          game_id: string;
+          package_amt: string;
+          updated_at: string;
+        };
+        Insert: {
+          fazer_offer: string;
+          game_id: string;
+          package_amt: string;
+          updated_at?: string;
+        };
+        Update: {
+          fazer_offer?: string;
+          game_id?: string;
+          package_amt?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       product_prices: {
         Row: {
           active: boolean;
-          fazer_offer: string | null;
           game_id: string;
           game_name: string;
           package_amt: string;
@@ -97,7 +117,6 @@ export type Database = {
         };
         Insert: {
           active?: boolean;
-          fazer_offer?: string | null;
           game_id: string;
           game_name: string;
           package_amt: string;
@@ -105,7 +124,6 @@ export type Database = {
         };
         Update: {
           active?: boolean;
-          fazer_offer?: string | null;
           game_id?: string;
           game_name?: string;
           package_amt?: string;

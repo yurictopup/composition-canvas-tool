@@ -119,6 +119,8 @@ const KM: Record<string, string> = {
     "តម្លៃនេះ អតិថិជនឃើញ និងបង់ភ្លាម ចុច បិទ ដើម្បីលាក់កញ្ចប់ ជ្រើសផលិតផល FazerCards ដើម្បីបញ្ចូលពេជ្រស្វ័យប្រវត្តិ",
   "Couldn't read the price table. Make sure the product_prices table exists in Supabase.":
     "អានតារាងតម្លៃមិនបាន សូមសាកម្តងទៀត",
+  "Couldn't read the FazerCards picks (package_offers table).":
+    "អានផលិតផល FazerCards ដែលបានជ្រើស (តារាង package_offers) មិនបាន",
   "Price (USD)": "តម្លៃ (USD)",
   "FazerCards cost": "ថ្លៃដើម",
   "On sale": "កំពុងលក់",
