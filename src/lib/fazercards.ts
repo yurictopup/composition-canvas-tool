@@ -63,7 +63,7 @@ async function call(
 
 /**
  * The FazerCards offer name for one of our packages, or null when it is delivered by hand.
- * A product the owner picked on /admin (product_prices.fazer_offer) wins over the built-in list.
+ * A product the owner picked on /admin (package_offers.fazer_offer) wins over the built-in list.
  */
 export function fazerOfferFor(gameId: string, packageAmt: string, picked?: string | null) {
   const game = fazerCatalog[gameId];

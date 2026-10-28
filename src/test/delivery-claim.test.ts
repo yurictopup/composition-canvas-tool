@@ -11,7 +11,7 @@ type Row = Record<string, unknown>;
 // A tiny in-memory stand-in for the orders table. Each query runs whole at the
 // moment it is sent, like one SQL statement, so two claims are serialized the
 // way Postgres serializes two UPDATEs of the same row.
-function memoryDb(orders: Row[]) {
+function memoryDb(orders: Row[], offers: Row[] = []) {
   const matchOr = (row: Row, expr: string) =>
     splitTop(expr).some((part) => {
       const [col, ...rest] = part.split(".");
@@ -27,6 +27,7 @@ function memoryDb(orders: Row[]) {
       const filters: ((row: Row) => boolean)[] = [];
       let values: Row | null = null;
       const run = () => {
+        if (table === "package_offers") return offers.filter((row) => filters.every((f) => f(row)));
         if (table !== "orders") return [];
         const hits = orders.filter((row) => filters.every((f) => f(row)));
         if (values) for (const row of hits) Object.assign(row, values, { updated_at: Date.now() });
@@ -153,6 +154,19 @@ afterEach(() => {
 });
 
 describe("deliverPaidOrder", () => {
+  it("buys the FazerCards product the owner picked in package_offers", async () => {
+    fazer(() => Promise.resolve(json({ ok: true, order: { id: "ord-2", status: "processing" } })));
+    const row = paidOrder();
+    const pick = { game_id: "mlbb", package_amt: "86 Diamonds", fazer_offer: "99 Diamonds" };
+    const db = memoryDb([row], [pick]);
+
+    const res = await deliverPaidOrder(db, row.id);
+    // The pick wins over the built-in "78 + 8 Diamonds", which FazerCards does sell here.
+    expect(res.message).toContain("99 Diamonds");
+    expect(row).toMatchObject({ status: "pending", supplier_status: "OFFER_NOT_FOUND" });
+    expect(buyCalls).toHaveLength(0);
+  });
+
   it("buys only once when two deliveries start at the same time", async () => {
     let answer!: (r: Response) => void;
     fazer(() => new Promise<Response>((resolve) => (answer = resolve)));

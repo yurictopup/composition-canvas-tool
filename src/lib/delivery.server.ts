@@ -96,13 +96,13 @@ export async function deliverPaidOrder(
 
   const apiKey = fazerKey();
   if (apiKey) {
-    const { data: priceRow } = await db
-      .from("product_prices")
+    const { data: offerRow } = await db
+      .from("package_offers")
       .select("fazer_offer")
       .eq("game_id", order.game_id)
       .eq("package_amt", order.package_amt)
       .maybeSingle();
-    const fazerOffer = (priceRow as { fazer_offer?: string | null } | null)?.fazer_offer ?? null;
+    const fazerOffer = (offerRow as { fazer_offer?: string } | null)?.fazer_offer ?? null;
     const result = await placeFazerOrder({ ...order, fazer_offer: fazerOffer }, { apiKey });
     if (result.supplierStatus === "NO_OFFER") {
       // Not sold through the API (Roblox, bundles): stays under Paid not delivered.
