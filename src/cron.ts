@@ -10,6 +10,7 @@ export default definePlugin((nitroApp) => {
     }
     const { sweepOrders } = await import("@/lib/order-sweep.server");
     const report = await sweepOrders();
-    if (report.checked || report.retried || report.refreshed) console.log("[sweep]", report);
+    if (report.checked || report.retried || report.refreshed || report.flagged)
+      console.log("[sweep]", report);
   });
 });

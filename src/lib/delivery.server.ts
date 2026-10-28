@@ -11,6 +11,12 @@ import {
 
 export type DeliveryResponse = { ok: boolean; message: string; status?: string };
 
+// Supplier states that mean a buy may have gone through but we never got its
+// answer (a timeout, a 5xx, or a call cut off while PLACING). Such an order is
+// never sent again by itself: the owner checks the FazerCards panel first.
+export const UNKNOWN = "UNKNOWN";
+const IN_DOUBT = ["PLACING", UNKNOWN, "UNCONFIRMED"];
+
 export function adminDb(): SupabaseClient {
   return supabaseAdmin as unknown as SupabaseClient;
 }
@@ -56,16 +62,24 @@ function describe(result: DeliveryResult): DeliveryResponse {
 export async function deliverPaidOrder(
   db: SupabaseClient,
   orderId: string,
-  { allowUnpaid = false }: { allowUnpaid?: boolean } = {},
+  {
+    allowUnpaid = false,
+    confirmedNotPlaced = false,
+  }: { allowUnpaid?: boolean; confirmedNotPlaced?: boolean } = {},
 ): Promise<DeliveryResponse> {
-  // Claim the order so two clicks don't race; GamesDrop's transactionId is the
-  // real guard against buying twice. Unpaid orders are never bought by mistake.
+  // Claim the order in one UPDATE, so two calls (two clicks, or the cron and
+  // the payment check) can't both win: Postgres re-checks the WHERE after the
+  // first one commits, and the order is PLACING by then. An order in doubt
+  // (UNKNOWN) is only sent again when the owner confirmed on the FazerCards
+  // panel that it is not there. Unpaid orders are never bought by mistake.
+  const blocked = confirmedNotPlaced ? ["PLACING"] : IN_DOUBT;
   let claim = db
     .from("orders")
     .update({ status: "processing", supplier_status: "PLACING" })
     .eq("id", orderId)
     .in("status", ["pending", "processing"])
-    .is("supplier_order_id", null);
+    .is("supplier_order_id", null)
+    .or(`supplier_status.is.null,supplier_status.not.in.(${blocked.join(",")})`);
   if (!allowUnpaid) claim = claim.not("paid_at", "is", null);
   const { data: order } = await claim
     .select("id, game_id, package_amt, player_id, player_zone, paid_at, price_usd")
@@ -74,8 +88,8 @@ export async function deliverPaidOrder(
     return {
       ok: false,
       message: allowUnpaid
-        ? "This order is not waiting for delivery."
-        : "This order is not paid by Bakong yet (or is not waiting for delivery).",
+        ? "This order is not waiting for delivery (or is being bought right now, or its supplier result is unknown)."
+        : "This order is not paid by Bakong yet (or is not waiting for delivery, is being bought right now, or its supplier result is unknown).",
     };
   }
 

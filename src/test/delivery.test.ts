@@ -88,7 +88,23 @@ describe("Placing a GamesDrop order", () => {
     });
   });
 
-  it("treats a timeout as unconfirmed, never as failed", async () => {
+  it.each([
+    [503, "BALANCE_UNAVAILABLE"],
+    [503, "INSUFFICIENT_BALANCE"],
+    [500, "OFFER_NOT_FOUND"],
+    [408, "INVALID_REQUEST_BODY"],
+    [409, "OUT_OF_STOCK"],
+  ])("treats HTTP %i as unknown even with code %s", async (httpStatus, code) => {
+    const f = fakeFetch({
+      [findOne]: { body: { price: 1 } },
+      [create]: { status: httpStatus, body: { code, message: "x" } },
+    });
+    const result = await placeGamesDropOrder(order, { ...opts, fetchImpl: f });
+    expect(result).toMatchObject({ status: "processing", supplierStatus: "UNKNOWN" });
+    expect(result.notPlaced).toBeUndefined();
+  });
+
+  it("treats a timeout as unknown, never as failed", async () => {
     const f = fakeFetch({
       [findOne]: { body: { price: 1 } },
       [create]: () => {
@@ -96,7 +112,7 @@ describe("Placing a GamesDrop order", () => {
       },
     });
     const result = await placeGamesDropOrder(order, { ...opts, fetchImpl: f });
-    expect(result).toMatchObject({ status: "processing", supplierStatus: "UNCONFIRMED" });
+    expect(result).toMatchObject({ status: "processing", supplierStatus: "UNKNOWN" });
     expect(result.notPlaced).toBeUndefined();
   });
 

@@ -13,6 +13,7 @@ vi.mock("@/lib/delivery.server", () => ({
   deliverPaidOrder: (...a: unknown[]) => deliverPaidOrder(...a),
   refreshPaidOrder: (...a: unknown[]) => refreshPaidOrder(...a),
   supplierStock: () => supplierStock(),
+  UNKNOWN: "UNKNOWN",
 }));
 vi.mock("@/lib/payment.server", () => ({
   checkOrderPayment: (...a: unknown[]) => checkOrderPayment(...a),
@@ -20,17 +21,23 @@ vi.mock("@/lib/payment.server", () => ({
 
 const { sweepOrders } = await import("@/lib/order-sweep.server");
 
-// Each from() answers with the next list: unpaid KHQRs, paid-not-bought, processing.
-function fakeDb(...lists: unknown[][]) {
+// Each read answers with the next list: unpaid KHQRs, paid-not-bought, processing.
+// The stuck-PLACING update answers with `stuck`.
+function fakeDb(lists: unknown[][], stuck: unknown[] = []) {
   let call = 0;
   return {
     from() {
-      const data = lists[call++] ?? [];
+      let isUpdate = false;
       const chain: Record<string, unknown> = {};
-      for (const m of ["select", "eq", "in", "is", "not", "gt", "order", "limit"]) {
+      for (const m of ["select", "eq", "in", "is", "not", "gt", "lt", "order", "limit"]) {
         chain[m] = () => chain;
       }
-      chain["then"] = (resolve: (v: unknown) => void) => resolve({ data });
+      chain["update"] = () => {
+        isUpdate = true;
+        return chain;
+      };
+      chain["then"] = (resolve: (v: unknown) => void) =>
+        resolve({ data: isUpdate ? stuck : (lists[call++] ?? []) });
       return chain;
     },
   } as unknown as SupabaseClient;
@@ -54,37 +61,39 @@ beforeEach(() => {
 describe("order sweep", () => {
   it("asks Bakong about each unpaid KHQR as the owner", async () => {
     checkOrderPayment.mockResolvedValueOnce({ available: true, paid: true });
-    const report = await sweepOrders(fakeDb([{ id: "a" }, { id: "b" }], [], []));
+    const report = await sweepOrders(fakeDb([[{ id: "a" }, { id: "b" }], [], []]));
     expect(checkOrderPayment).toHaveBeenCalledWith(expect.anything(), "a", null);
     expect(report).toMatchObject({ checked: 2, paid: 1 });
   });
 
   it("buys orders refused for low balance once FazerCards has money", async () => {
     supplierStock.mockResolvedValue({ ok: true, balance: 5 });
-    const report = await sweepOrders(fakeDb([], [paid("x"), paid("y")], []));
+    const report = await sweepOrders(fakeDb([[], [paid("x"), paid("y")], []]));
     expect(deliverPaidOrder.mock.calls.map((c) => c[1])).toEqual(["x", "y"]);
     expect(report.retried).toBe(2);
   });
 
   it("does nothing while the balance is empty", async () => {
     supplierStock.mockResolvedValue({ ok: true, balance: 0 });
-    await sweepOrders(fakeDb([], [paid("x")], []));
+    await sweepOrders(fakeDb([[], [paid("x")], []]));
     expect(deliverPaidOrder).not.toHaveBeenCalled();
   });
 
   it("stops when the balance runs out", async () => {
     supplierStock.mockResolvedValue({ ok: true, balance: 1.3 });
-    await sweepOrders(fakeDb([], [paid("x"), paid("y")], []));
+    await sweepOrders(fakeDb([[], [paid("x"), paid("y")], []]));
     expect(deliverPaidOrder.mock.calls.map((c) => c[1])).toEqual(["x"]);
   });
 
   it("never retries an order that may already be placed, or a hand-delivered package", async () => {
     supplierStock.mockResolvedValue({ ok: true, balance: 50 });
     await sweepOrders(
-      fakeDb(
+      fakeDb([
         [],
         [
           paid("unconfirmed", { supplier_status: "UNCONFIRMED" }),
+          paid("unknown", { supplier_status: "UNKNOWN" }),
+          paid("placing", { supplier_status: "PLACING" }),
           paid("roblox", {
             game_id: "roblox",
             package_amt: "80 Robux",
@@ -94,20 +103,27 @@ describe("order sweep", () => {
           paid("old-no-offer", { supplier_status: "NO_OFFER" }),
         ],
         [],
-      ),
+      ]),
     );
     expect(deliverPaidOrder.mock.calls.map((c) => c[1])).toEqual(["old-no-offer"]);
   });
 
+  it("marks orders cut off while PLACING as UNKNOWN, without buying them", async () => {
+    supplierStock.mockResolvedValue({ ok: true, balance: 50 });
+    const report = await sweepOrders(fakeDb([[], [], []], [{ id: "cut" }]));
+    expect(report.flagged).toBe(1);
+    expect(deliverPaidOrder).not.toHaveBeenCalled();
+  });
+
   it("checks FazerCards orders still processing", async () => {
-    const report = await sweepOrders(fakeDb([], [], [{ id: "p" }]));
+    const report = await sweepOrders(fakeDb([[], [], [{ id: "p" }]]));
     expect(refreshPaidOrder).toHaveBeenCalledWith(expect.anything(), "p");
     expect(report.refreshed).toBe(1);
   });
 
   it("keeps going when one step fails", async () => {
     checkOrderPayment.mockRejectedValueOnce(new Error("Bakong down"));
-    const report = await sweepOrders(fakeDb([{ id: "a" }], [], [{ id: "p" }]));
+    const report = await sweepOrders(fakeDb([[{ id: "a" }], [], [{ id: "p" }]]));
     expect(report.refreshed).toBe(1);
   });
 });
