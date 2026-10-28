@@ -111,10 +111,13 @@ function GamePage({ gameId }: { gameId: string }) {
     getPackages(gameId),
     getHotItems(gameId).map((h) => h.label),
   ) as { amt: string; price: number | null; hot?: boolean }[];
-  const hotItems = getHotItems(gameId).map((item) => ({
-    ...item,
-    price: livePrice(prices, gameId, packageKey(item.label, game.unit), item.price),
-  }));
+  // Once live prices load, items the owner switched off in the table are hidden, not shown as "—".
+  const hotItems = getHotItems(gameId)
+    .map((item) => ({
+      ...item,
+      price: livePrice(prices, gameId, packageKey(item.label, game.unit), item.price),
+    }))
+    .filter((item) => !prices || item.price !== null);
   // Badged items (the bundle) run full width on top; the rest sit in centred rows below.
   const featuredHot = hotItems.filter((item) => item.img && item.badge);
   const pictureHot = hotItems.filter((item) => item.img && !item.badge);
