@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Check, Clock, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
+import { Check, Clock, FlaskConical, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
 import { KhqrCode } from "@/components/KhqrCode";
 import { checkPayment, startPayment } from "@/lib/payment.functions";
 import { checkGuestPayment, startGuestPayment } from "@/lib/guest-order.functions";
@@ -108,7 +108,7 @@ export function PaymentView({
   const msLeft = state.expiresAt ? new Date(state.expiresAt).getTime() - now : null;
   const expired = msLeft !== null && msLeft <= 0;
   const minutesLeft = msLeft !== null ? Math.max(0, Math.ceil(msLeft / 60000)) : null;
-  const merchant = summary.merchant ?? "Yuric Topup";
+  const merchant = state.merchant ?? summary.merchant ?? "Yuric Topup";
 
   return (
     <div>
@@ -116,9 +116,7 @@ export function PaymentView({
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {t("Order")} #{summary.code}
         </p>
-        <h1 className="mt-1 font-sans text-xl font-bold leading-relaxed">
-          {t("Scan to pay")}
-        </h1>
+        <h1 className="mt-1 font-sans text-xl font-bold leading-relaxed">{t("Scan to pay")}</h1>
         <p className="font-sans text-sm text-muted-foreground">
           {summary.game} · {summary.item}
         </p>
@@ -172,16 +170,33 @@ export function PaymentView({
             )}
           </p>
           <p className="max-w-[320px] text-center font-sans text-xs leading-[1.7] text-muted-foreground">
-            {t("Scan with ABA, ACLEDA, Wing or any bank app. This page updates by itself once you pay.")}
+            {t(
+              "Scan with ABA, ACLEDA, Wing or any bank app. This page updates by itself once you pay.",
+            )}
           </p>
         </div>
       )}
 
+      {state.sandbox && <SandboxNote />}
+
       <p className="mt-4 flex items-center justify-center gap-1.5 font-sans text-[11px] text-muted-foreground">
         <ShieldCheck className="h-3.5 w-3.5 text-green-600" />
-        {t("Secure payment through Bakong, National Bank of Cambodia")}
+        {state.provider === "ABA PayWay"
+          ? t("Secure payment through ABA PayWay")
+          : t("Secure payment through Bakong, National Bank of Cambodia")}
       </p>
     </div>
+  );
+}
+
+// PayWay Sandbox: test money only, so the order is never topped up.
+function SandboxNote() {
+  const { t } = useStorePrefs();
+  return (
+    <p className="mx-auto mt-4 flex max-w-[320px] items-center justify-center gap-1.5 rounded-lg bg-amber-500/10 px-3 py-2 text-center font-sans text-xs leading-[1.7] text-amber-700 dark:text-amber-400">
+      <FlaskConical className="h-3.5 w-3.5 shrink-0" />
+      {t("Sandbox test payment, no real money and no top-up")}
+    </p>
   );
 }
 
@@ -189,6 +204,17 @@ function PaidView({ state, summary }: { state: PaymentState; summary: OrderSumma
   const { t } = useStorePrefs();
   const done = state.status === "completed";
   const amount = state.amount ?? summary.amount;
+
+  if (state.sandbox) {
+    return (
+      <div className="text-center">
+        <h1 className="font-sans text-xl font-bold leading-relaxed">
+          {t("Sandbox payment confirmed")}
+        </h1>
+        <SandboxNote />
+      </div>
+    );
+  }
 
   return (
     <div className="text-center">
