@@ -160,7 +160,8 @@ export const askBot = createServerFn({ method: "POST" })
       // Without the AI, a payment question still gets the real order check.
       if (orderQuestion && orders !== undefined)
         return { text: orderReply(orders), source: "orders" };
-      return { unavailable: errors.join(" | ") };
+      // The reason stays in the Worker logs; visitors only learn the AI is off.
+      return { unavailable: ai ? "AI failed" : "no AI binding" };
     },
   );
 
