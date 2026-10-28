@@ -23,6 +23,7 @@ import { guestOrderPath, saveGuestOrder } from "@/lib/guest-orders";
 import {
   ArrowUp,
   Check,
+  Clock,
   Copy,
   Link2,
   CircleAlert,
@@ -36,6 +37,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { livePackages, livePrice, packageKey, useLivePrices } from "@/lib/prices";
+import { gameOnSale, useStoreStatus } from "@/lib/store-status";
 
 export const Route = createFileRoute("/game/$gameId")({
   head: ({ params }) => {
@@ -84,6 +86,9 @@ function GamePage({ gameId }: { gameId: string }) {
   const [guestToken, setGuestToken] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const prices = useLivePrices(gameId);
+  // Owner paused sales on /admin: no packages or prices, only "coming soon".
+  const status = useStoreStatus();
+  const onSale = status ? gameOnSale(status, gameId) : null;
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
@@ -408,350 +413,389 @@ function GamePage({ gameId }: { gameId: string }) {
           </div>
         </div>
 
-        {/* Step 1 — Player ID */}
-        <section className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
-          <h2 className="mb-3 flex items-center gap-2.5 font-khmer text-base sm:mb-4 sm:gap-3 sm:text-lg">
-            <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground sm:h-8 sm:w-8">
-              1
-            </span>
-            {t("Enter Player ID")}
-          </h2>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void runCheck();
-            }}
-            className={`grid items-end gap-3 ${idConfig.secondary ? "sm:grid-cols-[1fr_1fr_auto]" : "sm:grid-cols-[1fr_auto]"}`}
-          >
-            <label className="grid min-w-0 gap-1.5 text-sm font-semibold sm:gap-2">
-              {idConfig.primary.label}
-              <input
-                value={uid}
-                onChange={(e) => {
-                  setUid(e.target.value);
-                  resetCheck();
+        {onSale !== true ? (
+          <SalesPaused loading={onSale === null} />
+        ) : (
+          <>
+            {/* Step 1 — Player ID */}
+            <section className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
+              <h2 className="mb-3 flex items-center gap-2.5 font-khmer text-base sm:mb-4 sm:gap-3 sm:text-lg">
+                <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground sm:h-8 sm:w-8">
+                  1
+                </span>
+                {t("Enter Player ID")}
+              </h2>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void runCheck();
                 }}
-                placeholder={idConfig.primary.placeholder}
-                inputMode={idConfig.primary.numeric ? "numeric" : "text"}
-                autoComplete="off"
-                spellCheck={false}
-                className={`min-w-0 rounded-lg border bg-input px-3 py-2 font-normal sm:px-4 sm:py-3 outline-none focus:border-primary ${check && !check.ok ? "border-red-500" : ""}`}
-              />
-            </label>
-            {idConfig.secondary && (
-              <label className="grid min-w-0 gap-1.5 text-sm font-semibold sm:gap-2">
-                {idConfig.secondary.label}
-                {idConfig.secondary.options ? (
-                  <select
-                    value={zone}
-                    onChange={(e) => {
-                      setZone(e.target.value);
-                      resetCheck();
-                    }}
-                    className={`h-11 min-w-0 rounded-lg border bg-input px-3 font-normal sm:h-12 sm:px-4 outline-none focus:border-primary ${check && !check.ok ? "border-red-500" : ""}`}
-                  >
-                    <option value="">{idConfig.secondary.placeholder}</option>
-                    {idConfig.secondary.options.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
+                className={`grid items-end gap-3 ${idConfig.secondary ? "sm:grid-cols-[1fr_1fr_auto]" : "sm:grid-cols-[1fr_auto]"}`}
+              >
+                <label className="grid min-w-0 gap-1.5 text-sm font-semibold sm:gap-2">
+                  {idConfig.primary.label}
                   <input
-                    value={zone}
+                    value={uid}
                     onChange={(e) => {
-                      setZone(e.target.value);
+                      setUid(e.target.value);
                       resetCheck();
                     }}
-                    placeholder={idConfig.secondary.placeholder}
-                    inputMode={idConfig.secondary.numeric ? "numeric" : "text"}
+                    placeholder={idConfig.primary.placeholder}
+                    inputMode={idConfig.primary.numeric ? "numeric" : "text"}
                     autoComplete="off"
                     spellCheck={false}
                     className={`min-w-0 rounded-lg border bg-input px-3 py-2 font-normal sm:px-4 sm:py-3 outline-none focus:border-primary ${check && !check.ok ? "border-red-500" : ""}`}
                   />
+                </label>
+                {idConfig.secondary && (
+                  <label className="grid min-w-0 gap-1.5 text-sm font-semibold sm:gap-2">
+                    {idConfig.secondary.label}
+                    {idConfig.secondary.options ? (
+                      <select
+                        value={zone}
+                        onChange={(e) => {
+                          setZone(e.target.value);
+                          resetCheck();
+                        }}
+                        className={`h-11 min-w-0 rounded-lg border bg-input px-3 font-normal sm:h-12 sm:px-4 outline-none focus:border-primary ${check && !check.ok ? "border-red-500" : ""}`}
+                      >
+                        <option value="">{idConfig.secondary.placeholder}</option>
+                        {idConfig.secondary.options.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        value={zone}
+                        onChange={(e) => {
+                          setZone(e.target.value);
+                          resetCheck();
+                        }}
+                        placeholder={idConfig.secondary.placeholder}
+                        inputMode={idConfig.secondary.numeric ? "numeric" : "text"}
+                        autoComplete="off"
+                        spellCheck={false}
+                        className={`min-w-0 rounded-lg border bg-input px-3 py-2 font-normal sm:px-4 sm:py-3 outline-none focus:border-primary ${check && !check.ok ? "border-red-500" : ""}`}
+                      />
+                    )}
+                  </label>
                 )}
-              </label>
-            )}
-            <Button type="submit" disabled={checking} className="h-10 px-6 font-bold sm:h-12">
-              {checking ? t("Checking…") : t("Check ID")}
-            </Button>
-          </form>
-          {check && (
-            <p
-              role="status"
-              className={`mt-3 flex items-start gap-2 font-sans text-sm leading-relaxed ${check.ok ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"}`}
-            >
-              {check.ok ? (
-                <CircleCheck className="mt-0.5 h-4 w-4 shrink-0" />
-              ) : (
-                <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+                <Button type="submit" disabled={checking} className="h-10 px-6 font-bold sm:h-12">
+                  {checking ? t("Checking…") : t("Check ID")}
+                </Button>
+              </form>
+              {check && (
+                <p
+                  role="status"
+                  className={`mt-3 flex items-start gap-2 font-sans text-sm leading-relaxed ${check.ok ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"}`}
+                >
+                  {check.ok ? (
+                    <CircleCheck className="mt-0.5 h-4 w-4 shrink-0" />
+                  ) : (
+                    <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+                  )}
+                  <span>
+                    {t(check.msg)}
+                    {check.name && <strong className="ml-1 font-bold">{check.name}</strong>}
+                  </span>
+                </p>
               )}
-              <span>
-                {t(check.msg)}
-                {check.name && <strong className="ml-1 font-bold">{check.name}</strong>}
-              </span>
-            </p>
-          )}
-        </section>
+            </section>
 
-        {/* Step 2 — Package */}
-        <section className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
-          <h2 className="mb-3 flex items-center gap-2.5 font-khmer text-base sm:mb-4 sm:gap-3 sm:text-lg">
-            <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground sm:h-8 sm:w-8">
-              2
-            </span>
-            {t("Choose a package")}
-          </h2>
+            {/* Step 2 — Package */}
+            <section className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
+              <h2 className="mb-3 flex items-center gap-2.5 font-khmer text-base sm:mb-4 sm:gap-3 sm:text-lg">
+                <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground sm:h-8 sm:w-8">
+                  2
+                </span>
+                {t("Choose a package")}
+              </h2>
 
-          {featuredHot.length + pictureHot.length > 0 && (
-            <div className="mb-5">
-              <p className="mb-3 flex items-center gap-2 text-sm font-bold text-amber-600">
-                <Sparkles className="h-4 w-4" /> {t("Recommended for You")}
-              </p>
-              {featuredHot.length > 0 && (
-                <div className="mb-3 space-y-3">
-                  {featuredHot.map((item) => renderHot(item, true))}
+              {featuredHot.length + pictureHot.length > 0 && (
+                <div className="mb-5">
+                  <p className="mb-3 flex items-center gap-2 text-sm font-bold text-amber-600">
+                    <Sparkles className="h-4 w-4" /> {t("Recommended for You")}
+                  </p>
+                  {featuredHot.length > 0 && (
+                    <div className="mb-3 space-y-3">
+                      {featuredHot.map((item) => renderHot(item, true))}
+                    </div>
+                  )}
+                  <div className="mb-3 flex flex-wrap justify-center gap-3">
+                    {pictureHot.map((item) => (
+                      <div
+                        key={item.label}
+                        className="w-[calc(50%-0.375rem)] sm:w-[calc((100%-1.5rem)/3)]"
+                      >
+                        {renderHot(item)}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
-              <div className="mb-3 flex flex-wrap justify-center gap-3">
-                {pictureHot.map((item) => (
-                  <div
-                    key={item.label}
-                    className="w-[calc(50%-0.375rem)] sm:w-[calc((100%-1.5rem)/3)]"
-                  >
-                    {renderHot(item)}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
-          {availablePackages.length > 0 ? (
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3">
-              {availablePackages.map((p, i) => (
-                <button
-                  key={p.amt}
-                  onClick={() => selectPkg(i)}
-                  className={`relative flex items-center justify-between rounded-xl border px-2.5 py-2 text-left sm:rounded-2xl sm:px-4 sm:py-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${pkg === i && hotPkg === null ? "border-primary bg-primary/10 ring-2 ring-primary shadow-[0_0_16px_oklch(0.42_0.19_266/0.35)]" : "border-border/60 bg-white"}`}
-                >
-                  {p.hot && (
-                    <span className="absolute -top-2 right-2 rounded-full bg-accent px-2 text-[10px] font-bold text-accent-foreground">
-                      HOT
-                    </span>
-                  )}
-                  <div>
-                    <div
-                      className={`text-sm font-bold sm:text-base ${pkg === i && hotPkg === null ? "text-primary" : "text-card-foreground"}`}
-                    >
-                      {p.amt}
-                    </div>
-                    <div className="text-xs text-muted-foreground">{game.unit}</div>
-                    <div
-                      className={`mt-1 text-sm font-bold ${pkg === i && hotPkg === null ? "text-primary" : "text-primary/70"}`}
-                    >
-                      {p.price !== null ? `$${p.price.toFixed(2)}` : "—"}
-                    </div>
-                  </div>
-                  {slotPic(packageSlotKey(gameId, p.amt)) ? (
-                    <img
-                      src={slotPic(packageSlotKey(gameId, p.amt))}
-                      loading="lazy"
-                      decoding="async"
-                      alt={`${p.amt} ${game.unit}`}
-                      className={`h-10 w-10 shrink-0 rounded-lg object-contain transition-transform sm:h-14 sm:w-14 ${pkg === i && hotPkg === null ? "scale-110" : ""}`}
-                    />
-                  ) : (
-                    <CurrencyIcon
-                      gameId={idGameId}
-                      className={`h-7 w-7 shrink-0 transition-transform sm:h-9 sm:w-9 ${pkg === i && hotPkg === null ? "scale-125" : ""}`}
-                    />
-                  )}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t("No packages available yet.")}</p>
-          )}
-
-          {gameId === "roblox" && (
-            <RobloxGamePassSteps
-              robux={pkg !== null ? Number(availablePackages[pkg]?.amt) : null}
-            />
-          )}
-
-          {moreItems.length > 0 && (
-            <div className="mt-6">
-              <p className="mb-3 flex items-center gap-2 text-sm font-bold text-primary">
-                <Package className="h-4 w-4" /> {t("More items")}
-              </p>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {moreItems.map((item) => {
-                  const i = hotItems.indexOf(item);
-                  const on = hotPkg === i;
-                  return (
+              {availablePackages.length > 0 ? (
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3">
+                  {availablePackages.map((p, i) => (
                     <button
-                      key={item.label}
-                      type="button"
-                      onClick={() => selectHot(i)}
-                      className={`flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${on ? "border-primary bg-primary/10 ring-2 ring-primary" : "border-border/60 bg-white"}`}
+                      key={p.amt}
+                      onClick={() => selectPkg(i)}
+                      className={`relative flex items-center justify-between rounded-xl border px-2.5 py-2 text-left sm:rounded-2xl sm:px-4 sm:py-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${pkg === i && hotPkg === null ? "border-primary bg-primary/10 ring-2 ring-primary shadow-[0_0_16px_oklch(0.42_0.19_266/0.35)]" : "border-border/60 bg-white"}`}
                     >
-                      <div className="min-w-0">
+                      {p.hot && (
+                        <span className="absolute -top-2 right-2 rounded-full bg-accent px-2 text-[10px] font-bold text-accent-foreground">
+                          HOT
+                        </span>
+                      )}
+                      <div>
                         <div
-                          className={`text-sm font-bold leading-tight ${on ? "text-primary" : "text-card-foreground"}`}
+                          className={`text-sm font-bold sm:text-base ${pkg === i && hotPkg === null ? "text-primary" : "text-card-foreground"}`}
                         >
-                          {item.label}
+                          {p.amt}
                         </div>
+                        <div className="text-xs text-muted-foreground">{game.unit}</div>
                         <div
-                          className={`mt-1 text-sm font-bold ${on ? "text-primary" : "text-primary/70"}`}
+                          className={`mt-1 text-sm font-bold ${pkg === i && hotPkg === null ? "text-primary" : "text-primary/70"}`}
                         >
-                          {item.price !== null ? `$${item.price.toFixed(2)}` : "—"}
+                          {p.price !== null ? `$${p.price.toFixed(2)}` : "—"}
                         </div>
                       </div>
-                      {slotPic(`item:${gameId}:${item.label}`) ? (
+                      {slotPic(packageSlotKey(gameId, p.amt)) ? (
                         <img
-                          src={slotPic(`item:${gameId}:${item.label}`)}
+                          src={slotPic(packageSlotKey(gameId, p.amt))}
                           loading="lazy"
                           decoding="async"
-                          alt={item.label}
-                          className={`h-11 w-11 shrink-0 rounded-lg object-contain transition-transform ${on ? "scale-110" : ""}`}
+                          alt={`${p.amt} ${game.unit}`}
+                          className={`h-10 w-10 shrink-0 rounded-lg object-contain transition-transform sm:h-14 sm:w-14 ${pkg === i && hotPkg === null ? "scale-110" : ""}`}
                         />
                       ) : (
                         <CurrencyIcon
                           gameId={idGameId}
-                          className={`h-8 w-8 shrink-0 transition-transform ${on ? "scale-125" : ""}`}
+                          className={`h-7 w-7 shrink-0 transition-transform sm:h-9 sm:w-9 ${pkg === i && hotPkg === null ? "scale-125" : ""}`}
                         />
                       )}
                     </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </section>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">{t("No packages available yet.")}</p>
+              )}
 
-        {/* Step 3 — Payment */}
-        <section className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
-          <h2 className="mb-3 flex items-center gap-2.5 font-khmer text-base sm:mb-4 sm:gap-3 sm:text-lg">
-            <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground sm:h-8 sm:w-8">
-              3
-            </span>
-            {t("Choose a payment method")}
-          </h2>
-          <div className="flex flex-wrap gap-3">
-            {payments.map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setPay(m)}
-                aria-pressed={pay === m}
-                className={`relative flex aspect-square w-36 flex-col items-center justify-center gap-2 sm:w-44 sm:gap-2.5 rounded-2xl border-2 bg-white px-4 text-center text-[#142650] transition ${
-                  pay === m
-                    ? "border-[#2f5fe0] shadow-[0_6px_18px_rgb(47_95_224/0.25)]"
-                    : "border-[#dfe8f6] hover:border-[#2f5fe0]/50"
-                }`}
-              >
-                <span
-                  className={`absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full border-2 ${
-                    pay === m ? "border-[#2f5fe0] bg-[#2f5fe0]" : "border-[#c5d3ea]"
-                  }`}
-                >
-                  {pay === m && <span className="h-2 w-2 rounded-full bg-white" />}
-                </span>
-                <KhqrMark />
-                <span className="block text-base font-bold">{m} KHQR</span>
-                <span className="block text-[11px] leading-snug text-[#5b6b8c]">
-                  {t("Scan with ABA, ACLEDA, Wing or any bank app")}
-                </span>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* Summary */}
-        <aside className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
-          <h3 className="font-khmer text-base sm:text-lg">{t("Order summary")}</h3>
-          <dl className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">{t("Game")}</dt>
-              <dd>{game.name}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">{t("Player ID")}</dt>
-              <dd>
-                {uid || "—"}
-                {zone && ` (${zone})`}
-              </dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">{t("Package")}</dt>
-              <dd>{selected ? `${selected.amt} ${game.unit}` : "—"}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">{t("Payment")}</dt>
-              <dd>{pay}</dd>
-            </div>
-          </dl>
-          <div className="mt-4 flex items-end justify-between border-t pt-4">
-            <span className="text-muted-foreground">{t("Total")}</span>
-            <span className="font-display text-2xl font-black text-accent sm:text-3xl">
-              {selected?.price != null ? `$${selected.price.toFixed(2)}` : "—"}
-            </span>
-          </div>
-
-          {signedIn === false && (
-            <div className="mt-4 rounded-xl border border-border/70 bg-muted/40 p-3">
-              <label className="grid gap-1.5 text-sm font-semibold">
-                {t("Phone or Telegram (optional)")}
-                <input
-                  value={contact}
-                  onChange={(e) => setContact(e.target.value)}
-                  maxLength={64}
-                  placeholder="012 345 678 / @username"
-                  autoComplete="tel"
-                  className="min-w-0 rounded-lg border bg-input px-3 py-2 font-normal outline-none focus:border-primary"
+              {gameId === "roblox" && (
+                <RobloxGamePassSteps
+                  robux={pkg !== null ? Number(availablePackages[pkg]?.amt) : null}
                 />
-              </label>
-              <p className="mt-2 font-sans text-xs leading-[1.7] text-muted-foreground">
-                {t("No account needed. We contact you here only if there is a problem with your order.")}{" "}
-                <Link to="/auth" className="font-semibold text-primary hover:underline">
-                  {t("Sign in")}
-                </Link>{" "}
-                {t("to keep all your orders in one place.")}
-              </p>
-            </div>
-          )}
+              )}
 
-          {orderErr && (
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-sm font-semibold text-destructive">
-              <CircleAlert className="h-4 w-4 shrink-0" />
-              {orderErr}
-            </p>
-          )}
+              {moreItems.length > 0 && (
+                <div className="mt-6">
+                  <p className="mb-3 flex items-center gap-2 text-sm font-bold text-primary">
+                    <Package className="h-4 w-4" /> {t("More items")}
+                  </p>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {moreItems.map((item) => {
+                      const i = hotItems.indexOf(item);
+                      const on = hotPkg === i;
+                      return (
+                        <button
+                          key={item.label}
+                          type="button"
+                          onClick={() => selectHot(i)}
+                          className={`flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${on ? "border-primary bg-primary/10 ring-2 ring-primary" : "border-border/60 bg-white"}`}
+                        >
+                          <div className="min-w-0">
+                            <div
+                              className={`text-sm font-bold leading-tight ${on ? "text-primary" : "text-card-foreground"}`}
+                            >
+                              {item.label}
+                            </div>
+                            <div
+                              className={`mt-1 text-sm font-bold ${on ? "text-primary" : "text-primary/70"}`}
+                            >
+                              {item.price !== null ? `$${item.price.toFixed(2)}` : "—"}
+                            </div>
+                          </div>
+                          {slotPic(`item:${gameId}:${item.label}`) ? (
+                            <img
+                              src={slotPic(`item:${gameId}:${item.label}`)}
+                              loading="lazy"
+                              decoding="async"
+                              alt={item.label}
+                              className={`h-11 w-11 shrink-0 rounded-lg object-contain transition-transform ${on ? "scale-110" : ""}`}
+                            />
+                          ) : (
+                            <CurrencyIcon
+                              gameId={idGameId}
+                              className={`h-8 w-8 shrink-0 transition-transform ${on ? "scale-125" : ""}`}
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </section>
 
-          <button
-            disabled={!canBuy}
-            onClick={handleBuy}
-            className="btn-3d glow-pulse mt-4 w-full rounded-xl py-3 sm:mt-5 sm:py-4 font-display font-bold disabled:opacity-40"
-          >
-            {busy ? (
-              t("Processing…")
-            ) : (
-              <span className="inline-flex items-center gap-2">
-                <ShoppingCart className="h-4 w-4" />
-                {t("Place Order")}
-              </span>
-            )}
-          </button>
+            {/* Step 3 — Payment */}
+            <section className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
+              <h2 className="mb-3 flex items-center gap-2.5 font-khmer text-base sm:mb-4 sm:gap-3 sm:text-lg">
+                <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground sm:h-8 sm:w-8">
+                  3
+                </span>
+                {t("Choose a payment method")}
+              </h2>
+              <div className="flex flex-wrap gap-3">
+                {payments.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setPay(m)}
+                    aria-pressed={pay === m}
+                    className={`relative flex aspect-square w-36 flex-col items-center justify-center gap-2 sm:w-44 sm:gap-2.5 rounded-2xl border-2 bg-white px-4 text-center text-[#142650] transition ${
+                      pay === m
+                        ? "border-[#2f5fe0] shadow-[0_6px_18px_rgb(47_95_224/0.25)]"
+                        : "border-[#dfe8f6] hover:border-[#2f5fe0]/50"
+                    }`}
+                  >
+                    <span
+                      className={`absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full border-2 ${
+                        pay === m ? "border-[#2f5fe0] bg-[#2f5fe0]" : "border-[#c5d3ea]"
+                      }`}
+                    >
+                      {pay === m && <span className="h-2 w-2 rounded-full bg-white" />}
+                    </span>
+                    <KhqrMark />
+                    <span className="block text-base font-bold">{m} KHQR</span>
+                    <span className="block text-[11px] leading-snug text-[#5b6b8c]">
+                      {t("Scan with ABA, ACLEDA, Wing or any bank app")}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </section>
 
-          {!check?.ok && (
-            <p className="mt-2 flex items-center justify-center gap-1 text-xs text-muted-foreground">
-              <ArrowUp className="h-3.5 w-3.5" /> {t("Check your Player ID first to order")}
-            </p>
-          )}
-        </aside>
+            {/* Summary */}
+            <aside className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
+              <h3 className="font-khmer text-base sm:text-lg">{t("Order summary")}</h3>
+              <dl className="mt-4 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">{t("Game")}</dt>
+                  <dd>{game.name}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">{t("Player ID")}</dt>
+                  <dd>
+                    {uid || "—"}
+                    {zone && ` (${zone})`}
+                  </dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">{t("Package")}</dt>
+                  <dd>{selected ? `${selected.amt} ${game.unit}` : "—"}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">{t("Payment")}</dt>
+                  <dd>{pay}</dd>
+                </div>
+              </dl>
+              <div className="mt-4 flex items-end justify-between border-t pt-4">
+                <span className="text-muted-foreground">{t("Total")}</span>
+                <span className="font-display text-2xl font-black text-accent sm:text-3xl">
+                  {selected?.price != null ? `$${selected.price.toFixed(2)}` : "—"}
+                </span>
+              </div>
+
+              {signedIn === false && (
+                <div className="mt-4 rounded-xl border border-border/70 bg-muted/40 p-3">
+                  <label className="grid gap-1.5 text-sm font-semibold">
+                    {t("Phone or Telegram (optional)")}
+                    <input
+                      value={contact}
+                      onChange={(e) => setContact(e.target.value)}
+                      maxLength={64}
+                      placeholder="012 345 678 / @username"
+                      autoComplete="tel"
+                      className="min-w-0 rounded-lg border bg-input px-3 py-2 font-normal outline-none focus:border-primary"
+                    />
+                  </label>
+                  <p className="mt-2 font-sans text-xs leading-[1.7] text-muted-foreground">
+                    {t(
+                      "No account needed. We contact you here only if there is a problem with your order.",
+                    )}{" "}
+                    <Link to="/auth" className="font-semibold text-primary hover:underline">
+                      {t("Sign in")}
+                    </Link>{" "}
+                    {t("to keep all your orders in one place.")}
+                  </p>
+                </div>
+              )}
+
+              {orderErr && (
+                <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-sm font-semibold text-destructive">
+                  <CircleAlert className="h-4 w-4 shrink-0" />
+                  {t(orderErr)}
+                </p>
+              )}
+
+              <button
+                disabled={!canBuy}
+                onClick={handleBuy}
+                className="btn-3d glow-pulse mt-4 w-full rounded-xl py-3 sm:mt-5 sm:py-4 font-display font-bold disabled:opacity-40"
+              >
+                {busy ? (
+                  t("Processing…")
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    <ShoppingCart className="h-4 w-4" />
+                    {t("Place Order")}
+                  </span>
+                )}
+              </button>
+
+              {!check?.ok && (
+                <p className="mt-2 flex items-center justify-center gap-1 text-xs text-muted-foreground">
+                  <ArrowUp className="h-3.5 w-3.5" /> {t("Check your Player ID first to order")}
+                </p>
+              )}
+            </aside>
+          </>
+        )}
       </main>
     </SiteChrome>
+  );
+}
+
+// Shown instead of the order form while the owner has sales switched off.
+function SalesPaused({ loading }: { loading: boolean }) {
+  const { t } = useStorePrefs();
+  if (loading) {
+    return (
+      <section className="card-3d mt-3 rounded-2xl p-6 text-center text-sm text-muted-foreground sm:mt-5 sm:rounded-3xl">
+        {t("Loading…")}
+      </section>
+    );
+  }
+  return (
+    <section className="card-3d mt-3 flex flex-col items-center rounded-2xl px-5 py-10 text-center sm:mt-5 sm:rounded-3xl sm:py-14">
+      <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
+        <Clock className="h-7 w-7" />
+      </span>
+      <h2 className="mt-4 font-khmer text-lg sm:text-xl">{t("Coming soon")}</h2>
+      <p className="mt-2 max-w-md font-sans text-sm leading-[1.7] text-muted-foreground">
+        {t("We are getting the packages ready. Please come back soon.")}
+      </p>
+      <a
+        href={`https://t.me/${store.telegram.replace("@", "")}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-5 rounded-xl border border-border px-5 py-2.5 font-sans text-sm font-semibold transition-colors hover:bg-muted"
+      >
+        {t("Ask us on Telegram")} {store.telegram}
+      </a>
+    </section>
   );
 }
 

@@ -137,6 +137,18 @@ const KM: Record<string, string> = {
   "New package, e.g. 86": "កញ្ចប់ថ្មី ឧ. 86",
   "Amount is a number, like 86 or 78 + 8": "ចំនួនត្រូវជាលេខ ឧ. 86 ឬ 78 + 8",
 
+  // Sales switch (top of Prices tab)
+  "Sales are open": "កំពុងបើកលក់",
+  "All sales are hidden": "បានលាក់កញ្ចប់ពេជ្រទាំងអស់",
+  "Customers can see packages and order": "អតិថិជនឃើញកញ្ចប់ និងអាចទិញបាន",
+  "Customers see Coming soon and cannot order. Paid orders are still delivered.":
+    "អតិថិជនឃើញថា នឹងបើកលក់ឆាប់ៗ ហើយទិញមិនបាន ការកម្មង់ដែលបានបង់ហើយ នៅតែបញ្ចូលពេជ្រធម្មតា",
+  "Hide all packages": "លាក់កញ្ចប់ទាំងអស់",
+  "Open sales": "បើកលក់វិញ",
+  "Hide one game only (tap to switch)": "លាក់តែហ្គេមណាមួយ (ចុចដើម្បីបិទ ឬបើក)",
+  "The sales switch needs store_settings.sql run in Supabase first.":
+    "សូមដំណើរការ store_settings.sql ក្នុង Supabase ជាមុនសិន ទើបប៊ូតុងលាក់កញ្ចប់ដំណើរការ",
+
   // Stock card
   Stock: "ស្តុក",
   "FazerCards money for auto delivery": "លុយ FazerCards សម្រាប់បញ្ចូលពេជ្រស្វ័យប្រវត្តិ",

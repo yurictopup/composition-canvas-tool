@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { baseGameId, findGame } from "@/lib/games";
 import { validatePlayerId } from "@/lib/player-id";
+import { salesOpenFor } from "@/lib/store-status";
 
 // Guest checkout: a visitor who is not signed in can still order. The order is
 // written by the server (service role) with the price from product_prices, and
@@ -49,6 +50,9 @@ export async function createGuestOrder(db: SupabaseClient, input: GuestOrderInpu
   const playerZone = input.playerZone?.trim() || null;
   const idError = validatePlayerId(baseGameId(game.id), playerId, playerZone ?? "");
   if (idError) throw new GuestOrderError(idError);
+  if (!(await salesOpenFor(db, game.id))) {
+    throw new GuestOrderError("Sales are paused right now. Please come back soon.");
+  }
 
   const { data: item } = await db
     .from("product_prices")

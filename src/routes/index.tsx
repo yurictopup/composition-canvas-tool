@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
-import { QrCode } from "lucide-react";
+import { Clock, QrCode } from "lucide-react";
 import banner from "@/assets/banner-angkor.webp";
 import { useSiteImage } from "@/lib/site-images";
 import mascot from "@/assets/mascot-cut.webp";
 import { games, serverGames } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { useStorePrefs } from "@/lib/storePrefs";
+import { useStoreStatus } from "@/lib/store-status";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Inside a game's own tab the main tile names its server, next to the other servers' tiles.
@@ -56,6 +57,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { t } = useStorePrefs();
   const pic = useSiteImage();
+  const status = useStoreStatus();
   return (
     <SiteChrome>
       <section className="mx-auto w-full max-w-[1500px] px-3 pt-3 sm:px-6 sm:pt-4">
@@ -102,6 +104,15 @@ function Index() {
           </span>
         </Link>
       </section>
+
+      {status && !status.salesOpen && (
+        <section className="mx-auto w-full max-w-[1500px] px-3 pt-3 sm:px-6 sm:pt-4">
+          <p className="card-3d flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-center font-sans text-sm font-semibold leading-[1.7]">
+            <Clock className="h-4 w-4 shrink-0 text-primary" />
+            {t("Store is getting ready. Packages open soon.")}
+          </p>
+        </section>
+      )}
 
       <section
         id="games"

@@ -119,6 +119,14 @@ const KM: Record<string, string> = {
   "Vietnam": "វៀតណាម",
   "Indonesia": "ឥណ្ឌូនេស៊ី",
   "No packages available yet.": "មិនទាន់មានកញ្ចប់ទេ",
+  "Loading…": "កំពុងទាញទិន្នន័យ…",
+  "Coming soon": "នឹងបើកលក់ឆាប់ៗនេះ",
+  "We are getting the packages ready. Please come back soon.":
+    "យើងកំពុងរៀបចំកញ្ចប់ពេជ្រ សូមត្រឡប់មកវិញឆាប់ៗនេះ",
+  "Ask us on Telegram": "សួរយើងតាម Telegram",
+  "Sales are paused right now. Please come back soon.":
+    "ឥឡូវផ្អាកការលក់សិន សូមត្រឡប់មកវិញឆាប់ៗនេះ",
+  "Store is getting ready. Packages open soon.": "ហាងកំពុងរៀបចំ កញ្ចប់ពេជ្រនឹងបើកលក់ឆាប់ៗនេះ",
   Game: "ហ្គេម",
   "Player ID": "Player ID",
   Package: "កញ្ចប់",
