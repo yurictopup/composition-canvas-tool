@@ -150,6 +150,10 @@ const KM: Record<string, string> = {
     "ស្កេនជាមួយ ABA, ACLEDA, Wing ឬកម្មវិធីធនាគារណាមួយ ពេលបង់រួច ទំព័រនេះនឹងប្តូរដោយស្វ័យប្រវត្តិ",
   "Secure payment through Bakong, National Bank of Cambodia":
     "បង់ប្រាក់សុវត្ថិភាពតាម Bakong ធនាគារជាតិនៃកម្ពុជា",
+  "Secure payment through ABA PayWay": "បង់ប្រាក់សុវត្ថិភាពតាម ABA PayWay",
+  "Sandbox test payment, no real money and no top-up":
+    "ការបង់ប្រាក់សាកល្បង Sandbox មិនមែនលុយពិត ហើយមិនបញ្ចូលទៅគណនីទេ",
+  "Sandbox payment confirmed": "ការបង់ប្រាក់ Sandbox បានបញ្ជាក់",
   "This QR has expired": "QR នេះផុតកំណត់ហើយ",
   "Get a new QR": "យក QR ថ្មី",
   "Payment received": "បានទទួលការបង់ប្រាក់",

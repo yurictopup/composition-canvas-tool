@@ -1,12 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import {
-  checkBakongPayment,
-  createPaymentQr,
-  isRelayToken,
-  paymentMatches,
-  type BakongConfig,
-} from "@/lib/bakong";
+import { paymentMatches } from "@/lib/bakong";
 import { deliverPaidOrder } from "@/lib/delivery.server";
+import { activeProvider, providerForRef, type PaymentProvider } from "@/lib/payment-provider";
+
+export { bakongConfig } from "@/lib/payment-provider";
 
 export type PaymentState = {
   available: boolean;
@@ -16,19 +13,13 @@ export type PaymentState = {
   paid: boolean;
   status?: string;
   message?: string;
+  /** Who made the QR, e.g. "Bakong" or "ABA PayWay". */
+  provider?: string;
+  /** The merchant name the bank shows for this QR, when the provider sets one. */
+  merchant?: string;
+  /** A PayWay Sandbox test: no real money, the order is not marked paid. */
+  sandbox?: boolean;
 };
-
-export function bakongConfig(): BakongConfig | null {
-  const token = process.env["BAKONG_TOKEN"];
-  const accountId = process.env["BAKONG_ACCOUNT_ID"];
-  if (!token || !accountId) return null;
-  return {
-    token,
-    accountId,
-    merchantName: process.env["BAKONG_MERCHANT_NAME"] || "Yuric Topup",
-    apiUrl: process.env["BAKONG_API_URL"],
-  };
-}
 
 type PayOrder = {
   id: string;
@@ -55,6 +46,14 @@ async function loadOrder(db: SupabaseClient, orderId: string, scope: OrderScope)
   return (data as PayOrder | null) ?? null;
 }
 
+function providerInfo(provider: PaymentProvider): Partial<PaymentState> {
+  return {
+    provider: provider.label,
+    ...(provider.merchantName ? { merchant: provider.merchantName } : {}),
+    ...(provider.sandbox ? { sandbox: true } : {}),
+  };
+}
+
 function paidState(order: { status: string }): PaymentState {
   return { available: true, paid: true, status: order.status };
 }
@@ -65,8 +64,8 @@ export async function startOrderPayment(
   orderId: string,
   scope: Exclude<OrderScope, null>,
 ): Promise<PaymentState> {
-  const cfg = bakongConfig();
-  if (!cfg) return { available: false, paid: false };
+  const provider = activeProvider();
+  if (!provider) return { available: false, paid: false };
   const order = await loadOrder(db, orderId, scope);
   if (!order) return { available: true, paid: false, message: "Order not found." };
   if (order.paid_at) return paidState(order);
@@ -79,9 +78,12 @@ export async function startOrderPayment(
     };
   }
   const amount = Number(order.price_usd);
+  // A QR still valid is reused, unless the shop has since switched provider.
+  const current = order.payment_md5 ? providerForRef(order.payment_md5) : null;
   if (
     order.payment_qr &&
     order.payment_expires_at &&
+    current?.name === provider.name &&
     new Date(order.payment_expires_at).getTime() > Date.now() + 60_000
   ) {
     return {
@@ -90,28 +92,41 @@ export async function startOrderPayment(
       qr: order.payment_qr,
       amount,
       expiresAt: order.payment_expires_at,
+      ...providerInfo(provider),
     };
   }
 
   // The old QR may have been paid just before it expired (or the customer came
-  // back later): ask Bakong about it before its md5 is replaced and forgotten.
-  if (order.payment_md5) {
-    const settled = await settlePayment(db, cfg, order, order.payment_md5);
+  // back later): ask about it before its reference is replaced and forgotten.
+  if (order.payment_md5 && current) {
+    const settled = await settlePayment(db, current, order, order.payment_md5);
     if (settled.paid) return settled;
   }
 
-  const qr = await createPaymentQr(cfg, { amount, billNumber: order.id.slice(0, 8).toUpperCase() });
+  const qr = await provider.createQr({ orderId: order.id, amount });
   const expiresAt = new Date(qr.expiresAt).toISOString();
   await db
     .from("orders")
-    .update({ payment_qr: qr.qr, payment_md5: qr.md5, payment_expires_at: expiresAt })
+    .update({
+      payment_qr: qr.qr,
+      payment_md5: qr.ref,
+      payment_expires_at: expiresAt,
+      payment: provider.label,
+    })
     .eq("id", order.id)
     .is("paid_at", null);
-  return { available: true, paid: false, qr: qr.qr, amount, expiresAt };
+  return {
+    available: true,
+    paid: false,
+    qr: qr.qr,
+    amount,
+    expiresAt,
+    ...providerInfo(provider),
+  };
 }
 
 /**
- * Asks Bakong whether the order's KHQR was paid; the first caller to see it
+ * Asks the provider that made the order's KHQR whether it was paid; the first caller to see it
  * paid marks the order and starts the FazerCards delivery.
  * scope null = the owner checking any order.
  */
@@ -120,38 +135,50 @@ export async function checkOrderPayment(
   orderId: string,
   scope: OrderScope,
 ): Promise<PaymentState> {
-  const cfg = bakongConfig();
-  if (!cfg) return { available: false, paid: false };
+  if (!activeProvider()) return { available: false, paid: false };
   const order = await loadOrder(db, orderId, scope);
   if (!order) return { available: true, paid: false, message: "Order not found." };
   if (order.paid_at) return paidState(order);
   if (!order.payment_md5)
     return { available: true, paid: false, message: "No KHQR for this order yet." };
+  const provider = providerForRef(order.payment_md5);
+  if (!provider)
+    return { available: true, paid: false, message: "The payment provider is not set up." };
 
-  return settlePayment(db, cfg, order, order.payment_md5);
+  return settlePayment(db, provider, order, order.payment_md5);
 }
 
-/** Asks Bakong about the order's current KHQR; when paid, marks it and starts the delivery. */
+/** Asks the provider about the order's current KHQR; when paid, marks it and starts the delivery. */
 async function settlePayment(
   db: SupabaseClient,
-  cfg: BakongConfig,
+  provider: PaymentProvider,
   order: PayOrder,
-  md5: string,
+  ref: string,
 ): Promise<PaymentState> {
-  const check = await checkBakongPayment(cfg, md5);
+  const check = await provider.check(ref);
   if (check.status === "unavailable")
     return { available: true, paid: false, message: check.message };
   if (check.status === "unpaid") return { available: true, paid: false };
 
   const amount = Number(order.price_usd);
-  // With a KHQR.dev token the QR is made by KHQR.dev for the account linked
-  // there (e.g. an ABA merchant), so only the amount is compared.
-  const accountId = isRelayToken(cfg.token) ? null : cfg.accountId;
-  if (!paymentMatches(check, { amount, accountId })) {
+  if (!paymentMatches(check, { amount, accountId: provider.expectedAccountId })) {
     return {
       available: true,
       paid: false,
-      message: "Bakong shows a payment that doesn't match this order. The shop will check it.",
+      message: `${provider.label} shows a payment that doesn't match this order. The shop will check it.`,
+    };
+  }
+
+  // Sandbox money is not real: show that the flow worked, but never mark the
+  // order paid or buy from FazerCards.
+  if (provider.sandbox) {
+    console.log("[payment] sandbox payment confirmed, order left unpaid", order.id);
+    return {
+      available: true,
+      paid: true,
+      sandbox: true,
+      status: "sandbox",
+      provider: provider.label,
     };
   }
 
