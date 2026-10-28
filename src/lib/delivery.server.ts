@@ -4,6 +4,7 @@ import { getIdConfig } from "@/lib/player-id";
 import { checkGamesDropOrder, placeGamesDropOrder, type DeliveryResult } from "@/lib/delivery";
 import {
   checkFazerOrder,
+  FazerCardsError,
   fetchFazerAccount,
   placeFazerOrder,
   type FazerAccount,
@@ -171,10 +172,13 @@ export async function supplierStock(): Promise<SupplierStock> {
   try {
     return { ok: true, ...(await fetchFazerAccount({ apiKey })) };
   } catch (error) {
-    return {
-      ok: false,
-      reason: "error",
-      message: error instanceof Error ? error.message : String(error),
-    };
+    // The owner sees this reason on the stock card; it also goes to Worker Logs.
+    let message = error instanceof Error ? error.message : String(error);
+    if (error instanceof FazerCardsError) {
+      const extra = [error.httpStatus && `HTTP ${error.httpStatus}`, error.code].filter(Boolean);
+      if (extra.length && !message.includes(extra.join(" "))) message += ` (${extra.join(" ")})`;
+    }
+    console.error("FazerCards stock check failed:", message);
+    return { ok: false, reason: "error", message };
   }
 }

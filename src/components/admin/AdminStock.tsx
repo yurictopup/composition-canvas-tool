@@ -115,12 +115,19 @@ export function AdminStock({
       </div>
 
       {stock && !stock.ok && (
-        <p className="mx-6 mt-4 flex items-center gap-2 rounded-md bg-[#FF9F4329] px-3 py-2 text-[13px] text-[#B8661A]">
-          <AlertTriangle size={16} />
-          {stock.reason === "no_key"
-            ? t("FazerCards API key is not set")
-            : t("Couldn't read FazerCards, try Refresh")}
-        </p>
+        <div className="mx-6 mt-4 rounded-md bg-[#FF9F4329] px-3 py-2 text-[13px] text-[#B8661A]">
+          <p className="flex items-center gap-2">
+            <AlertTriangle size={16} />
+            {stock.reason === "no_key"
+              ? t("FazerCards API key is not set")
+              : t("Couldn't read FazerCards, try Refresh")}
+          </p>
+          {stock.reason === "error" && stock.message && (
+            <p className="mt-1 break-words pl-6 font-mono text-[12px]">
+              {stock.message.slice(0, 300)}
+            </p>
+          )}
+        </div>
       )}
       {short > 0 && (
         <p className="mx-6 mt-4 flex items-center gap-2 rounded-md bg-[#FF4C5129] px-3 py-2 text-[13px] text-[#C7363B]">
