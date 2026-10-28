@@ -20,11 +20,13 @@ export type WorkersAi = {
   run: (model: string, input: Record<string, unknown>) => Promise<unknown>;
 };
 
+// Only the last MAX_TURNS turns (MAX_TEXT characters each) reach the model, so
+// the widget sends no more than that and anything bigger is refused unread.
 const askInput = z.object({
   turns: z
-    .array(z.object({ role: z.enum(["user", "bot"]), text: z.string().max(2000) }))
+    .array(z.object({ role: z.enum(["user", "bot"]), text: z.string().max(MAX_TEXT) }))
     .min(1)
-    .max(40),
+    .max(MAX_TURNS),
 });
 
 /** The Workers AI binding ("AI" in the Wrangler config); missing outside Cloudflare. */

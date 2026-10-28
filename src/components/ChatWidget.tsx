@@ -29,6 +29,7 @@ import {
   type BotAction,
 } from "@/lib/chatBrain";
 import { askBot, checkMyOrders } from "@/lib/chat.functions";
+import { MAX_TEXT, MAX_TURNS } from "@/lib/chatAi";
 import { setStoreTheme, useStorePrefs } from "@/lib/storePrefs";
 
 /** Workers AI answers (slow, about 5-10 seconds); off until a faster model is chosen. */
@@ -221,7 +222,13 @@ export function ChatWidget({
         );
       return;
     }
-    askBot({ data: { turns: history.map(({ role, text }) => ({ role, text })) } })
+    askBot({
+      data: {
+        turns: history
+          .slice(-MAX_TURNS)
+          .map(({ role, text }) => ({ role, text: text.slice(0, MAX_TEXT) })),
+      },
+    })
       .catch((error: unknown) => ({ unavailable: String(error) }))
       .then((ai) => {
         if ("text" in ai) {
