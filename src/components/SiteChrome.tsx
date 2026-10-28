@@ -22,7 +22,8 @@ export function SiteChrome({ children }: { children: ReactNode }) {
   const { light, t } = useStorePrefs();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    // The saved session is enough to show the menu; it needs no call to the auth server.
+    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });

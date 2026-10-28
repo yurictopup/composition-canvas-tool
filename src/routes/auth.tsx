@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { games } from "@/lib/games";
 import { useSiteImage } from "@/lib/site-images";
 import { useStorePrefs } from "@/lib/storePrefs";
-import banner from "@/assets/banner-angkor.png";
+import banner from "@/assets/banner-angkor.webp";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({

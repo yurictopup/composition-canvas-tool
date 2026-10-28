@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import banner from "@/assets/banner-angkor.png";
+import banner from "@/assets/banner-angkor.webp";
 import { findGame, gamePackages, games, hotItemsByGame } from "@/lib/games";
 
 // Pictures the owner can replace from /admin. Each slot has a built-in picture;

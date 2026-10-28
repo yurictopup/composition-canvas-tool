@@ -33,13 +33,19 @@ export async function fetchPrices(gameId?: string): Promise<PriceMap | null> {
   return map;
 }
 
+// Prices already read this visit, so going back to a game shows them at once
+// (they are still re-read in the background, so an owner's change shows too).
+const priceCache = new Map<string, PriceMap>();
+
 /** Prices for one game; null while loading or when the table can't be read. */
 export function useLivePrices(gameId: string): PriceMap | null {
-  const [prices, setPrices] = useState<PriceMap | null>(null);
+  const [prices, setPrices] = useState<PriceMap | null>(() => priceCache.get(gameId) ?? null);
   useEffect(() => {
     let cancelled = false;
+    setPrices(priceCache.get(gameId) ?? null);
     fetchPrices(gameId).then((map) => {
-      if (!cancelled) setPrices(map);
+      if (map) priceCache.set(gameId, map);
+      if (!cancelled) setPrices(map ?? priceCache.get(gameId) ?? null);
     });
     return () => {
       cancelled = true;

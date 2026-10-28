@@ -130,6 +130,8 @@ export function StoreFooter() {
                 <Link to="/game/$gameId" params={{ gameId: g.id }} className={link}>
                   <img
                     src={pic(g.icon)}
+                    loading="lazy"
+                    decoding="async"
                     alt=""
                     className="h-5 w-5 rounded-md object-cover sm:h-6 sm:w-6"
                   />

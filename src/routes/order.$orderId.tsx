@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { CircleAlert, Loader2 } from "lucide-react";
-import { z } from "zod";
 import { SiteChrome } from "@/components/SiteChrome";
 import { OrderPayment } from "@/components/OrderPayment";
 import { store } from "@/lib/games";
@@ -11,7 +10,9 @@ import { useStorePrefs } from "@/lib/storePrefs";
 
 // A guest order, opened by the secret link shown after ordering without an account.
 export const Route = createFileRoute("/order/$orderId")({
-  validateSearch: z.object({ t: z.string().optional() }),
+  // A plain check instead of zod keeps zod out of the bundle every page loads.
+  validateSearch: (search: Record<string, unknown>): { t?: string } =>
+    typeof search["t"] === "string" ? { t: search["t"] } : {},
   head: () => ({
     meta: [{ title: "Order — Yuric Topup" }, { name: "robots", content: "noindex, nofollow" }],
   }),
