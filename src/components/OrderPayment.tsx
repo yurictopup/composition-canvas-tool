@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Check, Clock, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
 import { KhqrCode } from "@/components/KhqrCode";
 import { checkPayment, startPayment } from "@/lib/payment.functions";
+import { checkGuestPayment, startGuestPayment } from "@/lib/guest-order.functions";
 import type { PaymentState } from "@/lib/payment.server";
 import { useStorePrefs } from "@/lib/storePrefs";
 
@@ -17,13 +18,15 @@ export type OrderSummary = {
 
 // Shows the order's own KHQR and waits for Bakong to confirm it. Once paid the
 // QR is replaced by a check mark. Without Bakong set up on the server, the
-// manual instructions (fallback) are shown.
+// manual instructions (fallback) are shown. Guest orders pass their link token.
 export function OrderPayment({
   orderId,
+  guestToken,
   summary,
   fallback,
 }: {
   orderId: string;
+  guestToken?: string | null | undefined;
   summary: OrderSummary;
   fallback: ReactNode;
 }) {
@@ -33,13 +36,16 @@ export function OrderPayment({
 
   useEffect(() => {
     let cancelled = false;
-    startPayment({ data: { orderId } })
+    (guestToken
+      ? startGuestPayment({ data: { orderId, token: guestToken } })
+      : startPayment({ data: { orderId } })
+    )
       .then((s) => !cancelled && setState(s))
       .catch(() => !cancelled && setError(true));
     return () => {
       cancelled = true;
     };
-  }, [orderId]);
+  }, [orderId, guestToken]);
 
   const waiting = !!state?.available && !!state.qr && !state.paid;
   const expired = waiting && !!state.expiresAt && new Date(state.expiresAt).getTime() < now;
@@ -49,14 +55,16 @@ export function OrderPayment({
     const timer = setInterval(async () => {
       setNow(Date.now());
       try {
-        const next = await checkPayment({ data: { orderId } });
+        const next = guestToken
+          ? await checkGuestPayment({ data: { orderId, token: guestToken } })
+          : await checkPayment({ data: { orderId } });
         if (next.paid) setState(next);
       } catch {
         // keep polling; a missed check is retried on the next tick
       }
     }, POLL_MS);
     return () => clearInterval(timer);
-  }, [waiting, expired, orderId]);
+  }, [waiting, expired, orderId, guestToken]);
 
   if (error || (state && !state.available)) return <>{fallback}</>;
   return <PaymentView state={state} now={now} summary={summary} />;

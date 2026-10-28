@@ -41,12 +41,16 @@ type PayOrder = {
   paid_at: string | null;
 };
 
-async function loadOrder(db: SupabaseClient, orderId: string, userId: string | null) {
+/** Whose order may be loaded: a user id, "guest" (a guest order whose link was checked), or null = the owner, any order. */
+export type OrderScope = string | null;
+
+async function loadOrder(db: SupabaseClient, orderId: string, scope: OrderScope) {
   let query = db
     .from("orders")
     .select("id, user_id, status, price_usd, payment_qr, payment_md5, payment_expires_at, paid_at")
     .eq("id", orderId);
-  if (userId) query = query.eq("user_id", userId);
+  if (scope === "guest") query = query.is("user_id", null);
+  else if (scope) query = query.eq("user_id", scope);
   const { data } = await query.maybeSingle();
   return (data as PayOrder | null) ?? null;
 }
@@ -59,11 +63,11 @@ function paidState(order: { status: string }): PaymentState {
 export async function startOrderPayment(
   db: SupabaseClient,
   orderId: string,
-  userId: string,
+  scope: Exclude<OrderScope, null>,
 ): Promise<PaymentState> {
   const cfg = bakongConfig();
   if (!cfg) return { available: false, paid: false };
-  const order = await loadOrder(db, orderId, userId);
+  const order = await loadOrder(db, orderId, scope);
   if (!order) return { available: true, paid: false, message: "Order not found." };
   if (order.paid_at) return paidState(order);
   if (order.status !== "pending") {
@@ -102,16 +106,16 @@ export async function startOrderPayment(
 /**
  * Asks Bakong whether the order's KHQR was paid; the first caller to see it
  * paid marks the order and starts the GamesDrop delivery.
- * userId null = the owner checking any order.
+ * scope null = the owner checking any order.
  */
 export async function checkOrderPayment(
   db: SupabaseClient,
   orderId: string,
-  userId: string | null,
+  scope: OrderScope,
 ): Promise<PaymentState> {
   const cfg = bakongConfig();
   if (!cfg) return { available: false, paid: false };
-  const order = await loadOrder(db, orderId, userId);
+  const order = await loadOrder(db, orderId, scope);
   if (!order) return { available: true, paid: false, message: "Order not found." };
   if (order.paid_at) return paidState(order);
   if (!order.payment_md5)

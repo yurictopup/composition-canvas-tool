@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isOwner } from "@/lib/games";
+import { guestOrderPath, listGuestOrders, type SavedGuestOrder } from "@/lib/guest-orders";
 import { setStoreLang, setStoreTheme, useStorePrefs, type StoreLang, type StoreTheme } from "@/lib/storePrefs";
 
 // Store header controls: language and theme for everyone, plus order
@@ -116,8 +117,10 @@ const avatarCls =
 
 export function StoreGuestMenu() {
   const { light, t } = useStorePrefs();
+  // Orders placed here without signing in; read when the menu opens.
+  const [saved, setSaved] = useState<SavedGuestOrder[]>([]);
   return (
-    <DM.Root modal={false}>
+    <DM.Root modal={false} onOpenChange={(open) => open && setSaved(listGuestOrders())}>
       <DM.Trigger className="ml-1 rounded-full outline-none transition hover:brightness-110" title={t("Sign In")}>
         <span className={avatarCls}>
           <UserRound size={19} />
@@ -134,6 +137,30 @@ export function StoreGuestMenu() {
               <span className="block text-xs text-on-dark-muted">{t("Sign in to track your orders")}</span>
             </span>
           </div>
+          {saved.length > 0 && (
+            <>
+              <DM.Separator className="my-1 h-px bg-brand-400/20" />
+              <p className="px-3 pb-1 pt-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-dark-muted">
+                {t("Orders on this device")}
+              </p>
+              {saved.slice(0, 5).map((o) => (
+                <DM.Item key={o.id} asChild>
+                  <a
+                    href={guestOrderPath(o.id, o.token)}
+                    className="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm outline-none transition data-[highlighted]:bg-brand-500/15"
+                  >
+                    <Receipt size={16} className="shrink-0 opacity-70" />
+                    <span className="min-w-0">
+                      <span className="block truncate font-medium">{o.game}</span>
+                      <span className="block truncate text-xs text-on-dark-muted">
+                        #{o.id.slice(0, 8).toUpperCase()} · {o.item}
+                      </span>
+                    </span>
+                  </a>
+                </DM.Item>
+              ))}
+            </>
+          )}
           <DM.Separator className="my-1 h-px bg-brand-400/20" />
           <div className="px-1.5 pb-1 pt-1.5">
             <DM.Item asChild>
