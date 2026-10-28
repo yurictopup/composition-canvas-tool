@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useSiteImage } from "@/lib/site-images";
+import { packageSlotKey, useSiteImage, useSlotImage } from "@/lib/site-images";
 import { useRef, useState } from "react";
 import { CurrencyIcon } from "@/components/CurrencyIcon";
 import {
@@ -60,6 +60,7 @@ function GameRoute() {
 function GamePage({ gameId }: { gameId: string }) {
   const { t } = useStorePrefs();
   const pic = useSiteImage();
+  const slotPic = useSlotImage();
   const navigate = useNavigate();
   const game = findGame(gameId);
   const [uid, setUid] = useState("");
@@ -505,10 +506,18 @@ function GamePage({ gameId }: { gameId: string }) {
                       {p.price !== null ? `$${p.price.toFixed(2)}` : "—"}
                     </div>
                   </div>
-                  <CurrencyIcon
-                    gameId={idGameId}
-                    className={`h-7 w-7 shrink-0 transition-transform sm:h-9 sm:w-9 ${pkg === i && hotPkg === null ? "scale-125" : ""}`}
-                  />
+                  {slotPic(packageSlotKey(gameId, p.amt)) ? (
+                    <img
+                      src={slotPic(packageSlotKey(gameId, p.amt))}
+                      alt={`${p.amt} ${game.unit}`}
+                      className={`h-10 w-10 shrink-0 rounded-lg object-contain transition-transform sm:h-14 sm:w-14 ${pkg === i && hotPkg === null ? "scale-110" : ""}`}
+                    />
+                  ) : (
+                    <CurrencyIcon
+                      gameId={idGameId}
+                      className={`h-7 w-7 shrink-0 transition-transform sm:h-9 sm:w-9 ${pkg === i && hotPkg === null ? "scale-125" : ""}`}
+                    />
+                  )}
                 </button>
               ))}
             </div>
@@ -550,10 +559,18 @@ function GamePage({ gameId }: { gameId: string }) {
                           {item.price !== null ? `$${item.price.toFixed(2)}` : "—"}
                         </div>
                       </div>
-                      <CurrencyIcon
-                        gameId={idGameId}
-                        className={`h-8 w-8 shrink-0 transition-transform ${on ? "scale-125" : ""}`}
-                      />
+                      {slotPic(`item:${gameId}:${item.label}`) ? (
+                        <img
+                          src={slotPic(`item:${gameId}:${item.label}`)}
+                          alt={item.label}
+                          className={`h-11 w-11 shrink-0 rounded-lg object-contain transition-transform ${on ? "scale-110" : ""}`}
+                        />
+                      ) : (
+                        <CurrencyIcon
+                          gameId={idGameId}
+                          className={`h-8 w-8 shrink-0 transition-transform ${on ? "scale-125" : ""}`}
+                        />
+                      )}
                     </button>
                   );
                 })}

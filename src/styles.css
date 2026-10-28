@@ -592,3 +592,15 @@ html:has(.store-light) { background: #eef4fd; }
   --chat-title-b: oklch(0.5 0.24 292);
 }
 .yt-chat[data-light="true"] .yt-aurora { opacity: 0.35; }
+
+/* Crop editor: checkerboard shows the parts of a slot the picture doesn't cover. */
+.crop-checker {
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, #e8effb 25%, transparent 25%),
+    linear-gradient(-45deg, #e8effb 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e8effb 75%),
+    linear-gradient(-45deg, transparent 75%, #e8effb 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
