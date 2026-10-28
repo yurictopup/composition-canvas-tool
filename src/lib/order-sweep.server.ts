@@ -4,9 +4,17 @@
 //    package bought from FazerCards;
 // 2. a paid order that FazerCards refused for a low balance (or that was paid
 //    before the API key was set) is bought once the balance is topped up;
-// 3. a FazerCards order still processing is checked until it is delivered.
+// 3. a FazerCards order still processing is checked until it is delivered;
+// 4. an order left PLACING by a call that was cut off is marked UNKNOWN for the
+//    owner to check. Nothing in doubt is ever bought again by itself.
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { adminDb, deliverPaidOrder, refreshPaidOrder, supplierStock } from "@/lib/delivery.server";
+import {
+  adminDb,
+  deliverPaidOrder,
+  refreshPaidOrder,
+  supplierStock,
+  UNKNOWN,
+} from "@/lib/delivery.server";
 import { fazerOfferFor } from "@/lib/fazercards";
 import { checkOrderPayment } from "@/lib/payment.server";
 
@@ -16,11 +24,19 @@ const PAYMENT_WINDOW_MS = 3 * 60 * MINUTE;
 // Paid orders older than this are left to the owner instead of bought by themselves.
 const RETRY_WINDOW_MS = 7 * 24 * 60 * MINUTE;
 const BATCH = 15;
+// A buy answers within about a minute (20 s timeouts); PLACING after this means it was cut off.
+const PLACING_STUCK_MS = 10 * MINUTE;
 
 // Supplier answers that mean nothing was bought and a later try can work.
 const RETRYABLE = /BALANCE|INSUFFICIENT|HTTP_402|NO_OFFER/;
 
-export type SweepReport = { checked: number; paid: number; retried: number; refreshed: number };
+export type SweepReport = {
+  checked: number;
+  paid: number;
+  retried: number;
+  refreshed: number;
+  flagged: number;
+};
 
 const since = (ms: number) => new Date(Date.now() - ms).toISOString();
 
@@ -85,10 +101,21 @@ async function refreshProcessing(db: SupabaseClient, report: SweepReport) {
   }
 }
 
+async function flagStuckPlacing(db: SupabaseClient, report: SweepReport) {
+  const { data } = await db
+    .from("orders")
+    .update({ supplier_status: UNKNOWN })
+    .eq("supplier_status", "PLACING")
+    .is("supplier_order_id", null)
+    .lt("updated_at", since(PLACING_STUCK_MS))
+    .select("id");
+  report.flagged += data?.length ?? 0;
+}
+
 export async function sweepOrders(db: SupabaseClient = adminDb()): Promise<SweepReport> {
-  const report: SweepReport = { checked: 0, paid: 0, retried: 0, refreshed: 0 };
+  const report: SweepReport = { checked: 0, paid: 0, retried: 0, refreshed: 0, flagged: 0 };
   // Each step on its own, so one failing (e.g. Bakong down) doesn't stop the others.
-  for (const step of [sweepPayments, retryDeliveries, refreshProcessing]) {
+  for (const step of [flagStuckPlacing, sweepPayments, retryDeliveries, refreshProcessing]) {
     try {
       await step(db, report);
     } catch (error) {

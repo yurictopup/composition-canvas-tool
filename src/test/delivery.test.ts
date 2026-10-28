@@ -88,7 +88,7 @@ describe("Placing a GamesDrop order", () => {
     });
   });
 
-  it("treats a timeout as unconfirmed, never as failed", async () => {
+  it("treats a timeout as unknown, never as failed", async () => {
     const f = fakeFetch({
       [findOne]: { body: { price: 1 } },
       [create]: () => {
@@ -96,7 +96,7 @@ describe("Placing a GamesDrop order", () => {
       },
     });
     const result = await placeGamesDropOrder(order, { ...opts, fetchImpl: f });
-    expect(result).toMatchObject({ status: "processing", supplierStatus: "UNCONFIRMED" });
+    expect(result).toMatchObject({ status: "processing", supplierStatus: "UNKNOWN" });
     expect(result.notPlaced).toBeUndefined();
   });
 

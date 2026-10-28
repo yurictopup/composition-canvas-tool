@@ -22,8 +22,14 @@ export function DeliveryCell({
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
+  // Being bought right now: no second click.
+  const placing = order.supplier_status === "PLACING";
+  // The last buy got no answer, so FazerCards may already have it: the owner checks first.
+  const inDoubt = order.supplier_status === "UNKNOWN" || order.supplier_status === "UNCONFIRMED";
   const canDeliver =
-    (order.status === "pending" || order.status === "processing") && !order.supplier_order_id;
+    (order.status === "pending" || order.status === "processing") &&
+    !order.supplier_order_id &&
+    !placing;
   const canRefresh = order.status === "processing" && !!order.supplier_order_id;
   const canCheckPayment = order.status === "pending" && !!order.payment_md5 && !order.paid_at;
 
@@ -45,9 +51,15 @@ export function DeliveryCell({
     if (
       action === "deliver" &&
       !window.confirm(
-        unpaid
-          ? t("Bakong has NOT confirmed this order is paid. Only continue if the customer paid you another way. Buy it from FazerCards now?")
-          : t("Buy this package from FazerCards now? It uses your FazerCards balance."),
+        inDoubt
+          ? t(
+              "FazerCards may already have this order (the last try got no answer). Open the FazerCards panel > Orders first. Only continue if this order is NOT there. Buy it again now?",
+            )
+          : unpaid
+            ? t(
+                "Bakong has NOT confirmed this order is paid. Only continue if the customer paid you another way. Buy it from FazerCards now?",
+              )
+            : t("Buy this package from FazerCards now? It uses your FazerCards balance."),
       )
     ) {
       return;
@@ -57,7 +69,9 @@ export function DeliveryCell({
     try {
       const res =
         action === "deliver"
-          ? await deliverOrder({ data: { orderId: order.id, allowUnpaid: unpaid } })
+          ? await deliverOrder({
+              data: { orderId: order.id, allowUnpaid: unpaid, confirmedNotPlaced: inDoubt },
+            })
           : await refreshDelivery({ data: { orderId: order.id } });
       setMsg(res.message);
     } catch (e) {
@@ -85,7 +99,7 @@ export function DeliveryCell({
           onClick={() => run("deliver")}
           className="rounded-lg bg-[#1C3CB2] px-3 py-1.5 font-semibold text-white disabled:opacity-40"
         >
-          {busy ? t("Sending…") : t("Deliver")}
+          {busy ? t("Sending…") : inDoubt ? t("Buy again (check first)") : t("Deliver")}
         </button>
       )}
       {canRefresh && (
@@ -98,7 +112,9 @@ export function DeliveryCell({
         </button>
       )}
       {order.supplier_status && (
-        <span className="text-gray-400">{t("Supplier")}: {order.supplier_status}</span>
+        <span className="text-gray-400">
+          {t("Supplier")}: {order.supplier_status}
+        </span>
       )}
       {msg && <span className="max-w-[200px] text-gray-600">{msg}</span>}
     </div>

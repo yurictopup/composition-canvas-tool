@@ -241,8 +241,8 @@ export async function placeFazerOrder(
       return { status: "failed", supplierStatus: `HTTP_${status}`, message, notPlaced: true };
     }
     // A timeout or server error may still have placed the order; keep it
-    // processing so the owner checks before anything is bought again.
-    return { status: "processing", supplierStatus: "UNCONFIRMED", message };
+    // processing as UNKNOWN: it is never sent again by itself, the owner checks first.
+    return { status: "processing", supplierStatus: "UNKNOWN", message };
   }
 }
 
