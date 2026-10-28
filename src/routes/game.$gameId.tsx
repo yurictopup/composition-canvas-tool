@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { packageSlotKey, useSiteImage, useSlotImage } from "@/lib/site-images";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CurrencyIcon } from "@/components/CurrencyIcon";
 import {
   baseGameId,
@@ -18,9 +18,13 @@ import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import { lookupPlayer } from "@/lib/player-lookup.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { placeGuestOrder } from "@/lib/guest-order.functions";
+import { guestOrderPath, saveGuestOrder } from "@/lib/guest-orders";
 import {
   ArrowUp,
   Check,
+  Copy,
+  Link2,
   CircleAlert,
   CircleCheck,
   Package,
@@ -61,7 +65,6 @@ function GamePage({ gameId }: { gameId: string }) {
   const { t } = useStorePrefs();
   const pic = useSiteImage();
   const slotPic = useSlotImage();
-  const navigate = useNavigate();
   const game = findGame(gameId);
   const [uid, setUid] = useState("");
   const [zone, setZone] = useState("");
@@ -75,7 +78,18 @@ function GamePage({ gameId }: { gameId: string }) {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [paidPrice, setPaidPrice] = useState<number | null>(null);
   const [orderErr, setOrderErr] = useState<string | null>(null);
+  // Not signed in: the order is placed as a guest and opened again by its secret link.
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [contact, setContact] = useState("");
+  const [guestToken, setGuestToken] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const prices = useLivePrices(gameId);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data } = supabase.auth.onAuthStateChange((_e, session) => setSignedIn(!!session));
+    return () => data.subscription.unsubscribe();
+  }, []);
 
   if (!game) {
     return (
@@ -218,8 +232,27 @@ function GamePage({ gameId }: { gameId: string }) {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+      const packageAmt = `${selected.amt} ${game.unit}`;
       if (!user) {
-        navigate({ to: "/auth" });
+        const guest = await placeGuestOrder({
+          data: {
+            gameId,
+            packageAmt,
+            playerId: uid.trim(),
+            playerZone: zone.trim() || undefined,
+            contact: contact.trim() || undefined,
+          },
+        });
+        saveGuestOrder({
+          id: guest.orderId,
+          token: guest.token,
+          game: game.name,
+          item: packageAmt,
+          at: new Date().toISOString(),
+        });
+        setGuestToken(guest.token);
+        setOrderId(guest.orderId);
+        setPaidPrice(guest.price);
         return;
       }
 
@@ -230,7 +263,7 @@ function GamePage({ gameId }: { gameId: string }) {
           user_email: user.email ?? "",
           game_id: gameId,
           game_name: game.name,
-          package_amt: `${selected.amt} ${game.unit}`,
+          package_amt: packageAmt,
           price_usd: selected.price,
           payment: pay,
           player_id: uid.trim(),
@@ -261,6 +294,7 @@ function GamePage({ gameId }: { gameId: string }) {
             {/* Payment: the order's own KHQR, or manual instructions when Bakong isn't set up */}
             <OrderPayment
               orderId={orderId}
+              guestToken={guestToken}
               summary={{
                 code: orderId.slice(0, 8).toUpperCase(),
                 game: game.name,
@@ -314,13 +348,21 @@ function GamePage({ gameId }: { gameId: string }) {
               }
             />
 
-            <Link
-              to="/profile"
-              className="mt-6 flex items-center justify-center gap-2 rounded-xl border border-border py-3 font-sans text-sm font-semibold transition-colors hover:bg-muted"
-            >
-              <Receipt className="h-4 w-4" />
-              {t("My orders")}
-            </Link>
+            {guestToken ? (
+              <GuestLinkBox
+                path={guestOrderPath(orderId, guestToken)}
+                copied={copied}
+                onCopied={() => setCopied(true)}
+              />
+            ) : (
+              <Link
+                to="/profile"
+                className="mt-6 flex items-center justify-center gap-2 rounded-xl border border-border py-3 font-sans text-sm font-semibold transition-colors hover:bg-muted"
+              >
+                <Receipt className="h-4 w-4" />
+                {t("My orders")}
+              </Link>
+            )}
 
             <p className="mt-5 text-center text-[11px] text-muted-foreground/80">
               Order ID: {orderId}
@@ -648,6 +690,29 @@ function GamePage({ gameId }: { gameId: string }) {
             </span>
           </div>
 
+          {signedIn === false && (
+            <div className="mt-4 rounded-xl border border-border/70 bg-muted/40 p-3">
+              <label className="grid gap-1.5 text-sm font-semibold">
+                {t("Phone or Telegram (optional)")}
+                <input
+                  value={contact}
+                  onChange={(e) => setContact(e.target.value)}
+                  maxLength={64}
+                  placeholder="012 345 678 / @username"
+                  autoComplete="tel"
+                  className="min-w-0 rounded-lg border bg-input px-3 py-2 font-normal outline-none focus:border-primary"
+                />
+              </label>
+              <p className="mt-2 font-sans text-xs leading-[1.7] text-muted-foreground">
+                {t("No account needed. We contact you here only if there is a problem with your order.")}{" "}
+                <Link to="/auth" className="font-semibold text-primary hover:underline">
+                  {t("Sign in")}
+                </Link>{" "}
+                {t("to keep all your orders in one place.")}
+              </p>
+            </div>
+          )}
+
           {orderErr && (
             <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-sm font-semibold text-destructive">
               <CircleAlert className="h-4 w-4 shrink-0" />
@@ -678,6 +743,49 @@ function GamePage({ gameId }: { gameId: string }) {
         </aside>
       </main>
     </SiteChrome>
+  );
+}
+
+// Guests have no order history, so the order's own link is how they come back to it.
+function GuestLinkBox({
+  path,
+  copied,
+  onCopied,
+}: {
+  path: string;
+  copied: boolean;
+  onCopied: () => void;
+}) {
+  const { t } = useStorePrefs();
+  const url = typeof window === "undefined" ? path : `${window.location.origin}${path}`;
+  return (
+    <div className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-4">
+      <p className="flex items-center gap-2 font-sans text-sm font-bold text-primary">
+        <Link2 className="h-4 w-4" />
+        {t("Save your order link")}
+      </p>
+      <p className="mt-1 font-sans text-xs leading-[1.7] text-muted-foreground">
+        {t("You ordered without an account. Open this link to see your order status later.")}
+      </p>
+      <div className="mt-3 flex items-center gap-2">
+        <input
+          readOnly
+          value={url}
+          onFocus={(e) => e.currentTarget.select()}
+          className="min-w-0 flex-1 rounded-lg border bg-input px-3 py-2 font-mono text-xs outline-none"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            void navigator.clipboard?.writeText(url).then(onCopied, () => {});
+          }}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-3 py-2 font-sans text-xs font-semibold text-primary-foreground"
+        >
+          {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied ? t("Copied") : t("Copy")}
+        </button>
+      </div>
+    </div>
   );
 }
 

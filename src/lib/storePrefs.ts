@@ -87,7 +87,6 @@ const KM: Record<string, string> = {
   "View all orders": "មើលការកម្មង់ទាំងអស់",
   "Waiting for payment": "រង់ចាំការបង់ប្រាក់",
   "Paid, delivering now": "បានបង់ កំពុងបញ្ចូល",
-  Delivered: "បានបញ្ចូលរួច",
   "Delivery failed, contact support": "បញ្ចូលមិនបាន សូមទាក់ទងជំនួយ",
   Refunded: "បានសងប្រាក់វិញ",
   "just now": "ឥឡូវនេះ",
@@ -164,6 +163,22 @@ const KM: Record<string, string> = {
   "ID is valid, ready to order": "ID ត្រឹមត្រូវ អាចបញ្ជាទិញបាន",
   "ID format is correct, please double-check it before paying": "ទម្រង់ ID ត្រឹមត្រូវ សូមពិនិត្យម្តងទៀតមុនបង់ប្រាក់",
   "Name check is busy right now. Please try again.": "ការពិនិត្យឈ្មោះរវល់បន្តិច សូមព្យាយាមម្តងទៀត",
+  "Phone or Telegram (optional)": "លេខទូរស័ព្ទ ឬ Telegram (មិនដាក់ក៏បាន)",
+  "No account needed. We contact you here only if there is a problem with your order.":
+    "មិនចាំបាច់មានគណនីទេ យើងទាក់ទងតាមនេះ តែពេលការកម្មង់មានបញ្ហាប៉ុណ្ណោះ",
+  "Sign in": "ចូលគណនី",
+  "to keep all your orders in one place.": "ដើម្បីរក្សាការកម្មង់ទាំងអស់នៅកន្លែងតែមួយ",
+  "Save your order link": "រក្សាទុកតំណការកម្មង់",
+  "You ordered without an account. Open this link to see your order status later.":
+    "អ្នកកម្មង់ដោយគ្មានគណនី បើកតំណនេះ ដើម្បីមើលស្ថានភាពការកម្មង់ពេលក្រោយ",
+  Copy: "ចម្លង",
+  Copied: "បានចម្លង",
+  "Orders on this device": "ការកម្មង់នៅលើឧបករណ៍នេះ",
+  "Order not found": "រកមិនឃើញការកម្មង់នេះទេ",
+  "This link is wrong or the order was removed.": "តំណនេះខុស ឬការកម្មង់ត្រូវបានលុប",
+  "Back to home": "ត្រឡប់ទៅទំព័រដើម",
+  "Player": "អ្នកលេង",
+  "Order failed. Contact us and we will help.": "ការកម្មង់បរាជ័យ សូមទាក់ទងយើង យើងនឹងជួយ",
 };
 
 export function translate(l: StoreLang, s: string) {
