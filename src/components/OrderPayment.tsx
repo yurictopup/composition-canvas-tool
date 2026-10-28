@@ -7,6 +7,9 @@ import type { PaymentState } from "@/lib/payment.server";
 import { useStorePrefs } from "@/lib/storePrefs";
 
 const POLL_MS = 5000;
+// Bakong can confirm a payment made in the last seconds a little after the QR
+// expires, so the page keeps asking for a while longer.
+const GRACE_MS = 3 * 60_000;
 
 export type OrderSummary = {
   code: string;
@@ -48,10 +51,11 @@ export function OrderPayment({
   }, [orderId, guestToken]);
 
   const waiting = !!state?.available && !!state.qr && !state.paid;
-  const expired = waiting && !!state.expiresAt && new Date(state.expiresAt).getTime() < now;
+  const stopped =
+    waiting && !!state.expiresAt && new Date(state.expiresAt).getTime() + GRACE_MS < now;
 
   useEffect(() => {
-    if (!waiting || expired) return;
+    if (!waiting || stopped) return;
     const timer = setInterval(async () => {
       setNow(Date.now());
       try {
@@ -64,7 +68,7 @@ export function OrderPayment({
       }
     }, POLL_MS);
     return () => clearInterval(timer);
-  }, [waiting, expired, orderId, guestToken]);
+  }, [waiting, stopped, orderId, guestToken]);
 
   if (error || (state && !state.available)) return <>{fallback}</>;
   return <PaymentView state={state} now={now} summary={summary} />;

@@ -13,6 +13,8 @@ export default defineConfig({
     server: { entry: "server" },
   },
   nitro: {
+    // Runs the order sweep on the Cloudflare cron below (src/cron.ts).
+    plugins: ["./src/cron.ts"],
     cloudflare: {
       // Cloudflare Workers Builds runs `wrangler preview` for non-main branches,
       // which requires a `previews` block in the generated wrangler.json.
@@ -20,8 +22,15 @@ export default defineConfig({
       // dashboard), so the public workers.dev address stays off on every deploy;
       // `preview_urls` keeps PR preview links working anyway.
       // `ai` binds Workers AI (free daily quota) for Yuric Bot, see src/lib/chat.functions.ts.
+      // The cron checks unpaid KHQRs and retries/refreshes FazerCards orders every 2 minutes.
       // @ts-expect-error nitro reads `wrangler` at build time, but its types don't list it yet.
-      wrangler: { previews: {}, workers_dev: false, preview_urls: true, ai: { binding: "AI" } },
+      wrangler: {
+        previews: {},
+        workers_dev: false,
+        preview_urls: true,
+        ai: { binding: "AI" },
+        triggers: { crons: ["*/2 * * * *"] },
+      },
     },
   },
 });
