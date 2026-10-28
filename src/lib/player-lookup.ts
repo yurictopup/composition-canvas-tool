@@ -36,6 +36,7 @@ export class GamesDropError extends Error {
   constructor(
     message: string,
     readonly code: string | null,
+    readonly httpStatus?: number,
   ) {
     super(message);
   }
@@ -63,6 +64,7 @@ export async function gamesDropPost(
     throw new GamesDropError(
       `GamesDrop ${path} returned HTTP ${res.status}${code ? ` ${code}` : ""}${message ? `: ${message}` : ""}`,
       code,
+      res.status,
     );
   }
   return res.json();

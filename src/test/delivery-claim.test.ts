@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: {} }));
 
 const { deliverPaidOrder } = await import("@/lib/delivery.server");
+const { sweepOrders } = await import("@/lib/order-sweep.server");
 
 type Row = Record<string, unknown>;
 
@@ -57,6 +58,16 @@ function memoryDb(orders: Row[]) {
           filters.push((row) => matchOr(row, expr));
           return chain;
         },
+        gt(col: string, v: string) {
+          filters.push((row) => time(row[col]) > time(v));
+          return chain;
+        },
+        lt(col: string, v: string) {
+          filters.push((row) => time(row[col]) < time(v));
+          return chain;
+        },
+        order: () => chain,
+        limit: () => chain,
         maybeSingle() {
           const data = run()[0] ?? null;
           return Promise.resolve({ data });
@@ -84,6 +95,8 @@ function splitTop(expr: string): string[] {
   }
   return [...out, cur];
 }
+
+const time = (v: unknown) => new Date(v as string | number).getTime();
 
 const listOf = (op: string) => op.slice(op.indexOf("(") + 1, -1).split(",");
 
@@ -118,6 +131,8 @@ function fazer(buy: () => Promise<Response>) {
           fields: [{ key: "user_id" }, { key: "zone_id" }],
         });
       }
+      if (url.endsWith("/balance")) return json({ ok: true, balance: 50, currency: "USD" });
+      if (url.endsWith("/me")) return json({ ok: true, plan: "Gold" });
       if (url.endsWith("/topups/order")) {
         buyCalls.push({ key: new Headers(init?.headers).get("Idempotency-Key") });
         return buy();
@@ -226,5 +241,48 @@ describe("deliverPaidOrder", () => {
     const row = paidOrder();
     await deliverPaidOrder(memoryDb([row]), row.id);
     expect(row).toMatchObject({ status: "processing", supplier_status: "UNKNOWN" });
+  });
+
+  it.each([
+    [503, "BALANCE_UNAVAILABLE"],
+    [503, "INSUFFICIENT_BALANCE"],
+    [503, "SERVICE_UNAVAILABLE"],
+    [502, "OFFER_NOT_FOUND"],
+    [408, "INVALID_REQUEST"],
+    [408, undefined],
+    [409, "INSUFFICIENT_BALANCE"],
+    [409, "IDEMPOTENCY_KEY_IN_USE"],
+  ])(
+    "marks HTTP %i with code %s UNKNOWN, and neither the cron nor a plain Deliver buys it again",
+    async (httpStatus, code) => {
+      fazer(() => Promise.resolve(json({ ok: false, code, error: "x" }, httpStatus)));
+      const row = paidOrder({ paid_at: new Date().toISOString() });
+      const db = memoryDb([row]);
+
+      await deliverPaidOrder(db, row.id);
+      expect(row).toMatchObject({ status: "processing", supplier_status: "UNKNOWN" });
+
+      const report = await sweepOrders(db);
+      expect(report.retried).toBe(0);
+      expect((await deliverPaidOrder(db, row.id)).ok).toBe(false);
+      expect(buyCalls).toHaveLength(1);
+      expect(row["supplier_status"]).toBe("UNKNOWN");
+    },
+  );
+
+  it("lets the cron retry a clear refusal (4xx low balance) once the balance is there", async () => {
+    let answer = json({ ok: false, code: "INSUFFICIENT_BALANCE", error: "x" }, 402);
+    fazer(() => Promise.resolve(answer));
+    const row = paidOrder({ paid_at: new Date().toISOString() });
+    const db = memoryDb([row]);
+
+    await deliverPaidOrder(db, row.id);
+    expect(row).toMatchObject({ status: "pending", supplier_status: "INSUFFICIENT_BALANCE" });
+
+    answer = json({ ok: true, order: { id: "ord-7", status: "processing" } });
+    const report = await sweepOrders(db);
+    expect(report.retried).toBe(1);
+    expect(buyCalls).toHaveLength(2);
+    expect(row["supplier_order_id"]).toBe("ord-7");
   });
 });

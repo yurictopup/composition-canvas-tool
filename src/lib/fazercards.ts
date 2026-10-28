@@ -171,6 +171,11 @@ export function mapFazerStatus(raw: unknown): DeliveryResult["status"] {
   return "processing";
 }
 
+/** HTTP answers after which an order may or may not have been placed. */
+export function inDoubtStatus(status: number): boolean {
+  return status >= 500 || status === 408 || status === 409;
+}
+
 // Errors that mean FazerCards did not take the order, so it is safe to retry later.
 const REJECTED =
   /balance|insufficient|invalid|validation|not_found|unavailable|out_of_stock|unauthor|forbidden/i;
@@ -234,10 +239,15 @@ export async function placeFazerOrder(
     console.error("[delivery]", message);
     const code = error instanceof FazerCardsError ? (error.code ?? "") : "";
     const status = error instanceof FazerCardsError ? error.httpStatus : undefined;
+    // A 5xx, 408 or 409 may come after FazerCards took the order, whatever code
+    // its body carries (e.g. BALANCE_UNAVAILABLE), so it is never read as a refusal.
+    if (status !== undefined && inDoubtStatus(status)) {
+      return { status: "processing", supplierStatus: "UNKNOWN", message };
+    }
     if (code && REJECTED.test(code)) {
       return { status: "failed", supplierStatus: code.toUpperCase(), message, notPlaced: true };
     }
-    if (status && status >= 400 && status < 500 && status !== 408 && status !== 409) {
+    if (status && status >= 400 && status < 500) {
       return { status: "failed", supplierStatus: `HTTP_${status}`, message, notPlaced: true };
     }
     // A timeout or server error may still have placed the order; keep it

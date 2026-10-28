@@ -2,6 +2,7 @@
 // The order id is sent as GamesDrop's transactionId, so a retry of the same
 // order can never buy it twice.
 import { GamesDropError, gamesDropPost, gamesDropTarget } from "@/lib/player-lookup";
+import { inDoubtStatus } from "@/lib/fazercards";
 
 type Fetch = typeof fetch;
 
@@ -98,7 +99,12 @@ export async function placeGamesDropOrder(
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error("[delivery]", message);
-    if (error instanceof GamesDropError && error.code && REJECTED.has(error.code)) {
+    // A 5xx, 408 or 409 may come after GamesDrop took the order, whatever its code says.
+    const inDoubt =
+      error instanceof GamesDropError &&
+      error.httpStatus !== undefined &&
+      inDoubtStatus(error.httpStatus);
+    if (!inDoubt && error instanceof GamesDropError && error.code && REJECTED.has(error.code)) {
       return { status: "failed", supplierStatus: error.code, message, notPlaced: true };
     }
     // A timeout or unknown error may still have placed the order; keep it
