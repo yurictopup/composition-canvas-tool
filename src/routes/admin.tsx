@@ -13,6 +13,7 @@ import {
   Search,
   ShoppingCart,
   Tag,
+  Truck,
   Users,
   Wallet,
   X,
@@ -22,6 +23,7 @@ import { isOwnerAccount } from "@/lib/owner";
 import { AdminPrices } from "@/components/AdminPrices";
 import { AdminImages } from "@/components/admin/AdminImages";
 import { AdminMfa } from "@/components/admin/AdminMfa";
+import { AdminSupplierOrders } from "@/components/admin/AdminSupplierOrders";
 import { DeliveryCell } from "@/components/AdminDelivery";
 import { AdminOverview, money, orderCost, paid } from "@/components/admin/AdminOverview";
 import { AdminTopbar, type ThemeChoice } from "@/components/admin/AdminTopbar";
@@ -97,6 +99,13 @@ const NAV: NavItem[] = [
     icon: <ImageIcon size={22} />,
     label: "Images",
     title: "Images",
+    section: "Store",
+  },
+  {
+    id: "supplier",
+    icon: <Truck size={22} />,
+    label: "FazerCards",
+    title: "FazerCards orders",
     section: "Store",
   },
 ];
@@ -722,6 +731,7 @@ function AdminPage() {
                 {/* ══════════════ PRICES TAB ══════════════ */}
                 {tab === "prices" && <AdminPrices />}
                 {tab === "images" && <AdminImages />}
+                {tab === "supplier" && <AdminSupplierOrders orders={orders} />}
               </>
             )}
           </main>
