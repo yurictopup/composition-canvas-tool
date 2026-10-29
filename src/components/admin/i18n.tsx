@@ -228,6 +228,14 @@ const KM: Record<string, string> = {
   Confirm: "បញ្ជាក់",
   "Sign out": "ចាកចេញ",
 
+  // Customers tab
+  registered: "បានចុះឈ្មោះ",
+  bought: "បានទិញ",
+  "Signed up": "ចុះឈ្មោះ",
+  "Guest checkout": "ទិញជាភ្ញៀវ",
+  "Search email": "ស្វែងរកអ៊ីមែល",
+  "Couldn't load accounts, try Refresh": "ទាញគណនីមិនបាន សាកផ្ទុកឡើងវិញ",
+
   // FazerCards orders tab
 "FazerCards orders": "ការកម្មង់ FazerCards",
 "Newest orders at FazerCards, with the real cost": "ការកម្មង់ចុងក្រោយនៅ FazerCards ជាមួយតម្លៃដើមពិត",
