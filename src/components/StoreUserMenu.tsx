@@ -22,7 +22,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { isOwner } from "@/lib/games";
+import { isOwnerAccount } from "@/lib/owner";
 import { guestOrderPath, listGuestOrders, type SavedGuestOrder } from "@/lib/guest-orders";
 import { setStoreLang, setStoreTheme, useStorePrefs, type StoreLang, type StoreTheme } from "@/lib/storePrefs";
 
@@ -180,11 +180,19 @@ export function StoreGuestMenu() {
 }
 
 export function StoreUserMenu({ user, onSignOut }: { user: User; onSignOut: () => void }) {
-  const owner = isOwner(user.email);
+  const [owner, setOwner] = useState(false);
   const { lang, light, t } = useStorePrefs();
   const km = lang === "km";
   const [orders, setOrders] = useState<OrderNote[]>([]);
   const [seen, setSeen] = useState(0);
+
+  useEffect(() => {
+    let live = true;
+    isOwnerAccount(supabase).then((yes) => live && setOwner(yes));
+    return () => {
+      live = false;
+    };
+  }, [user.id]);
 
   useEffect(() => {
     try {

@@ -4,8 +4,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isVerifiedOwner } from "@/lib/owner";
 import type { DeliveryResponse, SupplierStock } from "@/lib/delivery.server";
 
-function requireOwner(claims: Record<string, unknown>) {
-  if (!isVerifiedOwner(claims)) {
+async function requireOwner(context: { supabase: unknown; claims: Record<string, unknown> }) {
+  if (!(await isVerifiedOwner(context.supabase, context.claims))) {
     throw new Error("Only the shop owner can do this (sign in with the 6-digit code).");
   }
 }
@@ -25,7 +25,7 @@ export const deliverOrder = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data, context }): Promise<DeliveryResponse> => {
-    requireOwner(context.claims);
+    await requireOwner(context);
     const { adminDb, deliverPaidOrder } = await import("@/lib/delivery.server");
     return deliverPaidOrder(adminDb(), data.orderId, {
       allowUnpaid: data.allowUnpaid === true,
@@ -37,7 +37,7 @@ export const refreshDelivery = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator(orderInput)
   .handler(async ({ data, context }): Promise<DeliveryResponse> => {
-    requireOwner(context.claims);
+    await requireOwner(context);
     const { adminDb, refreshPaidOrder } = await import("@/lib/delivery.server");
     return refreshPaidOrder(adminDb(), data.orderId);
   });
@@ -46,7 +46,7 @@ export const refreshDelivery = createServerFn({ method: "POST" })
 export const getSupplierStock = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<SupplierStock> => {
-    requireOwner(context.claims);
+    await requireOwner(context);
     const { supplierStock } = await import("@/lib/delivery.server");
     return supplierStock();
   });

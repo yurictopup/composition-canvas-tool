@@ -18,7 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { isOwner } from "@/lib/games";
+import { isOwnerAccount } from "@/lib/owner";
 import { AdminPrices } from "@/components/AdminPrices";
 import { AdminImages } from "@/components/admin/AdminImages";
 import { AdminMfa } from "@/components/admin/AdminMfa";
@@ -154,8 +154,8 @@ function AdminPage() {
   }
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (isOwner(data.user?.email)) {
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (data.user && (await isOwnerAccount(supabase))) {
         setAllowed(true);
         setOwnerEmail(data.user?.email ?? "");
       } else {
