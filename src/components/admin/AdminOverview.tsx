@@ -295,10 +295,13 @@ export function AdminOverview({
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-      <AdminStock orders={allOrders} orderCost={orderCost} />
+      {/* On phones the money cards come first and the stock card follows them. */}
+      <div className="lg:col-span-12">
+        <AdminStock orders={allOrders} orderCost={orderCost} />
+      </div>
 
       {/* Congratulations */}
-      <Card className="relative overflow-hidden lg:col-span-4">
+      <Card className="relative overflow-hidden lg:col-span-4 max-lg:-order-2">
         <div className="p-6">
           <h5 className="text-lg font-medium">
             {t("Congratulations")} {ownerName}
@@ -323,7 +326,7 @@ export function AdminOverview({
       </Card>
 
       {/* Statistics */}
-      <Card className="flex flex-col lg:col-span-8">
+      <Card className="flex flex-col lg:col-span-8 max-lg:-order-1">
         <CardHead
           title={t("Statistics")}
           right={
