@@ -95,7 +95,14 @@ async function customerOrders(): Promise<OrderContext> {
   );
   if (unpaid.length) {
     const { checkOrderPayment } = await import("@/lib/payment.server");
-    await Promise.all(unpaid.map((o) => checkOrderPayment(db, o.id, userId).catch(() => null)));
+    const { bankCheckAllowed } = await import("@/lib/rate-limit.server");
+    await Promise.all(
+      unpaid.map((o) =>
+        checkOrderPayment(db, o.id, userId, {
+          beforeBankCheck: () => bankCheckAllowed(o.id),
+        }).catch(() => null),
+      ),
+    );
     ({ data: rows } = await load());
   }
   return (rows ?? []).map((o) => ({
@@ -123,10 +130,12 @@ export const askBot = createServerFn({ method: "POST" })
     async ({
       data,
     }): Promise<{ text: string; source: "ai" | "orders" } | { unavailable: string }> => {
-      const { allowRequest } = await import("@/lib/rate-limit");
-      const { clientIp } = await import("@/lib/rate-limit.server");
+      const { rule } = await import("@/lib/rate-limit");
+      const { checkLimits, clientIp } = await import("@/lib/rate-limit.server");
       // Every answer spends the shared free quota, so one visitor can't use it all.
-      if (!allowRequest(`chat:${clientIp()}`, 12, 60_000)) return { unavailable: "rate limit" };
+      const ip = clientIp();
+      if (!(await checkLimits([rule("chatIp", ip), rule("chatIpDay", ip)])).allowed)
+        return { unavailable: "rate limit" };
 
       const turns = data.turns
         .slice(-MAX_TURNS)
@@ -171,9 +180,9 @@ export const askBot = createServerFn({ method: "POST" })
  */
 export const checkMyOrders = createServerFn({ method: "POST" }).handler(
   async (): Promise<{ text: string } | { unavailable: string }> => {
-    const { allowRequest } = await import("@/lib/rate-limit");
-    const { clientIp } = await import("@/lib/rate-limit.server");
-    if (!allowRequest(`chat-orders:${clientIp()}`, 12, 60_000))
+    const { rule } = await import("@/lib/rate-limit");
+    const { checkLimits, clientIp } = await import("@/lib/rate-limit.server");
+    if (!(await checkLimits([rule("chatOrdersIp", clientIp())])).allowed)
       return { unavailable: "rate limit" };
     const orders = await customerOrders().catch(() => undefined);
     if (orders === undefined) return { unavailable: "order lookup failed" };

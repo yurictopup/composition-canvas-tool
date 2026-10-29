@@ -112,10 +112,22 @@ async function flagStuckPlacing(db: SupabaseClient, report: SweepReport) {
   report.flagged += data?.length ?? 0;
 }
 
+// Forget request-limit counters nobody used for a day (they'd be full anyway).
+async function pruneRateLimits(db: SupabaseClient) {
+  const { error } = await db.rpc("rate_limit_prune");
+  if (error) throw new Error(error.message);
+}
+
 export async function sweepOrders(db: SupabaseClient = adminDb()): Promise<SweepReport> {
   const report: SweepReport = { checked: 0, paid: 0, retried: 0, refreshed: 0, flagged: 0 };
   // Each step on its own, so one failing (e.g. Bakong down) doesn't stop the others.
-  for (const step of [flagStuckPlacing, sweepPayments, retryDeliveries, refreshProcessing]) {
+  for (const step of [
+    flagStuckPlacing,
+    sweepPayments,
+    retryDeliveries,
+    refreshProcessing,
+    pruneRateLimits,
+  ]) {
     try {
       await step(db, report);
     } catch (error) {

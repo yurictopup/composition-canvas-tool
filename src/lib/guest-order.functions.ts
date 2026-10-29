@@ -5,10 +5,14 @@ import type { PaymentState } from "@/lib/payment.server";
 
 const orderInput = z.object({ orderId: z.string().uuid(), token: z.string().min(16).max(64) });
 
-async function guestLimit(name: string, limit: number) {
-  const { enforceLimit } = await import("@/lib/rate-limit");
-  const { clientIp } = await import("@/lib/rate-limit.server");
-  enforceLimit(`${name}:${clientIp()}`, limit);
+type LimitName = keyof typeof import("@/lib/rate-limit").LIMITS;
+
+/** Shared (all Workers) limits for this visitor's address. */
+async function guestLimit(...names: LimitName[]) {
+  const { rule } = await import("@/lib/rate-limit");
+  const { clientIp, enforceLimits } = await import("@/lib/rate-limit.server");
+  const ip = clientIp();
+  await enforceLimits(names.map((name) => rule(name, ip)));
 }
 
 /** Throws unless the token is the one the server gave out for this order. */
@@ -29,7 +33,7 @@ export const placeGuestOrder = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }): Promise<{ orderId: string; price: number; token: string }> => {
-    await guestLimit("guest-order", 5);
+    await guestLimit("guestOrderIp");
     const { adminDb } = await import("@/lib/delivery.server");
     const { createGuestOrder } = await import("@/lib/guest-order.server");
     return createGuestOrder(adminDb(), data);
@@ -38,7 +42,7 @@ export const placeGuestOrder = createServerFn({ method: "POST" })
 export const getGuestOrder = createServerFn({ method: "POST" })
   .validator(orderInput)
   .handler(async ({ data }): Promise<GuestOrderView | null> => {
-    await guestLimit("guest-view", 30);
+    await guestLimit("guestView");
     await requireGuestToken(data.orderId, data.token);
     const { adminDb } = await import("@/lib/delivery.server");
     const { loadGuestOrder } = await import("@/lib/guest-order.server");
@@ -48,8 +52,11 @@ export const getGuestOrder = createServerFn({ method: "POST" })
 export const startGuestPayment = createServerFn({ method: "POST" })
   .validator(orderInput)
   .handler(async ({ data }): Promise<PaymentState> => {
-    await guestLimit("guest-pay-start", 10);
+    await guestLimit("guestPayStartIp");
     await requireGuestToken(data.orderId, data.token);
+    const { rule } = await import("@/lib/rate-limit");
+    const { enforceLimits } = await import("@/lib/rate-limit.server");
+    await enforceLimits([rule("payStartOrder", data.orderId)]);
     const { adminDb } = await import("@/lib/delivery.server");
     const { startOrderPayment } = await import("@/lib/payment.server");
     return startOrderPayment(adminDb(), data.orderId, "guest");
@@ -59,9 +66,12 @@ export const checkGuestPayment = createServerFn({ method: "POST" })
   .validator(orderInput)
   .handler(async ({ data }): Promise<PaymentState> => {
     // The order page polls every 5 seconds (12 a minute).
-    await guestLimit("guest-pay-check", 30);
+    await guestLimit("payCheckIp");
     await requireGuestToken(data.orderId, data.token);
     const { adminDb } = await import("@/lib/delivery.server");
     const { checkOrderPayment } = await import("@/lib/payment.server");
-    return checkOrderPayment(adminDb(), data.orderId, "guest");
+    const { bankCheckAllowed } = await import("@/lib/rate-limit.server");
+    return checkOrderPayment(adminDb(), data.orderId, "guest", {
+      beforeBankCheck: () => bankCheckAllowed(data.orderId),
+    });
   });

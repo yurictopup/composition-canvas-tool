@@ -23,10 +23,12 @@ export const lookupPlayer = createServerFn({ method: "POST" })
     // Malformed IDs never reach the supplier.
     if (validatePlayerId(data.gameId, data.primary, data.secondary ?? ""))
       return { status: "not_found" };
-    const { allowRequest } = await import("@/lib/rate-limit");
-    const { clientIp } = await import("@/lib/rate-limit.server");
+    const { rule } = await import("@/lib/rate-limit");
+    const { checkLimits, clientIp } = await import("@/lib/rate-limit.server");
     // Each check may call a supplier; too many from one visitor reads as busy.
-    if (!allowRequest(`lookup:${clientIp()}`, 20, 60_000)) return { status: "unavailable" };
+    const ip = clientIp();
+    const limit = await checkLimits([rule("lookupIp", ip), rule("lookupIpHour", ip)]);
+    if (!limit.allowed) return { status: "unavailable" };
     if (data.gameId === "roblox") return cachedLookup(data, () => lookupRoblox(data.primary));
     const usesServerPicker = !!getIdConfig(data.gameId).secondary?.options;
     return cachedLookup(data, async () => {

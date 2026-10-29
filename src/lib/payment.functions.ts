@@ -15,8 +15,13 @@ export const startPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator(orderInput)
   .handler(async ({ data, context }): Promise<PaymentState> => {
-    const { enforceLimit } = await import("@/lib/rate-limit");
-    enforceLimit(`pay-start:${context.userId}`, 10);
+    const { rule } = await import("@/lib/rate-limit");
+    const { clientIp, enforceLimits } = await import("@/lib/rate-limit.server");
+    await enforceLimits([
+      rule("payStartUser", context.userId),
+      rule("payStartOrder", data.orderId),
+      rule("guestPayStartIp", clientIp()),
+    ]);
     const { adminDb } = await import("@/lib/delivery.server");
     const { startOrderPayment } = await import("@/lib/payment.server");
     return startOrderPayment(adminDb(), data.orderId, context.userId);
@@ -28,9 +33,13 @@ export const checkPayment = createServerFn({ method: "POST" })
   .validator(orderInput)
   .handler(async ({ data, context }): Promise<PaymentState> => {
     // The order page polls every 5 seconds (12 a minute).
-    const { enforceLimit } = await import("@/lib/rate-limit");
-    enforceLimit(`pay-check:${context.userId}`, 30);
+    const { rule } = await import("@/lib/rate-limit");
+    const { clientIp, enforceLimits } = await import("@/lib/rate-limit.server");
+    await enforceLimits([rule("payCheckUser", context.userId), rule("payCheckIp", clientIp())]);
     const { adminDb } = await import("@/lib/delivery.server");
     const { checkOrderPayment } = await import("@/lib/payment.server");
-    return checkOrderPayment(adminDb(), data.orderId, ownerOrSelf(context.claims, context.userId));
+    const { bankCheckAllowed } = await import("@/lib/rate-limit.server");
+    return checkOrderPayment(adminDb(), data.orderId, ownerOrSelf(context.claims, context.userId), {
+      beforeBankCheck: () => bankCheckAllowed(data.orderId),
+    });
   });

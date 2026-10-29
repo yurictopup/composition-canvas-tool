@@ -132,6 +132,12 @@ export async function checkOrderPayment(
   db: SupabaseClient,
   orderId: string,
   scope: OrderScope,
+  {
+    beforeBankCheck,
+  }: {
+    /** False skips the Bakong call this time (the order was asked about a moment ago). */
+    beforeBankCheck?: () => Promise<boolean>;
+  } = {},
 ): Promise<PaymentState> {
   const cfg = bakongConfig();
   if (!cfg) return { available: false, paid: false };
@@ -140,6 +146,8 @@ export async function checkOrderPayment(
   if (order.paid_at) return paidState(order);
   if (!order.payment_md5)
     return { available: true, paid: false, message: "No KHQR for this order yet." };
+  // Not paid as of a few seconds ago; the next poll (or the cron) asks again.
+  if (beforeBankCheck && !(await beforeBankCheck())) return { available: true, paid: false };
 
   return settlePayment(db, cfg, order, order.payment_md5);
 }
@@ -168,14 +176,40 @@ async function settlePayment(
     };
   }
 
-  const { data: marked } = await db
+  const { data: marked, error: markError } = await db
     .from("orders")
     .update({ paid_at: new Date().toISOString(), payment_hash: check.hash })
     .eq("id", order.id)
     .is("paid_at", null)
     .select("id")
     .maybeSingle();
-  if (!marked) return paidState(order); // another check got there first
+  if (markError) {
+    // 23505: this bank transaction already paid another order (orders_payment_hash_idx).
+    // Never deliver twice for one payment; the owner looks at it.
+    console.error(
+      "[payment] could not mark order paid",
+      order.id,
+      markError.code,
+      markError.message,
+    );
+    return {
+      available: true,
+      paid: false,
+      message:
+        markError.code === "23505"
+          ? "This payment was already used for another order. The shop will check it."
+          : "Could not confirm the payment right now. Please try again in a moment.",
+    };
+  }
+  if (!marked) {
+    // Another check got there first: report what the database says now.
+    const { data: now } = await db
+      .from("orders")
+      .select("status, paid_at")
+      .eq("id", order.id)
+      .maybeSingle();
+    return now?.paid_at ? paidState(now) : { available: true, paid: false };
+  }
 
   try {
     const delivery = await deliverPaidOrder(db, order.id);
