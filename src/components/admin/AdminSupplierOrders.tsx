@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle2, Clock, ExternalLink, RefreshCw, XCircle } from "lucide-react";
 import { getSupplierOrders } from "@/lib/delivery.functions";
 import type { SupplierOrders } from "@/lib/delivery.server";
+import { findGame } from "@/lib/games";
 import type { AdminOrder } from "./types";
 import { useAdminT } from "./i18n";
 
@@ -120,6 +121,8 @@ export function AdminSupplierOrders({ orders }: { orders: AdminOrder[] }) {
       <div className="grid grid-cols-1 gap-4 px-6 pb-6 md:grid-cols-2">
         {list.map((f) => {
           const sale = sales.get(f.id);
+          // The API list has no pictures, so the store's own game icon stands in.
+          const image = f.image ?? findGame(sale?.game_id)?.icon ?? null;
           const icon =
             f.status === "completed" ? (
               <CheckCircle2 size={18} className="text-[#28C76F]" />
@@ -133,8 +136,8 @@ export function AdminSupplierOrders({ orders }: { orders: AdminOrder[] }) {
               key={f.id}
               className="flex gap-3 rounded-md border border-[var(--vx-border)] p-3"
             >
-              {f.image ? (
-                <img src={f.image} alt="" className="h-14 w-14 shrink-0 rounded-md object-cover" />
+              {image ? (
+                <img src={image} alt="" className="h-14 w-14 shrink-0 rounded-md object-cover" />
               ) : (
                 <span className="h-14 w-14 shrink-0 rounded-md bg-[var(--vx-border)]" />
               )}
