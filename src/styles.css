@@ -336,12 +336,39 @@
   background: var(--vx-bg);
   color: var(--vx-body);
 }
-/* Headings use the shop's Khmer display font (Koulen has one weight, so no faux bold). */
+/* Koulen for Khmer letters only: its Latin digits read badly ("1" looks like "I"),
+   so numbers and English in headings fall through to Public Sans. */
+@font-face {
+  font-family: "Koulen Khmer";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/koulen/v30/AMOQz46as3KIBPemjno8ouY.woff2) format("woff2");
+  unicode-range: U+1780-17FF, U+19E0-19FF, U+200C-200D, U+25CC;
+}
 .vx h1, .vx h2, .vx h3, .vx h4, .vx h5 {
   color: var(--vx-heading);
-  font-family: var(--font-khmer);
-  font-weight: 400;
-  letter-spacing: 0.01em;
+  font-family: "Koulen Khmer", "Public Sans", "Kantumruy Pro", sans-serif;
+  font-weight: 600;
+}
+.vx-skel {
+  background: var(--vx-border);
+  border-radius: 0.375rem;
+}
+@keyframes vx-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .vx-fade {
+    animation: vx-fade 0.25s ease-out;
+  }
 }
 .vx-card {
   background: var(--vx-card);
