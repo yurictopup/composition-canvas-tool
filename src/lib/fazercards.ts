@@ -388,6 +388,32 @@ const firstText = (...values: unknown[]) => {
   return typeof hit === "string" ? hit.trim() : "";
 };
 
+// Order fields are not documented, so the cost is the first known money field,
+// else any number-like field whose name reads as a price (e.g. "0.388").
+const asMoney = (v: unknown) => {
+  const n = typeof v === "number" || typeof v === "string" ? Number(v) : NaN;
+  return v !== "" && Number.isFinite(n) ? n : null;
+};
+function orderCost(o: Record<string, unknown>): number {
+  for (const key of [
+    "payUsd", "pay_usd", "amountUsd", "amount_usd", "priceUsd", "price_usd",
+    "totalUsd", "total_usd", "costUsd", "cost_usd", "amount", "price", "total", "cost", "sum",
+  ]) {
+    const n = asMoney(o[key]);
+    if (n !== null) return n;
+  }
+  for (const [key, value] of Object.entries(o)) {
+    if (!/price|amount|cost|total|sum|pay|charge/i.test(key)) continue;
+    const n =
+      asMoney(value) ??
+      (value && typeof value === "object"
+        ? asMoney((value as Record<string, unknown>).usd ?? (value as Record<string, unknown>).amount)
+        : null);
+    if (n !== null) return n;
+  }
+  return 0;
+}
+
 /** The newest FazerCards orders with what each one really cost, for the owner's list on /admin. */
 export async function listFazerOrders(opts: Opts, limit = 50): Promise<FazerOrder[]> {
   const json = await call(opts, `/orders?page=1&limit=${limit}`);
@@ -396,11 +422,14 @@ export async function listFazerOrders(opts: Opts, limit = 50): Promise<FazerOrde
     .map((o) => ({
       id: firstText(o.id, o.order_id, o.orderId),
       status: firstText(o.status).toLowerCase(),
-      game: firstText(o.gameName, o.game_name, o.category),
-      product: firstText(o.productName, o.product_name, o.offer_name, o.item),
-      cost: Number(o.payUsd ?? o.pay_usd ?? o.amountUsd ?? o.amount_usd ?? o.price_usd ?? o.price ?? 0),
+      game: firstText(
+        o.gameName, o.game_name, o.categoryName, o.category_name, o.category,
+        o.serviceName, o.service_name, o.game, o.title,
+      ),
+      product: firstText(o.productName, o.product_name, o.offerName, o.offer_name, o.item),
+      cost: orderCost(o),
       createdAt: firstText(o.createdAt, o.created_at),
-      image: firstText(o.image, o.image_url) || null,
+      image: firstText(o.image, o.image_url, o.imageUrl, o.icon_url) || null,
     }))
     .filter((o) => o.id);
 }
