@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
   Circle,
@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isOwnerAccount } from "@/lib/owner";
+import { findGame } from "@/lib/games";
 import { AdminPrices } from "@/components/AdminPrices";
 import { AdminImages } from "@/components/admin/AdminImages";
 import { AdminMfa } from "@/components/admin/AdminMfa";
@@ -110,6 +111,44 @@ const NAV: NavItem[] = [
   },
 ];
 
+// Placeholder cards in the dashboard's own grid while the first orders load.
+const SKELETON = ["lg:col-span-12", "lg:col-span-4", "lg:col-span-8", "lg:col-span-6", "lg:col-span-6"];
+
+function GameIcon({ gameId, size = 28 }: { gameId: string; size?: number }) {
+  const icon = findGame(gameId)?.icon;
+  if (!icon) return null;
+  return (
+    <img
+      src={icon}
+      alt=""
+      width={size}
+      height={size}
+      className="shrink-0 rounded-md object-cover"
+      style={{ width: size, height: size }}
+    />
+  );
+}
+
+/** A short two-note chime for a newly paid order; silent when the browser blocks audio. */
+function chime() {
+  try {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.setValueAtTime(1320, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.42);
+    osc.onended = () => void ctx.close();
+  } catch {
+    // No audio: the new order still shows in the list.
+  }
+}
+
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "2-digit",
@@ -163,16 +202,41 @@ function AdminPage() {
   }
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (data.user && (await isOwnerAccount(supabase))) {
+    // The user, owner and order requests run together instead of one after another.
+    // Orders only show after the 6-digit code; RLS returns all of them only to a
+    // session that passed it, and onCodePassed loads them again.
+    void loadData();
+    Promise.all([supabase.auth.getUser(), isOwnerAccount(supabase)]).then(([{ data }, owner]) => {
+      if (data.user && owner) {
         setAllowed(true);
-        setOwnerEmail(data.user?.email ?? "");
+        setOwnerEmail(data.user.email ?? "");
       } else {
         navigate({ to: "/" });
       }
       setChecking(false);
     });
   }, [navigate]);
+
+  // Refresh every minute while the page is open, and chime for orders paid after it opened
+  // (earlier ones, including those loaded again after the 6-digit code, stay silent).
+  const openedAt = useRef(Date.now());
+  const seenPaid = useRef(new Set<string>());
+  useEffect(() => {
+    if (!codeOk) return;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") void loadData();
+    }, 60_000);
+    return () => window.clearInterval(timer);
+  }, [codeOk]);
+  useEffect(() => {
+    let fresh = false;
+    for (const o of orders) {
+      if (!paid(o) || seenPaid.current.has(o.id)) continue;
+      seenPaid.current.add(o.id);
+      if (o.paid_at && new Date(o.paid_at).getTime() > openedAt.current) fresh = true;
+    }
+    if (fresh) chime();
+  }, [orders]);
 
   const onCodePassed = useCallback(() => {
     setCodeOk(true);
@@ -234,6 +298,21 @@ function AdminPage() {
         ),
       )
     : fo;
+
+  const statusSelect = (o: Order) => (
+    <select
+      value={o.status}
+      disabled={updatingId === o.id}
+      onChange={(e) => updateStatus(o.id, e.target.value)}
+      className="rounded-md border border-[var(--vx-border)] bg-white px-2 py-1 text-xs outline-none focus:border-[var(--vx-primary)]"
+    >
+      <option value="pending">{t("pending")}</option>
+      <option value="processing">{t("processing")}</option>
+      <option value="completed">{t("completed")}</option>
+      <option value="failed">{t("failed")}</option>
+      <option value="refunded">{t("refunded")}</option>
+    </select>
+  );
 
   const current = NAV.find((n) => n.id === tab) ?? NAV[0]!;
   const ownerName = ownerEmail.split("@")[0] || "Owner";
@@ -450,11 +529,21 @@ function AdminPage() {
             </div>
 
             {loading && orders.length === 0 ? (
-              <div className="vx-card flex h-48 items-center justify-center">
-                <p>{t("Loading...")}</p>
+              <div
+                className="grid animate-pulse grid-cols-1 gap-6 lg:grid-cols-12"
+                aria-busy="true"
+                aria-label={t("Loading...")}
+              >
+                {SKELETON.map((span, i) => (
+                  <div key={i} className={`vx-card space-y-3 p-6 ${span}`}>
+                    <div className="vx-skel h-4 w-1/3" />
+                    <div className="vx-skel h-8 w-1/2" />
+                    <div className="vx-skel h-3 w-2/3" />
+                  </div>
+                ))}
               </div>
             ) : (
-              <>
+              <div key={tab} className="vx-fade">
                 {/* ══════════════ OVERVIEW TAB ══════════════ */}
                 {tab === "overview" && (
                   <AdminOverview
@@ -475,13 +564,13 @@ function AdminPage() {
                           {shownOrders.length} {t("orders")}
                         </p>
                       </div>
-                      <label className="flex items-center gap-2 rounded-md border border-[var(--vx-border)] px-3 py-1.5 focus-within:border-[var(--vx-primary)]">
+                      <label className="flex w-full items-center gap-2 rounded-md border border-[var(--vx-border)] px-3 py-1.5 focus-within:border-[var(--vx-primary)] sm:w-auto">
                         <Search size={16} className="text-[var(--vx-muted)]" />
                         <input
                           value={query}
                           onChange={(e) => setQuery(e.target.value)}
                           placeholder={t("Search order, email, player ID")}
-                          className="w-56 bg-transparent text-[13px] outline-none"
+                          className="w-full bg-transparent text-[13px] outline-none sm:w-56"
                         />
                       </label>
                     </div>
@@ -491,7 +580,40 @@ function AdminPage() {
                         <p>{t("No orders yet")}</p>
                       </div>
                     ) : (
-                      <div className="overflow-x-auto">
+                      <>
+                      {/* Phones get one card per order instead of the wide table. */}
+                      <ul className="divide-y divide-[var(--vx-border)] border-t border-[var(--vx-border)] md:hidden">
+                        {shownOrders.map((o) => (
+                          <li key={o.id} className="space-y-2 p-4">
+                            <div className="flex items-start gap-3">
+                              <GameIcon gameId={o.game_id} size={44} />
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate font-medium text-[var(--vx-heading)]">
+                                  {o.game_name}
+                                </p>
+                                <p className="text-[13px]">{o.package_amt}</p>
+                              </div>
+                              <p className="font-semibold text-[var(--vx-heading)]">
+                                {money(Number(o.price_usd))}
+                              </p>
+                            </div>
+                            <p className="break-all font-mono text-xs">
+                              {o.player_id}
+                              {o.player_zone ? ` (${o.player_zone})` : ""}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--vx-muted)]">
+                              <StatusBadge status={o.status} />
+                              <span>{fmtDate(o.created_at)}</span>
+                              <span className="min-w-0 truncate">{o.user_email}</span>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              {statusSelect(o)}
+                              <DeliveryCell order={o} onChanged={loadData} />
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="hidden overflow-x-auto md:block">
                         <table className="vx-table w-full text-sm">
                           <thead className="border-y border-[var(--vx-border)]">
                             <tr className="text-left">
@@ -520,7 +642,10 @@ function AdminPage() {
                                   {o.user_email}
                                 </td>
                                 <td className="px-4 py-3 font-medium text-[var(--vx-heading)]">
-                                  {o.game_name}
+                                  <span className="flex items-center gap-2">
+                                    <GameIcon gameId={o.game_id} />
+                                    {o.game_name}
+                                  </span>
                                 </td>
                                 <td className="px-4 py-3 text-sm">{o.package_amt}</td>
                                 <td className="px-4 py-3 text-xs font-mono">
@@ -537,18 +662,7 @@ function AdminPage() {
                                   {fmtDate(o.created_at)}
                                 </td>
                                 <td className="px-4 py-3">
-                                  <select
-                                    value={o.status}
-                                    disabled={updatingId === o.id}
-                                    onChange={(e) => updateStatus(o.id, e.target.value)}
-                                    className="rounded-md border border-[var(--vx-border)] bg-white px-2 py-1 text-xs outline-none focus:border-[var(--vx-primary)]"
-                                  >
-                                    <option value="pending">{t("pending")}</option>
-                                    <option value="processing">{t("processing")}</option>
-                                    <option value="completed">{t("completed")}</option>
-                                    <option value="failed">{t("failed")}</option>
-                                    <option value="refunded">{t("refunded")}</option>
-                                  </select>
+                                  {statusSelect(o)}
                                 </td>
                                 <td className="px-4 py-3">
                                   <DeliveryCell order={o} onChanged={loadData} />
@@ -558,6 +672,7 @@ function AdminPage() {
                           </tbody>
                         </table>
                       </div>
+                      </>
                     )}
                   </div>
                 )}
@@ -732,7 +847,7 @@ function AdminPage() {
                 {tab === "prices" && <AdminPrices />}
                 {tab === "images" && <AdminImages />}
                 {tab === "supplier" && <AdminSupplierOrders orders={orders} />}
-              </>
+              </div>
             )}
           </main>
 
