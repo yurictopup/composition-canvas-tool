@@ -227,6 +227,18 @@ const KM: Record<string, string> = {
   "Wrong or expired code. Try the new code.": "លេខកូដខុស ឬហួសពេល សាកលេខកូដថ្មី",
   Confirm: "បញ្ជាក់",
   "Sign out": "ចាកចេញ",
+
+  // FazerCards orders tab
+"FazerCards orders": "ការកម្មង់ FazerCards",
+"Newest orders at FazerCards, with the real cost": "ការកម្មង់ចុងក្រោយនៅ FazerCards ជាមួយតម្លៃដើមពិត",
+"Open FazerCards": "បើក FazerCards",
+"Spent at FazerCards": "ចំណាយនៅ FazerCards",
+"Real profit": "ចំណេញពិត",
+"Still processing": "កំពុងដំណើរការ",
+Sold: "លក់",
+"Not from the store": "មិនមែនពីហាង",
+"No FazerCards orders yet": "មិនទាន់មានការកម្មង់ FazerCards ទេ",
+"Couldn't read FazerCards orders, try Refresh": "អានការកម្មង់ FazerCards មិនបាន សាកផ្ទុកឡើងវិញ",
 };
 
 export function translate(lang: Lang, s: string) {
