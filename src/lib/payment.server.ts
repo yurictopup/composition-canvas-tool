@@ -115,6 +115,12 @@ export async function startOrderPayment(
 
   const qr = await createPaymentQr(cfg, { amount, billNumber: order.id.slice(0, 8).toUpperCase() });
   const expiresAt = new Date(qr.expiresAt).toISOString();
+  // Remember every QR this order was given, so a payment made later with an
+  // older one (a screenshot, an app that ignores the expiry) is still found.
+  const { error: keepError } = await db
+    .from("order_payments")
+    .insert({ md5: qr.md5, order_id: order.id, expires_at: expiresAt });
+  if (keepError) console.error("[payment] could not keep the QR", order.id, keepError.message);
   await db
     .from("orders")
     .update({ payment_qr: qr.qr, payment_md5: qr.md5, payment_expires_at: expiresAt })
@@ -201,6 +207,17 @@ async function settlePayment(
           : "Could not confirm the payment right now. Please try again in a moment.",
     };
   }
+  if (marked) {
+    // Which of the order's QRs was paid (for the owner); never blocks delivery.
+    await db
+      .from("order_payments")
+      .update({ paid_at: new Date().toISOString() })
+      .eq("md5", md5)
+      .then(
+        () => undefined,
+        () => undefined,
+      );
+  }
   if (!marked) {
     // Another check got there first: report what the database says now.
     const { data: now } = await db
@@ -219,4 +236,27 @@ async function settlePayment(
     console.error("[payment] delivery failed", error instanceof Error ? error.message : error);
     return { available: true, paid: true, status: "pending" };
   }
+}
+
+/** Older QRs are asked about for this long after they were made. */
+export const EARLIER_QR_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Asks Bakong about one of the order's expired QRs (replaced or not). Used by
+ * the cron: the customer's page only polls the newest live QR. Does nothing
+ * once the order is paid or no longer waiting for payment.
+ */
+export async function checkEarlierQr(
+  db: SupabaseClient,
+  orderId: string,
+  md5: string,
+): Promise<PaymentState> {
+  const cfg = bakongConfig();
+  if (!cfg) return { available: false, paid: false };
+  const order = await loadOrder(db, orderId, null);
+  if (!order) return { available: true, paid: false, message: "Order not found." };
+  if (order.paid_at) return paidState(order);
+  // The newest QR counts too: once it expired, only this sweep still asks about it.
+  if (order.status !== "pending") return { available: true, paid: false };
+  return settlePayment(db, cfg, order, md5);
 }

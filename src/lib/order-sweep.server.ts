@@ -16,7 +16,7 @@ import {
   UNKNOWN,
 } from "@/lib/delivery.server";
 import { fazerOfferFor } from "@/lib/fazercards";
-import { checkOrderPayment } from "@/lib/payment.server";
+import { checkEarlierQr, checkOrderPayment, EARLIER_QR_WINDOW_MS } from "@/lib/payment.server";
 
 const MINUTE = 60_000;
 // Unpaid KHQRs are asked about for this long after the order was made.
@@ -112,6 +112,34 @@ async function flagStuckPlacing(db: SupabaseClient, report: SweepReport) {
   report.flagged += data?.length ?? 0;
 }
 
+// A customer who came back after the QR expired got a new one; a payment made
+// with the old one (a screenshot, an app that ignores the expiry) only shows
+// up when that old md5 is asked about. Each old QR is asked every 10 minutes
+// for a day after it was made.
+async function sweepEarlierQrs(db: SupabaseClient, report: SweepReport) {
+  const { data } = await db
+    .from("order_payments")
+    .select("md5, order_id")
+    .is("paid_at", null)
+    .lt("expires_at", new Date().toISOString())
+    .gt("created_at", since(EARLIER_QR_WINDOW_MS))
+    .order("created_at", { ascending: false })
+    .limit(BATCH * 2);
+  const rows = (data ?? []) as { md5: string; order_id: string }[];
+  if (!rows.length) return;
+  const { rule } = await import("@/lib/rate-limit");
+  const { checkLimits } = await import("@/lib/rate-limit.server");
+  let asked = 0;
+  for (const row of rows) {
+    if (asked >= BATCH) break;
+    if (!(await checkLimits([rule("earlierQrCheck", row.md5)])).allowed) continue;
+    asked++;
+    report.checked++;
+    const state = await checkEarlierQr(db, row.order_id, row.md5);
+    if (state.paid) report.paid++;
+  }
+}
+
 // Forget request-limit counters nobody used for a day (they'd be full anyway).
 async function pruneRateLimits(db: SupabaseClient) {
   const { error } = await db.rpc("rate_limit_prune");
@@ -126,6 +154,7 @@ export async function sweepOrders(db: SupabaseClient = adminDb()): Promise<Sweep
     sweepPayments,
     retryDeliveries,
     refreshProcessing,
+    sweepEarlierQrs,
     pruneRateLimits,
   ]) {
     try {

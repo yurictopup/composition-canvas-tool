@@ -5,6 +5,7 @@ const deliverPaidOrder = vi.fn();
 const refreshPaidOrder = vi.fn();
 const supplierStock = vi.fn();
 const checkOrderPayment = vi.fn();
+const checkEarlierQr = vi.fn();
 
 vi.mock("@/lib/delivery.server", () => ({
   adminDb: () => {
@@ -17,6 +18,8 @@ vi.mock("@/lib/delivery.server", () => ({
 }));
 vi.mock("@/lib/payment.server", () => ({
   checkOrderPayment: (...a: unknown[]) => checkOrderPayment(...a),
+  checkEarlierQr: (...a: unknown[]) => checkEarlierQr(...a),
+  EARLIER_QR_WINDOW_MS: 86_400_000,
 }));
 
 const { sweepOrders } = await import("@/lib/order-sweep.server");
@@ -56,6 +59,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   deliverPaidOrder.mockResolvedValue({ ok: true, message: "" });
   checkOrderPayment.mockResolvedValue({ available: true, paid: false });
+  checkEarlierQr.mockResolvedValue({ available: true, paid: false });
 });
 
 describe("order sweep", () => {
@@ -125,5 +129,29 @@ describe("order sweep", () => {
     checkOrderPayment.mockRejectedValueOnce(new Error("Bakong down"));
     const report = await sweepOrders(fakeDb([[{ id: "a" }], [], [{ id: "p" }]]));
     expect(report.refreshed).toBe(1);
+  });
+});
+
+describe("earlier QRs", () => {
+  it("asks Bakong about expired QRs, each at most every 10 minutes", async () => {
+    const errors = console.error;
+    console.error = () => {}; // no database in tests: the limit falls back to memory
+    try {
+      checkEarlierQr.mockResolvedValueOnce({ available: true, paid: true });
+      const old = [
+        { md5: `m1-${Math.random()}`, order_id: "o1" },
+        { md5: `m2-${Math.random()}`, order_id: "o2" },
+      ];
+      const first = await sweepOrders(fakeDb([[], [], [], old]));
+      expect(checkEarlierQr.mock.calls.map((c) => [c[1], c[2]])).toEqual(
+        old.map((o) => [o.order_id, o.md5]),
+      );
+      expect(first).toMatchObject({ checked: 2, paid: 1 });
+      checkEarlierQr.mockClear();
+      await sweepOrders(fakeDb([[], [], [], old]));
+      expect(checkEarlierQr).not.toHaveBeenCalled();
+    } finally {
+      console.error = errors;
+    }
   });
 });

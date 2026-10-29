@@ -15,7 +15,7 @@ vi.mock("@/lib/delivery.server", () => ({
   deliverPaidOrder: (...a: unknown[]) => deliverPaidOrder(...a),
 }));
 
-const { startOrderPayment } = await import("@/lib/payment.server");
+const { checkEarlierQr, startOrderPayment } = await import("@/lib/payment.server");
 
 const expiredOrder = {
   id: "0b8c1d2e-0000-4000-8000-000000000001",
@@ -29,15 +29,25 @@ const expiredOrder = {
   paid_at: null,
 };
 
-function fakeDb(salesOpen = true) {
+function fakeDb(salesOpen = true, order: Record<string, unknown> = expiredOrder) {
   const updates: Record<string, unknown>[] = [];
+  const inserts: { table: string; values: Record<string, unknown> }[] = [];
   const db = {
     from(table: string) {
       let row: unknown =
-        table === "store_settings" ? { sales_open: salesOpen, hidden_games: [] } : expiredOrder;
+        table === "store_settings" ? { sales_open: salesOpen, hidden_games: [] } : order;
       const chain: Record<string, unknown> = {};
       for (const m of ["select", "eq", "is"]) chain[m] = () => chain;
+      chain["insert"] = (values: Record<string, unknown>) => {
+        inserts.push({ table, values });
+        row = null;
+        return chain;
+      };
       chain["update"] = (values: Record<string, unknown>) => {
+        if (table === "order_payments") {
+          updates.push({ table, ...values });
+          return chain;
+        }
         updates.push(values);
         row = { id: expiredOrder.id };
         return chain;
@@ -47,7 +57,7 @@ function fakeDb(salesOpen = true) {
       return chain;
     },
   } as unknown as SupabaseClient;
-  return { db, updates };
+  return { db, updates, inserts };
 }
 
 beforeEach(() => {
@@ -82,6 +92,18 @@ describe("expired KHQR", () => {
     expect(updates[0]).toMatchObject({ payment_md5: "new-md5" });
   });
 
+  it("remembers every new QR, so a payment with an older one is still found", async () => {
+    checkBakongPayment.mockResolvedValue({ status: "unpaid" });
+    const { db, inserts } = fakeDb();
+    await startOrderPayment(db, expiredOrder.id, "guest");
+    expect(inserts).toEqual([
+      {
+        table: "order_payments",
+        values: expect.objectContaining({ md5: "new-md5", order_id: expiredOrder.id }),
+      },
+    ]);
+  });
+
   it("makes no new QR while the owner has sales switched off", async () => {
     checkBakongPayment.mockResolvedValue({ status: "unpaid" });
     const { db, updates } = fakeDb(false);
@@ -90,5 +112,26 @@ describe("expired KHQR", () => {
     expect(state.qr).toBeUndefined();
     expect(createPaymentQr).not.toHaveBeenCalled();
     expect(updates).toHaveLength(0);
+  });
+});
+
+describe("earlier QRs (cron)", () => {
+  it("marks the order paid when an earlier QR was paid", async () => {
+    checkBakongPayment.mockResolvedValue({ status: "paid", hash: "h2", amount: 1.25 });
+    const { db, updates } = fakeDb(true, { ...expiredOrder, payment_md5: "newest-md5" });
+    const state = await checkEarlierQr(db, expiredOrder.id, "first-md5");
+    expect(checkBakongPayment).toHaveBeenCalledWith(expect.anything(), "first-md5");
+    expect(state.paid).toBe(true);
+    expect(updates[0]).toMatchObject({ payment_hash: "h2" });
+    expect(updates[1]).toMatchObject({ table: "order_payments" });
+    expect(deliverPaidOrder).toHaveBeenCalledWith(db, expiredOrder.id);
+  });
+
+  it("leaves orders that are paid or not waiting for payment alone", async () => {
+    const paid = fakeDb(true, { ...expiredOrder, paid_at: new Date().toISOString() });
+    expect((await checkEarlierQr(paid.db, expiredOrder.id, "first-md5")).paid).toBe(true);
+    const failed = fakeDb(true, { ...expiredOrder, status: "failed" });
+    expect((await checkEarlierQr(failed.db, expiredOrder.id, "first-md5")).paid).toBe(false);
+    expect(checkBakongPayment).not.toHaveBeenCalled();
   });
 });

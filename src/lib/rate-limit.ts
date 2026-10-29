@@ -67,6 +67,8 @@ export const LIMITS = {
   // At most one Bakong question per order every 4 s, however many tabs,
   // visitors or Workers poll it, so the Bakong token is never flooded.
   bankCheckOrder: { capacity: 1, perSeconds: 4 },
+  // Replaced (older) QRs of an unpaid order: the cron asks every 10 minutes.
+  earlierQrCheck: { capacity: 1, perSeconds: 600 },
 } satisfies Record<string, Budget>;
 
 export function rule(name: keyof typeof LIMITS, subject: string): Rule {
