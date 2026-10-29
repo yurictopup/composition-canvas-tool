@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isVerifiedOwner } from "@/lib/owner";
-import type { DeliveryResponse, SupplierStock } from "@/lib/delivery.server";
+import type { DeliveryResponse, SupplierOrders, SupplierStock } from "@/lib/delivery.server";
 
 async function requireOwner(context: { supabase: unknown; claims: Record<string, unknown> }) {
   if (!(await isVerifiedOwner(context.supabase, context.claims))) {
@@ -49,4 +49,13 @@ export const getSupplierStock = createServerFn({ method: "GET" })
     await requireOwner(context);
     const { supplierStock } = await import("@/lib/delivery.server");
     return supplierStock();
+  });
+
+// Owner-only: the newest FazerCards orders for the FazerCards tab on /admin.
+export const getSupplierOrders = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<SupplierOrders> => {
+    await requireOwner(context);
+    const { supplierOrders } = await import("@/lib/delivery.server");
+    return supplierOrders();
   });

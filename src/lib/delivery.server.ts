@@ -6,8 +6,10 @@ import {
   checkFazerOrder,
   FazerCardsError,
   fetchFazerAccount,
+  listFazerOrders,
   placeFazerOrder,
   type FazerAccount,
+  type FazerOrder,
 } from "@/lib/fazercards";
 
 export type DeliveryResponse = { ok: boolean; message: string; status?: string };
@@ -179,6 +181,23 @@ export async function supplierStock(): Promise<SupplierStock> {
       if (extra.length && !message.includes(extra.join(" "))) message += ` (${extra.join(" ")})`;
     }
     console.error("FazerCards stock check failed:", message);
+    return { ok: false, reason: "error", message };
+  }
+}
+
+export type SupplierOrders =
+  | { ok: true; orders: FazerOrder[] }
+  | { ok: false; reason: "no_key" | "error"; message?: string };
+
+/** The newest FazerCards orders; never throws, so the dashboard always renders. */
+export async function supplierOrders(): Promise<SupplierOrders> {
+  const apiKey = fazerKey();
+  if (!apiKey) return { ok: false, reason: "no_key" };
+  try {
+    return { ok: true, orders: await listFazerOrders({ apiKey }) };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("FazerCards order list failed:", message);
     return { ok: false, reason: "error", message };
   }
 }

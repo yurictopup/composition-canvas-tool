@@ -370,3 +370,37 @@ export async function validateFazerPlayer(
     return { status: "unavailable" };
   }
 }
+
+// ── Order list (GET /orders) ──────────────────────────────────────────────
+
+export type FazerOrder = {
+  id: string;
+  status: string;
+  game: string;
+  product: string;
+  cost: number;
+  createdAt: string;
+  image: string | null;
+};
+
+const firstText = (...values: unknown[]) => {
+  const hit = values.find((v) => typeof v === "string" && v.trim());
+  return typeof hit === "string" ? hit.trim() : "";
+};
+
+/** The newest FazerCards orders with what each one really cost, for the owner's list on /admin. */
+export async function listFazerOrders(opts: Opts, limit = 50): Promise<FazerOrder[]> {
+  const json = await call(opts, `/orders?page=1&limit=${limit}`);
+  const items = Array.isArray(json.items) ? (json.items as Record<string, unknown>[]) : [];
+  return items
+    .map((o) => ({
+      id: firstText(o.id, o.order_id, o.orderId),
+      status: firstText(o.status).toLowerCase(),
+      game: firstText(o.gameName, o.game_name, o.category),
+      product: firstText(o.productName, o.product_name, o.offer_name, o.item),
+      cost: Number(o.payUsd ?? o.pay_usd ?? o.amountUsd ?? o.amount_usd ?? o.price_usd ?? o.price ?? 0),
+      createdAt: firstText(o.createdAt, o.created_at),
+      image: firstText(o.image, o.image_url) || null,
+    }))
+    .filter((o) => o.id);
+}
