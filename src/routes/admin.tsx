@@ -6,11 +6,9 @@ import {
   CircleDot,
   Gem,
   ImageIcon,
-  Inbox,
   LayoutDashboard,
   Menu,
   RefreshCw,
-  Search,
   ShoppingCart,
   Tag,
   Truck,
@@ -20,13 +18,12 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isOwnerAccount } from "@/lib/owner";
-import { findGame } from "@/lib/games";
 import { AdminPrices } from "@/components/AdminPrices";
 import { AdminImages } from "@/components/admin/AdminImages";
 import { AdminCustomers } from "@/components/admin/AdminCustomers";
 import { AdminMfa } from "@/components/admin/AdminMfa";
+import { AdminOrders } from "@/components/admin/AdminOrders";
 import { AdminSupplierOrders } from "@/components/admin/AdminSupplierOrders";
-import { DeliveryCell } from "@/components/AdminDelivery";
 import { AdminOverview, money, orderCost, paid } from "@/components/admin/AdminOverview";
 import { AdminTopbar, type ThemeChoice } from "@/components/admin/AdminTopbar";
 import { AdminLangContext, translate, type Lang } from "@/components/admin/i18n";
@@ -115,21 +112,6 @@ const NAV: NavItem[] = [
 // Placeholder cards in the dashboard's own grid while the first orders load.
 const SKELETON = ["lg:col-span-12", "lg:col-span-4", "lg:col-span-8", "lg:col-span-6", "lg:col-span-6"];
 
-function GameIcon({ gameId, size = 28 }: { gameId: string; size?: number }) {
-  const icon = findGame(gameId)?.icon;
-  if (!icon) return null;
-  return (
-    <img
-      src={icon}
-      alt=""
-      width={size}
-      height={size}
-      className="shrink-0 rounded-md object-cover"
-      style={{ width: size, height: size }}
-    />
-  );
-}
-
 /** A short two-note chime for a newly paid order; silent when the browser blocks audio. */
 function chime() {
   try {
@@ -172,7 +154,6 @@ function AdminPage() {
   const [tab, setTab] = useState("overview");
   const [timeFilter, setTimeFilter] = useState<"today" | "7d" | "30d" | "all">("all");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [query, setQuery] = useState("");
   const [lang, setLang] = useState<Lang>("km");
   const [theme, setTheme] = useState<ThemeChoice>("light");
   const [systemDark, setSystemDark] = useState(false);
@@ -289,29 +270,6 @@ function AdminPage() {
   const supplierCost = completedOrders.reduce((s, o) => s + (orderCost(o) ?? 0), 0);
 
 
-  const q = query.trim().toLowerCase();
-  const shownOrders = q
-    ? fo.filter((o) =>
-        [o.id, o.user_email, o.game_name, o.package_amt, o.player_id, o.status].some((v) =>
-          v?.toLowerCase().includes(q),
-        ),
-      )
-    : fo;
-
-  const statusSelect = (o: Order) => (
-    <select
-      value={o.status}
-      disabled={updatingId === o.id}
-      onChange={(e) => updateStatus(o.id, e.target.value)}
-      className="rounded-md border border-[var(--vx-border)] bg-white px-2 py-1 text-xs outline-none focus:border-[var(--vx-primary)]"
-    >
-      <option value="pending">{t("pending")}</option>
-      <option value="processing">{t("processing")}</option>
-      <option value="completed">{t("completed")}</option>
-      <option value="failed">{t("failed")}</option>
-      <option value="refunded">{t("refunded")}</option>
-    </select>
-  );
 
   const current = NAV.find((n) => n.id === tab) ?? NAV[0]!;
   const ownerName = ownerEmail.split("@")[0] || "Owner";
@@ -555,125 +513,12 @@ function AdminPage() {
 
                 {/* ══════════════ ORDERS TAB ══════════════ */}
                 {tab === "orders" && (
-                  <div className="vx-card overflow-hidden">
-                    <div className="flex flex-wrap items-center justify-between gap-3 p-6">
-                      <div>
-                        <h5 className="text-lg font-medium">{t("Orders")}</h5>
-                        <p className="text-[13px] text-[var(--vx-muted)]">
-                          {shownOrders.length} {t("orders")}
-                        </p>
-                      </div>
-                      <label className="flex w-full items-center gap-2 rounded-md border border-[var(--vx-border)] px-3 py-1.5 focus-within:border-[var(--vx-primary)] sm:w-auto">
-                        <Search size={16} className="text-[var(--vx-muted)]" />
-                        <input
-                          value={query}
-                          onChange={(e) => setQuery(e.target.value)}
-                          placeholder={t("Search order, email, player ID")}
-                          className="w-full bg-transparent text-[13px] outline-none sm:w-56"
-                        />
-                      </label>
-                    </div>
-                    {shownOrders.length === 0 ? (
-                      <div className="p-12 text-center text-[var(--vx-muted)]">
-                        <Inbox size={40} strokeWidth={1.5} className="mx-auto mb-3" />
-                        <p>{t("No orders yet")}</p>
-                      </div>
-                    ) : (
-                      <>
-                      {/* Phones get one card per order instead of the wide table. */}
-                      <ul className="divide-y divide-[var(--vx-border)] border-t border-[var(--vx-border)] md:hidden">
-                        {shownOrders.map((o) => (
-                          <li key={o.id} className="space-y-2 p-4">
-                            <div className="flex items-start gap-3">
-                              <GameIcon gameId={o.game_id} size={44} />
-                              <div className="min-w-0 flex-1">
-                                <p className="truncate font-medium text-[var(--vx-heading)]">
-                                  {o.game_name}
-                                </p>
-                                <p className="text-[13px]">{o.package_amt}</p>
-                              </div>
-                              <p className="font-semibold text-[var(--vx-heading)]">
-                                {money(Number(o.price_usd))}
-                              </p>
-                            </div>
-                            <p className="break-all font-mono text-xs">
-                              {o.player_id}
-                              {o.player_zone ? ` (${o.player_zone})` : ""}
-                            </p>
-                            <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--vx-muted)]">
-                              <StatusBadge status={o.status} />
-                              <span>{fmtDate(o.created_at)}</span>
-                              <span className="min-w-0 truncate">{o.user_email}</span>
-                            </div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              {statusSelect(o)}
-                              <DeliveryCell order={o} onChanged={loadData} />
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                      <div className="hidden overflow-x-auto md:block">
-                        <table className="vx-table w-full text-sm">
-                          <thead className="border-y border-[var(--vx-border)]">
-                            <tr className="text-left">
-                              <th className="px-4 py-3">{t("Order ID")}</th>
-                              <th className="px-4 py-3">{t("Customer")}</th>
-                              <th className="px-4 py-3">{t("Game")}</th>
-                              <th className="px-4 py-3">{t("Package")}</th>
-                              <th className="px-4 py-3">{t("Player ID")}</th>
-                              <th className="px-4 py-3">{t("Price")}</th>
-                              <th className="px-4 py-3">{t("Status")}</th>
-                              <th className="px-4 py-3">{t("Date")}</th>
-                              <th className="px-4 py-3">{t("Update")}</th>
-                              <th className="px-4 py-3">{t("Delivery")}</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-[var(--vx-border)]">
-                            {shownOrders.map((o) => (
-                              <tr
-                                key={o.id}
-                                className="transition-colors hover:bg-[var(--vx-hover)]"
-                              >
-                                <td className="px-4 py-3 text-xs font-medium text-[var(--vx-primary)]">
-                                  #{o.id.slice(0, 8).toUpperCase()}
-                                </td>
-                                <td className="px-4 py-3 max-w-[160px] truncate text-xs">
-                                  {o.user_email}
-                                </td>
-                                <td className="px-4 py-3 font-medium text-[var(--vx-heading)]">
-                                  <span className="flex items-center gap-2">
-                                    <GameIcon gameId={o.game_id} />
-                                    {o.game_name}
-                                  </span>
-                                </td>
-                                <td className="px-4 py-3 text-sm">{o.package_amt}</td>
-                                <td className="px-4 py-3 text-xs font-mono">
-                                  {o.player_id}
-                                  {o.player_zone ? ` (${o.player_zone})` : ""}
-                                </td>
-                                <td className="px-4 py-3 font-medium text-[var(--vx-heading)]">
-                                  {money(Number(o.price_usd))}
-                                </td>
-                                <td className="px-4 py-3">
-                                  <StatusBadge status={o.status} />
-                                </td>
-                                <td className="px-4 py-3 text-xs text-[var(--vx-muted)]">
-                                  {fmtDate(o.created_at)}
-                                </td>
-                                <td className="px-4 py-3">
-                                  {statusSelect(o)}
-                                </td>
-                                <td className="px-4 py-3">
-                                  <DeliveryCell order={o} onChanged={loadData} />
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                      </>
-                    )}
-                  </div>
+                  <AdminOrders
+                    orders={fo}
+                    updatingId={updatingId}
+                    onStatus={updateStatus}
+                    onChanged={loadData}
+                  />
                 )}
 
                 {/* ══════════════ CUSTOMERS TAB ══════════════ */}
