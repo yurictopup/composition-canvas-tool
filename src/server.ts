@@ -1,5 +1,6 @@
 import "./lib/error-capture";
 
+import { CSP_NONCE_HEADER, contentSecurityPolicy, newCspNonce } from "./lib/csp";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
@@ -45,11 +46,10 @@ function isH3SwallowedErrorBody(body: string): boolean {
 }
 
 // Browser protections for every page: no framing by other sites (clickjacking),
-// no MIME sniffing, HTTPS only, forms post only to us, no other tab can reach
-// this window, and no camera/mic/location access.
+// only our own scripts (see lib/csp.ts), no MIME sniffing, HTTPS only, forms
+// post only to us, no other tab can reach this window, and no
+// camera/mic/location access.
 const SECURITY_HEADERS: Record<string, string> = {
-  "content-security-policy":
-    "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'; upgrade-insecure-requests",
   "cross-origin-opener-policy": "same-origin-allow-popups",
   "x-frame-options": "DENY",
   "x-content-type-options": "nosniff",
@@ -61,8 +61,14 @@ const SECURITY_HEADERS: Record<string, string> = {
 // Pages search engines should never list (the admin and sign-in screens).
 const PRIVATE_PATHS = /^\/(admin|auth|profile)(\/|$)/;
 
-function withSecurityHeaders(response: Response, request?: Request): Response {
+function withSecurityHeaders(response: Response, nonce: string, request?: Request): Response {
   const secured = new Response(response.body, response);
+  if (!secured.headers.has("content-security-policy")) {
+    secured.headers.set(
+      "content-security-policy",
+      contentSecurityPolicy(nonce, !import.meta.env.DEV),
+    );
+  }
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
     if (!secured.headers.has(name)) secured.headers.set(name, value);
   }
@@ -74,14 +80,20 @@ function withSecurityHeaders(response: Response, request?: Request): Response {
 }
 
 export default {
-  async fetch(request: Request, env: unknown, ctx: unknown) {
+  async fetch(incoming: Request, env: unknown, ctx: unknown) {
+    // A new nonce per request, handed to the page render (src/router.tsx).
+    // Any nonce header the visitor sent is replaced.
+    const nonce = newCspNonce();
+    const headers = new Headers(incoming.headers);
+    headers.set(CSP_NONCE_HEADER, nonce);
+    const request = new Request(incoming, { headers });
     try {
       // Bindings (Workers AI) for server functions, in case the host didn't share them already.
       const g = globalThis as { __env__?: unknown };
       if (!g.__env__ && env && typeof env === "object") g.__env__ = env;
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return withSecurityHeaders(await normalizeCatastrophicSsrResponse(response), request);
+      return withSecurityHeaders(await normalizeCatastrophicSsrResponse(response), nonce, request);
     } catch (error) {
       console.error(error);
       return withSecurityHeaders(
@@ -89,6 +101,7 @@ export default {
           status: 500,
           headers: { "content-type": "text/html; charset=utf-8" },
         }),
+        nonce,
       );
     }
   },

@@ -38,9 +38,11 @@ export type GuestOrderInput = {
 
 export class GuestOrderError extends Error {}
 
-// Unpaid guest orders allowed for one Player ID per hour, and for the whole shop
-// per 10 minutes (stops a flood of fake orders filling the admin list).
-const PER_PLAYER_HOUR = 5;
+// Unpaid guest orders allowed for the whole shop per 10 minutes (stops a flood
+// of fake orders filling the admin list). Each visitor's address is limited
+// before this (guestOrderIp in rate-limit.ts). There is no limit per Player ID:
+// anyone can type any ID, so such a limit would let a stranger block a real
+// player from buying by leaving unpaid orders on their ID.
 const SHOP_TEN_MINUTES = 60;
 
 export async function createGuestOrder(db: SupabaseClient, input: GuestOrderInput) {
@@ -63,20 +65,6 @@ export async function createGuestOrder(db: SupabaseClient, input: GuestOrderInpu
     .maybeSingle();
   if (!item) throw new GuestOrderError("This package is not available for purchase.");
 
-  const hourAgo = new Date(Date.now() - 60 * 60_000).toISOString();
-  const { count: playerOpen } = await db
-    .from("orders")
-    .select("id", { count: "exact", head: true })
-    .is("user_id", null)
-    .eq("player_id", playerId)
-    .eq("status", "pending")
-    .is("paid_at", null)
-    .gt("created_at", hourAgo);
-  if ((playerOpen ?? 0) >= PER_PLAYER_HOUR) {
-    throw new GuestOrderError(
-      "Too many unpaid orders. Please pay or wait an hour before ordering again.",
-    );
-  }
   const tenMinutesAgo = new Date(Date.now() - 10 * 60_000).toISOString();
   const { count: shopOpen } = await db
     .from("orders")

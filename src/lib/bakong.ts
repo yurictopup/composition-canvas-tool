@@ -34,6 +34,7 @@ const NBC_URL = "https://api-bakong.nbc.gov.kh/v1";
 const RELAY_URL = "https://api.khqr.dev/v1";
 const TIMEOUT_MS = 10000;
 export const QR_LIFETIME_MS = 30 * 60 * 1000;
+const PAID_STATUSES = new Set(["PAID", "SUCCESS", "COMPLETED"]);
 
 export function isRelayToken(token: string): boolean {
   return token.startsWith("rbk");
@@ -122,9 +123,15 @@ export async function checkBakongPayment(cfg: BakongConfig, qrMd5: string): Prom
       : { status: "unpaid" };
   }
   const data = body.data;
+  // KHQR.dev adds a status; NBC answers only for completed payments and has none.
+  // Only a known "paid" word counts: anything else (FAILED, REFUNDED, a new
+  // word) is never taken as money received.
   const relayStatus = String(data["status"] ?? "").toUpperCase();
   if (relayStatus === "SCANNED" || relayStatus === "UNPAID" || relayStatus === "EXPIRED")
     return { status: "unpaid" };
+  if (relayStatus !== "" && !PAID_STATUSES.has(relayStatus)) {
+    return { status: "unavailable", message: `Bakong answered with status ${relayStatus}.` };
+  }
   const amount = Number(data["amount"]);
   return {
     status: "paid",
@@ -135,18 +142,23 @@ export async function checkBakongPayment(cfg: BakongConfig, qrMd5: string): Prom
   };
 }
 
-/** A paid answer only counts when it is for our account, in USD, for the full amount. */
+/**
+ * A paid answer only counts when it is for the full amount in USD.
+ * With our own account (NBC token) NBC always sends the currency and the
+ * receiving account, so both must be there and match: a missing one is not a
+ * match. accountId null = the QR came from KHQR.dev for the account linked
+ * there; its answer is checked for amount, and for currency when sent.
+ */
 export function paymentMatches(
   check: Extract<PaymentCheck, { status: "paid" }>,
   expected: { amount: number; accountId: string | null },
 ): boolean {
   if (check.amount === null || Math.abs(check.amount - expected.amount) > 0.005) return false;
-  if (check.currency !== null && check.currency.toUpperCase() !== "USD") return false;
-  if (
-    expected.accountId !== null &&
-    check.toAccountId !== null &&
-    check.toAccountId !== expected.accountId
-  )
-    return false;
-  return true;
+  if (expected.accountId === null) {
+    return check.currency === null || check.currency.toUpperCase() === "USD";
+  }
+  return (
+    check.currency?.toUpperCase() === "USD" &&
+    check.toAccountId?.toLowerCase() === expected.accountId.toLowerCase()
+  );
 }

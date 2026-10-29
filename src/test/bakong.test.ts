@@ -108,6 +108,19 @@ describe("Bakong payment check", () => {
     );
   });
 
+  it("never counts an unknown KHQR.dev status as paid", async () => {
+    for (const status of ["FAILED", "REFUNDED", "PENDING"]) {
+      const f = fakeFetch(200, { responseCode: 0, data: { status, amount: 1.09, hash: "h" } });
+      expect((await checkBakongPayment({ ...nbc, token: "rbk_x", fetchImpl: f }, "m")).status).toBe(
+        "unavailable",
+      );
+    }
+    const paidF = fakeFetch(200, { responseCode: 0, data: { status: "PAID", amount: 1.09 } });
+    expect(
+      (await checkBakongPayment({ ...nbc, token: "rbk_x", fetchImpl: paidF }, "m")).status,
+    ).toBe("paid");
+  });
+
   it("does not count a scanned-but-unpaid KHQR.dev answer", async () => {
     const f = fakeFetch(200, { responseCode: 0, data: { status: "SCANNED" } });
     expect(await checkBakongPayment({ ...nbc, token: "rbk_x", fetchImpl: f }, "m")).toEqual({
@@ -134,9 +147,15 @@ describe("Matching a payment to the order", () => {
     expect(paymentMatches({ ...paid, toAccountId: "someone@aclb" }, expected)).toBe(false);
     expect(paymentMatches({ ...paid, amount: null }, expected)).toBe(false);
   });
+  it("rejects an NBC answer without the currency or the receiving account", () => {
+    expect(paymentMatches({ ...paid, currency: null }, expected)).toBe(false);
+    expect(paymentMatches({ ...paid, toAccountId: null }, expected)).toBe(false);
+    expect(paymentMatches({ ...paid, toAccountId: "BRACHNHA_SAY@bkrt" }, expected)).toBe(true);
+  });
   it("skips the account check when the QR came from KHQR.dev", () => {
     const relay = { amount: 1.09, accountId: null };
     expect(paymentMatches({ ...paid, toAccountId: "shop@abaa" }, relay)).toBe(true);
     expect(paymentMatches({ ...paid, toAccountId: "shop@abaa", amount: 1.0 }, relay)).toBe(false);
+    expect(paymentMatches({ ...paid, currency: "KHR" }, relay)).toBe(false);
   });
 });
