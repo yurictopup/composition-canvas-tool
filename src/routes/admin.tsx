@@ -23,6 +23,7 @@ import { isOwnerAccount } from "@/lib/owner";
 import { findGame } from "@/lib/games";
 import { AdminPrices } from "@/components/AdminPrices";
 import { AdminImages } from "@/components/admin/AdminImages";
+import { AdminCustomers } from "@/components/admin/AdminCustomers";
 import { AdminMfa } from "@/components/admin/AdminMfa";
 import { AdminSupplierOrders } from "@/components/admin/AdminSupplierOrders";
 import { DeliveryCell } from "@/components/AdminDelivery";
@@ -287,8 +288,6 @@ function AdminPage() {
   const completedOrders = fo.filter(paid);
   const supplierCost = completedOrders.reduce((s, o) => s + (orderCost(o) ?? 0), 0);
 
-  // Unique customers
-  const uniqueCustomers = [...new Set(fo.map((o) => o.user_email))];
 
   const q = query.trim().toLowerCase();
   const shownOrders = q
@@ -678,68 +677,8 @@ function AdminPage() {
                 )}
 
                 {/* ══════════════ CUSTOMERS TAB ══════════════ */}
-                {tab === "customers" && (
-                  <div className="vx-card overflow-hidden">
-                    <div className="p-6">
-                      <h5 className="text-lg font-medium">{t("Customers")}</h5>
-                      <p className="text-[13px] text-[var(--vx-muted)]">
-                        {uniqueCustomers.length} {t("customers")}
-                      </p>
-                    </div>
-                    {uniqueCustomers.length === 0 ? (
-                      <div className="p-12 text-center text-[var(--vx-muted)]">
-                        <Users size={40} strokeWidth={1.5} className="mx-auto mb-3" />
-                        <p>{t("No customers yet")}</p>
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <table className="vx-table w-full text-sm">
-                          <thead className="border-y border-[var(--vx-border)]">
-                            <tr className="text-left">
-                              <th className="px-6 py-3">{t("Customer")}</th>
-                              <th className="px-6 py-3">{t("Total Orders")}</th>
-                              <th className="px-6 py-3">{t("Total Spent")}</th>
-                              <th className="px-6 py-3">{t("Last Order")}</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-[var(--vx-border)]">
-                            {uniqueCustomers.map((email) => {
-                              const userOrders = fo.filter((o) => o.user_email === email);
-                              const spent = userOrders
-                                .filter(paid)
-                                .reduce((s, o) => s + Number(o.price_usd), 0);
-                              const last = userOrders[0]?.created_at;
-                              return (
-                                <tr
-                                  key={email}
-                                  className="transition-colors hover:bg-[var(--vx-hover)]"
-                                >
-                                  <td className="px-6 py-3">
-                                    <div className="flex items-center gap-3">
-                                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--vx-primary-soft)] text-xs font-semibold uppercase text-[var(--vx-primary)]">
-                                        {email.slice(0, 2)}
-                                      </span>
-                                      <span className="font-medium text-[var(--vx-heading)]">
-                                        {email}
-                                      </span>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-3">{userOrders.length}</td>
-                                  <td className="px-6 py-3 font-medium text-[var(--vx-heading)]">
-                                    {money(spent)}
-                                  </td>
-                                  <td className="px-6 py-3 text-xs text-[var(--vx-muted)]">
-                                    {last ? fmtDate(last) : "—"}
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                )}
+                {tab === "customers" && <AdminCustomers orders={fo} />}
+
 
                 {/* ══════════════ CASH FLOW TAB ══════════════ */}
                 {tab === "cashflow" && (
