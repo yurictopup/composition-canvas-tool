@@ -211,7 +211,7 @@ export function AdminOrders({
 
           <div className="hidden overflow-x-auto md:block">
             <table className="vx-table w-full text-sm">
-              <thead className="border-y border-[var(--vx-border)] text-[12px] uppercase tracking-wide text-[var(--vx-muted)]">
+              <thead className="whitespace-nowrap border-y border-[var(--vx-border)] text-[12px] uppercase tracking-wide text-[var(--vx-muted)]">
                 <tr className="text-left">
                   <th className="px-5 py-3 font-medium">#</th>
                   <th className="px-5 py-3 font-medium">{t("Game")}</th>
@@ -236,8 +236,12 @@ export function AdminOrders({
                           <div className="flex items-center gap-3">
                             <GameIcon gameId={o.game_id} size={34} />
                             <div className="min-w-0">
-                              <p className="font-medium text-[var(--vx-heading)]">{o.game_name}</p>
-                              <p className="text-xs text-[var(--vx-muted)]">{o.package_amt}</p>
+                              <p className="whitespace-nowrap font-medium text-[var(--vx-heading)]">
+                                {o.game_name}
+                              </p>
+                              <p className="whitespace-nowrap text-xs text-[var(--vx-muted)]">
+                                {o.package_amt}
+                              </p>
                             </div>
                           </div>
                         </td>
@@ -252,7 +256,7 @@ export function AdminOrders({
                         <td className="px-5 py-3 text-center">
                           <StatusDot status={o.status} />
                         </td>
-                        <td className="px-5 py-3 text-xs text-[var(--vx-muted)]">
+                        <td className="whitespace-nowrap px-5 py-3 text-xs text-[var(--vx-muted)]">
                           {fmtDate(o.created_at)}
                         </td>
                         <td className="px-5 py-3 text-center">
