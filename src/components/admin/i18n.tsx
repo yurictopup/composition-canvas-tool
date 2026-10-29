@@ -236,6 +236,15 @@ const KM: Record<string, string> = {
   "Search email": "ស្វែងរកអ៊ីមែល",
   "Couldn't load accounts, try Refresh": "ទាញគណនីមិនបាន សាកផ្ទុកឡើងវិញ",
 
+  // Orders table
+Showing: "បង្ហាញ",
+to: "ដល់",
+of: "នៃ",
+entries: "ការកម្មង់",
+Details: "មើលលម្អិត",
+"Hide details": "លាក់លម្អិត",
+Actions: "សកម្មភាព",
+
   // FazerCards orders tab
 "FazerCards orders": "ការកម្មង់ FazerCards",
 "Newest orders at FazerCards, with the real cost": "ការកម្មង់ចុងក្រោយនៅ FazerCards ជាមួយតម្លៃដើមពិត",
