@@ -82,7 +82,12 @@ export async function enforceLimits(rules: Rule[], take: Take = takeFromDatabase
   if (!result.allowed) throw new TooManyRequestsError(result.retryAfterSeconds);
 }
 
-/** At most one Bakong question per order every few seconds, whoever is polling. */
+/** At most one Bakong question per order every 30 s, whoever is polling. */
 export async function bankCheckAllowed(orderId: string, take: Take = takeFromDatabase) {
   return (await checkLimits([rule("bankCheckOrder", orderId)], take)).allowed;
+}
+
+/** Takes one of the shop's daily NBC requests; false once they are used up. */
+export async function nbcBudgetAllowed(take: Take = takeFromDatabase) {
+  return (await checkLimits([rule("nbcDay", "all")], take)).allowed;
 }

@@ -112,7 +112,12 @@ export async function checkBakongPayment(cfg: BakongConfig, qrMd5: string): Prom
     };
   }
   // NBC answers with data only for a completed payment.
-  const data = body.data;
+  return paidFrom(body.data);
+}
+
+type PaidCheck = Extract<PaymentCheck, { status: "paid" }>;
+
+function paidFrom(data: Record<string, unknown>): PaidCheck {
   const amount = Number(data["amount"]);
   return {
     status: "paid",
@@ -121,6 +126,48 @@ export async function checkBakongPayment(cfg: BakongConfig, qrMd5: string): Prom
     toAccountId: typeof data["toAccountId"] === "string" ? data["toAccountId"] : null,
     hash: typeof data["hash"] === "string" ? data["hash"] : null,
   };
+}
+
+/** NBC takes at most this many md5s in one list check. */
+export const MD5_LIST_MAX = 50;
+
+/**
+ * Asks NBC about many KHQRs in one request (one of the 100 a day), for the
+ * cron. Gives the paid ones by md5; every md5 not in the map is not paid yet.
+ */
+export async function checkBakongPayments(
+  cfg: BakongConfig,
+  md5s: string[],
+): Promise<{ status: "ok"; paid: Map<string, PaidCheck> } | { status: "unavailable"; message: string }> {
+  let res: { status: number; json: unknown };
+  try {
+    res = await post(cfg, "/check_transaction_by_md5_list", md5s.slice(0, MD5_LIST_MAX));
+  } catch (error) {
+    return { status: "unavailable", message: error instanceof Error ? error.message : String(error) };
+  }
+  const body = (res.json ?? {}) as {
+    responseCode?: unknown;
+    responseMessage?: unknown;
+    errorCode?: unknown;
+    data?: unknown;
+  };
+  if (res.status !== 200 || body.responseCode !== 0 || !Array.isArray(body.data)) {
+    const said = typeof body.responseMessage === "string" ? `: ${body.responseMessage}` : "";
+    return {
+      status: "unavailable",
+      message: `Bakong list check failed (HTTP ${res.status}, error ${String(body.errorCode)})${said}`,
+    };
+  }
+  const paid = new Map<string, PaidCheck>();
+  for (const item of body.data as Record<string, unknown>[]) {
+    const md5 = item?.["md5"];
+    const data = item?.["data"];
+    // Each row says SUCCESS with the transaction, or NOT_FOUND.
+    if (typeof md5 === "string" && item["status"] === "SUCCESS" && data && typeof data === "object") {
+      paid.set(md5, paidFrom(data as Record<string, unknown>));
+    }
+  }
+  return { status: "ok", paid };
 }
 
 /**

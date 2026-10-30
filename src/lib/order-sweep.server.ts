@@ -16,11 +16,9 @@ import {
   UNKNOWN,
 } from "@/lib/delivery.server";
 import { fazerOfferFor } from "@/lib/fazercards";
-import { checkEarlierQr, checkOrderPayment, EARLIER_QR_WINDOW_MS } from "@/lib/payment.server";
+import { sweepBakongPayments } from "@/lib/payment.server";
 
 const MINUTE = 60_000;
-// Unpaid KHQRs are asked about for this long after the order was made.
-const PAYMENT_WINDOW_MS = 3 * 60 * MINUTE;
 // Paid orders older than this are left to the owner instead of bought by themselves.
 const RETRY_WINDOW_MS = 7 * 24 * 60 * MINUTE;
 const BATCH = 15;
@@ -40,21 +38,12 @@ export type SweepReport = {
 
 const since = (ms: number) => new Date(Date.now() - ms).toISOString();
 
+// Every unpaid KHQR of the last day (current or replaced) in one NBC request,
+// rationed to stay under NBC's 100 requests a day (see sweepBakongPayments).
 async function sweepPayments(db: SupabaseClient, report: SweepReport) {
-  const { data } = await db
-    .from("orders")
-    .select("id")
-    .eq("status", "pending")
-    .is("paid_at", null)
-    .not("payment_md5", "is", null)
-    .gt("created_at", since(PAYMENT_WINDOW_MS))
-    .order("created_at", { ascending: false })
-    .limit(BATCH);
-  for (const { id } of data ?? []) {
-    report.checked++;
-    const state = await checkOrderPayment(db, id, null);
-    if (state.paid) report.paid++;
-  }
+  const result = await sweepBakongPayments(db);
+  report.checked += result.checked;
+  report.paid += result.paid;
 }
 
 async function retryDeliveries(db: SupabaseClient, report: SweepReport) {
@@ -112,34 +101,6 @@ async function flagStuckPlacing(db: SupabaseClient, report: SweepReport) {
   report.flagged += data?.length ?? 0;
 }
 
-// A customer who came back after the QR expired got a new one; a payment made
-// with the old one (a screenshot, an app that ignores the expiry) only shows
-// up when that old md5 is asked about. Each old QR is asked every 10 minutes
-// for a day after it was made.
-async function sweepEarlierQrs(db: SupabaseClient, report: SweepReport) {
-  const { data } = await db
-    .from("order_payments")
-    .select("md5, order_id")
-    .is("paid_at", null)
-    .lt("expires_at", new Date().toISOString())
-    .gt("created_at", since(EARLIER_QR_WINDOW_MS))
-    .order("created_at", { ascending: false })
-    .limit(BATCH * 2);
-  const rows = (data ?? []) as { md5: string; order_id: string }[];
-  if (!rows.length) return;
-  const { rule } = await import("@/lib/rate-limit");
-  const { checkLimits } = await import("@/lib/rate-limit.server");
-  let asked = 0;
-  for (const row of rows) {
-    if (asked >= BATCH) break;
-    if (!(await checkLimits([rule("earlierQrCheck", row.md5)])).allowed) continue;
-    asked++;
-    report.checked++;
-    const state = await checkEarlierQr(db, row.order_id, row.md5);
-    if (state.paid) report.paid++;
-  }
-}
-
 // Forget request-limit counters nobody used for a day (they'd be full anyway).
 async function pruneRateLimits(db: SupabaseClient) {
   const { error } = await db.rpc("rate_limit_prune");
@@ -154,7 +115,6 @@ export async function sweepOrders(db: SupabaseClient = adminDb()): Promise<Sweep
     sweepPayments,
     retryDeliveries,
     refreshProcessing,
-    sweepEarlierQrs,
     pruneRateLimits,
   ]) {
     try {

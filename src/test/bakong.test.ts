@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { buildKhqr, crc16, formatKhqrAmount } from "@/lib/khqr";
-import { checkBakongPayment, createPaymentQr, md5, paymentMatches } from "@/lib/bakong";
+import {
+  checkBakongPayment,
+  checkBakongPayments,
+  createPaymentQr,
+  md5,
+  paymentMatches,
+} from "@/lib/bakong";
 
 describe("KHQR payload", () => {
   it("uses CRC-16/CCITT-FALSE", () => {
@@ -124,6 +130,55 @@ describe("Bakong payment check", () => {
     expect((await checkBakongPayment({ ...nbc, fetchImpl: fakeFetch(502, {}) }, "m")).status).toBe(
       "unavailable",
     );
+  });
+});
+
+describe("Bakong list check", () => {
+  it("asks about many md5s in one request and returns only the paid ones", async () => {
+    const f = fakeFetch(200, {
+      responseCode: 0,
+      data: [
+        {
+          md5: "a",
+          status: "SUCCESS",
+          data: { hash: "h1", amount: 1.09, currency: "USD", toAccountId: "brachnha_say@bkrt" },
+        },
+        { md5: "b", status: "NOT_FOUND", data: null },
+      ],
+    });
+    const result = await checkBakongPayments({ ...nbc, fetchImpl: f }, ["a", "b"]);
+    expect(String(f.mock.calls[0]![0])).toBe(
+      "https://api-bakong.nbc.gov.kh/v1/check_transaction_by_md5_list",
+    );
+    expect(JSON.parse(String((f.mock.calls[0]![1] as RequestInit).body))).toEqual(["a", "b"]);
+    expect(result.status).toBe("ok");
+    if (result.status !== "ok") return;
+    expect([...result.paid.keys()]).toEqual(["a"]);
+    expect(result.paid.get("a")).toMatchObject({ amount: 1.09, hash: "h1" });
+  });
+
+  it("sends at most 50 md5s", async () => {
+    const f = fakeFetch(200, { responseCode: 0, data: [] });
+    await checkBakongPayments(
+      { ...nbc, fetchImpl: f },
+      Array.from({ length: 60 }, (_, i) => `m${i}`),
+    );
+    expect(JSON.parse(String((f.mock.calls[0]![1] as RequestInit).body))).toHaveLength(50);
+  });
+
+  it("reports the daily limit as unavailable", async () => {
+    const f = fakeFetch(200, {
+      responseCode: 1,
+      errorCode: 19,
+      responseMessage: "Daily request limit of 100 exceeded for this source.",
+      data: null,
+    });
+    const result = await checkBakongPayments({ ...nbc, fetchImpl: f }, ["a"]);
+    expect(result).toEqual({
+      status: "unavailable",
+      message:
+        "Bakong list check failed (HTTP 200, error 19): Daily request limit of 100 exceeded for this source.",
+    });
   });
 });
 
