@@ -95,7 +95,7 @@ export function findGame(id: string | undefined): Game | undefined {
 
 /** In-game pictures of single currency packages, by game and package amount. Uploads from /admin win. */
 export const packagePictures: Record<string, Record<string, string>> = {
-  bloodstrike: { "105": bs105, "320": bs320, "540": bs540, "1100": bs1100, "2260": bs2260, "5800": bs5800 },
+  bloodstrike: { "51": bs105, "105": bs105, "320": bs320, "540": bs540, "1100": bs1100, "2260": bs2260, "5800": bs5800 },
 };
 
 /** The main game of a server variant (same Player ID rules and name check). */
