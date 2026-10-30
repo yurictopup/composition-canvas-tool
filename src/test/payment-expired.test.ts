@@ -8,7 +8,6 @@ const deliverPaidOrder = vi.fn();
 vi.mock("@/lib/bakong", () => ({
   checkBakongPayment: (...a: unknown[]) => checkBakongPayment(...a),
   createPaymentQr: (...a: unknown[]) => createPaymentQr(...a),
-  isRelayToken: () => true,
   paymentMatches: () => true,
 }));
 vi.mock("@/lib/delivery.server", () => ({
@@ -62,8 +61,8 @@ function fakeDb(salesOpen = true, order: Record<string, unknown> = expiredOrder)
 
 beforeEach(() => {
   vi.clearAllMocks();
-  process.env["BAKONG_TOKEN"] = "rbk_test";
-  process.env["BAKONG_ACCOUNT_ID"] = "shop@aba";
+  process.env["BAKONG_NBC_TOKEN"] = "eyJtest";
+  process.env["BAKONG_NBC_ACCOUNT_ID"] = "shop@bkrt";
   createPaymentQr.mockResolvedValue({
     qr: "new-qr",
     md5: "new-md5",

@@ -1,27 +1,8 @@
-// Owner-only trial of the NBC (Bakong Open API) token before it replaces the
-// live payment setup. It reads its own BAKONG_NBC_* secrets, so the live
-// BAKONG_* settings are never touched, and it creates no orders and buys
-// nothing from FazerCards.
-import {
-  checkBakongPayment,
-  createPaymentQr,
-  isRelayToken,
-  paymentMatches,
-  type BakongConfig,
-} from "@/lib/bakong";
+// Owner-only check of the NBC (Bakong Open API) setup with the same config as
+// customer payments. It creates no orders and buys nothing from FazerCards.
+import { checkBakongPayment, createPaymentQr, paymentMatches } from "@/lib/bakong";
 import { adminDb } from "@/lib/delivery.server";
-
-export function nbcTestConfig(): BakongConfig | null {
-  const token = process.env["BAKONG_NBC_TOKEN"];
-  const accountId = process.env["BAKONG_NBC_ACCOUNT_ID"];
-  if (!token || !accountId || isRelayToken(token)) return null;
-  return {
-    token,
-    accountId,
-    merchantName: process.env["BAKONG_NBC_MERCHANT_NAME"] || "Yuric Store",
-    apiUrl: process.env["BAKONG_NBC_API_URL"],
-  };
-}
+import { bakongConfig as nbcTestConfig } from "@/lib/payment.server";
 
 /** When the token expires, read from its own payload; the token never leaves the server. */
 export function tokenExpiry(token: string): string | null {

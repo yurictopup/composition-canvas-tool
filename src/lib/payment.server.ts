@@ -2,7 +2,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   checkBakongPayment,
   createPaymentQr,
-  isRelayToken,
   paymentMatches,
   type BakongConfig,
 } from "@/lib/bakong";
@@ -21,15 +20,16 @@ export type PaymentState = {
   codes?: string[];
 };
 
+// The NBC token and the shop's own Bakong account, from Worker secrets.
 export function bakongConfig(): BakongConfig | null {
-  const token = process.env["BAKONG_TOKEN"];
-  const accountId = process.env["BAKONG_ACCOUNT_ID"];
+  const token = process.env["BAKONG_NBC_TOKEN"];
+  const accountId = process.env["BAKONG_NBC_ACCOUNT_ID"];
   if (!token || !accountId) return null;
   return {
     token,
     accountId,
-    merchantName: process.env["BAKONG_MERCHANT_NAME"] || "Yuric Topup",
-    apiUrl: process.env["BAKONG_API_URL"],
+    merchantName: process.env["BAKONG_NBC_MERCHANT_NAME"] || "Yuric Store",
+    apiUrl: process.env["BAKONG_NBC_API_URL"],
   };
 }
 
@@ -175,10 +175,7 @@ async function settlePayment(
   if (check.status === "unpaid") return { available: true, paid: false };
 
   const amount = Number(order.price_usd);
-  // With a KHQR.dev token the QR is made by KHQR.dev for the account linked
-  // there (e.g. an ABA merchant), so only the amount is compared.
-  const accountId = isRelayToken(cfg.token) ? null : cfg.accountId;
-  if (!paymentMatches(check, { amount, accountId })) {
+  if (!paymentMatches(check, { amount, accountId: cfg.accountId })) {
     return {
       available: true,
       paid: false,
