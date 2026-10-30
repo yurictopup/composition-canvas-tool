@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Check, Clock, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
+import { Check, Clock, Copy, ExternalLink, Gift, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
 import { KhqrCode } from "@/components/KhqrCode";
 import { checkPayment, startPayment } from "@/lib/payment.functions";
 import { checkGuestPayment, startGuestPayment } from "@/lib/guest-order.functions";
@@ -53,9 +53,13 @@ export function OrderPayment({
   const waiting = !!state?.available && !!state.qr && !state.paid;
   const stopped =
     waiting && !!state.expiresAt && new Date(state.expiresAt).getTime() + GRACE_MS < now;
+  // Paid but not delivered yet: keep asking (no bank call any more) so the page shows
+  // "delivered" and, for Roblox, the code as soon as it is ready.
+  const delivering =
+    !!state?.paid && !["completed", "failed", "refunded"].includes(state.status ?? "");
 
   useEffect(() => {
-    if (!waiting || stopped) return;
+    if ((!waiting || stopped) && !delivering) return;
     const timer = setInterval(async () => {
       setNow(Date.now());
       try {
@@ -68,7 +72,7 @@ export function OrderPayment({
       }
     }, POLL_MS);
     return () => clearInterval(timer);
-  }, [waiting, stopped, orderId, guestToken]);
+  }, [waiting, stopped, delivering, orderId, guestToken]);
 
   if (error || (state && !state.available)) return <>{fallback}</>;
   return <PaymentView state={state} now={now} summary={summary} />;
@@ -186,7 +190,7 @@ export function PaymentView({
 }
 
 function PaidView({ state, summary }: { state: PaymentState; summary: OrderSummary }) {
-  const { t } = useStorePrefs();
+  const { t, lang } = useStorePrefs();
   const done = state.status === "completed";
   const amount = state.amount ?? summary.amount;
 
@@ -202,7 +206,11 @@ function PaidView({ state, summary }: { state: PaymentState; summary: OrderSumma
         {done ? (
           <>
             <Check className="h-4 w-4 text-green-600" />
-            {t("Delivered to your account")}
+            {state.codes?.length
+              ? lang === "km"
+                ? "លេខកូដរបស់អ្នករួចរាល់ហើយ"
+                : "Your code is ready"
+              : t("Delivered to your account")}
           </>
         ) : (
           <>
@@ -212,12 +220,78 @@ function PaidView({ state, summary }: { state: PaymentState; summary: OrderSumma
         )}
       </p>
 
+      {state.codes?.length ? <RedeemCodes codes={state.codes} /> : null}
+
       <dl className="mx-auto mt-6 max-w-[340px] divide-y divide-border rounded-2xl border border-border text-left font-sans text-sm">
         <Row label={t("Order")} value={`#${summary.code}`} />
         <Row label={t("Game")} value={summary.game} />
         <Row label={t("Package")} value={summary.item} />
         {amount != null && <Row label={t("Total")} value={`$${amount.toFixed(2)}`} />}
       </dl>
+    </div>
+  );
+}
+
+// The Roblox gift code with a copy button and how to redeem it.
+function RedeemCodes({ codes }: { codes: string[] }) {
+  const { lang } = useStorePrefs();
+  const km = lang === "km";
+  const [copied, setCopied] = useState<string | null>(null);
+  const copy = (code: string) => {
+    void navigator.clipboard?.writeText(code).then(() => {
+      setCopied(code);
+      setTimeout(() => setCopied(null), 2000);
+    });
+  };
+  const steps = km
+    ? [
+        "ចុច Copy ដើម្បីចម្លងលេខកូដ",
+        "បើក roblox.com/redeem ក្នុង browser (មិនមែនកម្មវិធី Roblox) ហើយ log in គណនីរបស់អ្នក",
+        "Paste លេខកូដក្នុងប្រអប់ Enter your code ហើយចុច Redeem",
+        "Robux ចូលគណនីភ្លាមៗ · លេខកូដប្រើបានតែម្តង កុំឲ្យអ្នកណាឃើញ",
+      ]
+    : [
+        "Tap Copy to copy the code.",
+        "Open roblox.com/redeem in a browser (not the Roblox app) and sign in.",
+        "Paste the code into Enter your code and tap Redeem.",
+        "Robux arrive at once. The code works only once, so keep it private.",
+      ];
+  return (
+    <div className="mx-auto mt-6 max-w-[340px] rounded-2xl border border-primary/40 bg-primary/5 p-4 text-left font-sans">
+      <p className="mb-2 flex items-center gap-2 text-sm font-bold text-primary">
+        <Gift className="h-4 w-4" /> {km ? "លេខកូដ Roblox របស់អ្នក" : "Your Roblox code"}
+      </p>
+      {codes.map((code) => (
+        <div
+          key={code}
+          className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-border bg-background px-3 py-2"
+        >
+          <span className="select-all break-all font-mono text-base font-bold tracking-wider">
+            {code}
+          </span>
+          <button
+            type="button"
+            onClick={() => copy(code)}
+            className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-primary px-2.5 py-1.5 text-xs font-bold text-primary-foreground"
+          >
+            {copied === code ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied === code ? (km ? "បានចម្លង" : "Copied") : "Copy"}
+          </button>
+        </div>
+      ))}
+      <ol className="mt-2 list-decimal space-y-1 pl-5 text-[13px] leading-relaxed text-muted-foreground">
+        {steps.map((s) => (
+          <li key={s}>{s}</li>
+        ))}
+      </ol>
+      <a
+        href="https://www.roblox.com/redeem"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+      >
+        roblox.com/redeem <ExternalLink className="h-3.5 w-3.5" />
+      </a>
     </div>
   );
 }
