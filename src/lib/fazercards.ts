@@ -2,7 +2,13 @@
 // Our order id is sent as the Idempotency-Key, so a retry of the same order can
 // never buy it twice.
 import type { DeliveryOrder, DeliveryResult } from "@/lib/delivery";
-import { fazerCatalog, fazerGiftCards } from "@/lib/fazercards-catalog";
+import {
+  fazerCatalog,
+  fazerGiftCards,
+  fazerTelegram,
+  type TelegramBuy,
+} from "@/lib/fazercards-catalog";
+import { telegramUsername } from "@/lib/player-id";
 import type { LookupInput, LookupResult } from "@/lib/player-lookup";
 
 type Fetch = typeof fetch;
@@ -367,6 +373,80 @@ export async function placeFazerGiftCard(
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error("[delivery] gift card", message);
+    const code = error instanceof FazerCardsError ? (error.code ?? "") : "";
+    const status = error instanceof FazerCardsError ? error.httpStatus : undefined;
+    if (status !== undefined && inDoubtStatus(status)) {
+      return { status: "processing", supplierStatus: "UNKNOWN", message };
+    }
+    if (code && REJECTED.test(code)) {
+      return { status: "failed", supplierStatus: code.toUpperCase(), message, notPlaced: true };
+    }
+    if (status && status >= 400 && status < 500) {
+      return { status: "failed", supplierStatus: `HTTP_${status}`, message, notPlaced: true };
+    }
+    return { status: "processing", supplierStatus: "UNKNOWN", message };
+  }
+}
+
+/** FazerCards' current price of a Telegram buy, from its quote endpoints. */
+async function telegramCost(opts: Opts, buy: TelegramBuy): Promise<number> {
+  if (buy.kind === "stars") {
+    const json = (await call(opts, "/telegram/stars")) as Record<string, unknown>;
+    return Number(json["price_per_star"]) * buy.quantity;
+  }
+  const json = (await call(opts, "/telegram/premium")) as Record<string, unknown>;
+  const plans = Array.isArray(json["plans"]) ? (json["plans"] as { months?: unknown; price_usd?: unknown }[]) : [];
+  return Number(plans.find((p) => Number(p.months) === buy.months)?.price_usd);
+}
+
+/**
+ * Buys Telegram Stars or Premium for the username on a paid order. FazerCards takes the
+ * balance at once and delivers a little later; the cron follows it with checkFazerOrder.
+ * Same safety rules as gift cards: the order id is sent as Idempotency-Key, a price above
+ * what the buyer paid is refused, and an answer that never came back stays UNKNOWN.
+ */
+export async function placeFazerTelegram(
+  order: { id: string; game_id: string; package_amt: string; player_id: string; price_usd?: number | string | null },
+  opts: Opts,
+): Promise<DeliveryResult> {
+  const buy = fazerTelegram[order.game_id]?.(order.package_amt) ?? null;
+  const username = telegramUsername(order.player_id);
+  if (!buy || !username) {
+    return {
+      status: "failed",
+      supplierStatus: "NO_OFFER",
+      message: `${order.package_amt} is delivered by hand.`,
+      notPlaced: true,
+    };
+  }
+  try {
+    const cost = await telegramCost(opts, buy);
+    const paid = Number(order.price_usd);
+    if (order.price_usd != null && Number.isFinite(cost) && cost > paid) {
+      return {
+        status: "failed",
+        supplierStatus: "COST_ABOVE_PRICE",
+        message: `FazerCards cost ${cost.toFixed(2)} is above the paid ${paid.toFixed(2)}.`,
+        notPlaced: true,
+      };
+    }
+    const res = await call(opts, `/telegram/${buy.kind}/buy`, {
+      method: "POST",
+      headers: { "Idempotency-Key": order.id },
+      body:
+        buy.kind === "stars"
+          ? { telegram_username: username, quantity: buy.quantity }
+          : { telegram_username: username, months: buy.months },
+    });
+    const placed = (res.order ?? {}) as { id?: unknown; status?: unknown };
+    return {
+      status: mapFazerStatus(placed.status),
+      supplierStatus: String(placed.status ?? "processing").toUpperCase(),
+      ...(placed.id != null ? { supplierOrderId: String(placed.id) } : {}),
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[delivery] telegram", message);
     const code = error instanceof FazerCardsError ? (error.code ?? "") : "";
     const status = error instanceof FazerCardsError ? error.httpStatus : undefined;
     if (status !== undefined && inDoubtStatus(status)) {

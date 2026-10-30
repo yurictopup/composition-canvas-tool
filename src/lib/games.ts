@@ -22,6 +22,7 @@ import zzz from "@/assets/zzz.webp";
 import eafc from "@/assets/eafc.webp";
 import lol from "@/assets/lol.webp";
 import hi3 from "@/assets/hi3.webp";
+import telegram from "@/assets/telegram.svg";
 
 // Games FazerCards can top up for Cambodian accounts, plus Roblox, which the team delivers
 // by hand through the buyer's Game Pass. CODM (India-only there) and the Supercell games
@@ -33,6 +34,9 @@ export const games = [
   { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess, unit: "Diamonds", blurb: "Instant Magic Chess delivery" },
   { id: "pubg", name: "PUBG Mobile", icon: pubg, unit: "UC", blurb: "Fast PUBG UC delivery" },
   { id: "roblox", name: "Roblox", icon: roblox, unit: "Robux", blurb: "Robux gift code · redeem at roblox.com/redeem" },
+  // Bought by FazerCards for the buyer's Telegram username (see fazerTelegram).
+  { id: "tgstars", name: "Telegram Stars", icon: telegram, unit: "Stars", blurb: "Stars sent to your Telegram username" },
+  { id: "tgpremium", name: "Telegram Premium", icon: telegram, unit: "Months", blurb: "Premium for your Telegram username" },
   { id: "hok", name: "Honor of Kings", icon: hok, unit: "Tokens", blurb: "Tokens HoK ចូលភ្លាម" },
   { id: "wildrift", name: "League of Legends: Wild Rift", icon: wildrift, unit: "Wild Cores", blurb: "League of Legends: Wild Rift" },
   { id: "bloodstrike", name: "Blood Strike", icon: bloodstrike, unit: "Gold", blurb: "Blood Strike" },
@@ -389,7 +393,20 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "5250", price: 49.49 },
     { amt: "11000", price: 99.49 },
   ],
-
+  // Telegram Stars / Premium for a username; FazerCards cost on 2026-10-30 was
+  // $0.0152 a star and $12.18 / $16.24 / $29.43 for 3 / 6 / 12 months.
+  tgstars: [
+    { amt: "50", price: 0.89 },
+    { amt: "100", price: 1.75, hot: true },
+    { amt: "250", price: 4.45 },
+    { amt: "500", price: 8.69 },
+    { amt: "750", price: 13.39 },
+  ],
+  tgpremium: [
+    { amt: "3", price: 13.89, hot: true },
+    { amt: "6", price: 18.49 },
+    { amt: "12", price: 32.99 },
+  ],
 };
 
 // Roblox keeps 30% of a Game Pass sale, so the pass must cost more than the Robux delivered.

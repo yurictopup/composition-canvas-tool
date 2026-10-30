@@ -29,6 +29,7 @@ import {
   CircleCheck,
   Package,
   Receipt,
+  Send,
   ShoppingCart,
   Sparkles,
   Star,
@@ -583,6 +584,9 @@ function GamePage({ gameId }: { gameId: string }) {
               )}
 
               {gameId === "roblox" && <RobloxCodeSteps />}
+              {(gameId === "tgstars" || gameId === "tgpremium") && (
+                <TelegramSteps premium={gameId === "tgpremium"} />
+              )}
 
               {moreItems.length > 0 && (
                 <div className="mt-6">
@@ -844,6 +848,61 @@ function KhqrMark() {
       <span className="text-xl font-extrabold leading-none tracking-wide">KHQR</span>
       <span className="mt-1.5 h-[3px] w-12 rounded bg-white/70" />
     </span>
+  );
+}
+
+// Telegram Stars / Premium go straight to the username typed above; nothing to redeem.
+function TelegramSteps({ premium }: { premium: boolean }) {
+  const { lang } = useStorePrefs();
+  const km = lang === "km";
+  const what = premium ? "Telegram Premium" : "Stars";
+  const buy = km
+    ? [
+        "បញ្ចូល Telegram username របស់អ្នក (មើលក្នុង Telegram → Settings → Username)",
+        premium ? "ជ្រើសរយៈពេល Premium (3, 6 ឬ 12 ខែ)" : "ជ្រើសចំនួន Stars ដែលចង់បាន",
+        "បង់ប្រាក់តាម KHQR (ABA, ACLEDA, Wing ឬធនាគារណាមួយ)",
+        `${what} ចូលគណនី Telegram នោះក្នុងរយៈពេលប៉ុន្មាននាទី`,
+      ]
+    : [
+        "Enter your Telegram username (Telegram → Settings → Username).",
+        premium ? "Pick how long you want Premium (3, 6 or 12 months)." : "Pick how many Stars you want.",
+        "Pay with KHQR (ABA, ACLEDA, Wing or any bank app).",
+        `${what} arrive on that Telegram account within a few minutes.`,
+      ];
+  const notes = km
+    ? [
+        "សូមពិនិត្យ username ឱ្យត្រូវ មុនពេលបង់ប្រាក់ ព្រោះផ្ញើហើយ មិនអាចដកវិញបានទេ",
+        "គណនីត្រូវតែមាន username (មិនមែនតែលេខទូរស័ព្ទទេ)",
+        ...(premium ? [] : ["Stars ប្រើទិញ gift, sticker និងមុខងារក្នុង Telegram"]),
+      ]
+    : [
+        "Check the username before paying: once sent it can't be taken back.",
+        "The account needs a username (a phone number alone is not enough).",
+        ...(premium ? [] : ["Stars buy gifts, stickers and features inside Telegram."]),
+      ];
+  return (
+    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+      <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+        <p className="mb-2 flex items-center gap-2 text-sm font-bold text-primary">
+          <Send className="h-4 w-4" /> {km ? "របៀបទិញ" : "How to buy"}
+        </p>
+        <ol className="list-decimal space-y-1 pl-5 font-sans text-sm leading-relaxed text-card-foreground">
+          {buy.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ol>
+      </div>
+      <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+        <p className="mb-2 flex items-center gap-2 text-sm font-bold text-primary">
+          <CircleAlert className="h-4 w-4" /> {km ? "ចំណាំ" : "Good to know"}
+        </p>
+        <ul className="list-disc space-y-1 pl-5 font-sans text-sm leading-relaxed text-card-foreground">
+          {notes.map((note) => (
+            <li key={note}>{note}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 

@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getIdConfig } from "@/lib/player-id";
-import { fazerGiftCards } from "@/lib/fazercards-catalog";
+import { fazerGiftCards, fazerTelegram } from "@/lib/fazercards-catalog";
 import { checkGamesDropOrder, placeGamesDropOrder, type DeliveryResult } from "@/lib/delivery";
 import {
   checkFazerOrder,
@@ -10,6 +10,7 @@ import {
   listFazerOrders,
   placeFazerGiftCard,
   placeFazerOrder,
+  placeFazerTelegram,
   type FazerAccount,
   type FazerOrder,
 } from "@/lib/fazercards";
@@ -108,10 +109,13 @@ export async function deliverPaidOrder(
       .eq("package_amt", order.package_amt)
       .maybeSingle();
     const fazerOffer = (offerRow as { fazer_offer?: string } | null)?.fazer_offer ?? null;
-    // Roblox is sold as a gift card code; every other game is a top-up to the player ID.
-    const result = fazerGiftCards[order.game_id]
-      ? await placeFazerGiftCard(order, { apiKey, picked: fazerOffer })
-      : await placeFazerOrder({ ...order, fazer_offer: fazerOffer }, { apiKey });
+    // Telegram goes to a username, Roblox is a gift card code, every other game is a
+    // top-up to the player ID.
+    const result = fazerTelegram[order.game_id]
+      ? await placeFazerTelegram(order, { apiKey })
+      : fazerGiftCards[order.game_id]
+        ? await placeFazerGiftCard(order, { apiKey, picked: fazerOffer })
+        : await placeFazerOrder({ ...order, fazer_offer: fazerOffer }, { apiKey });
     if (result.supplierStatus === "NO_OFFER") {
       // Not sold through the API (Roblox, bundles): stays under Paid not delivered.
       await db

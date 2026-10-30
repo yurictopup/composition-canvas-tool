@@ -505,3 +505,18 @@ export const fazerGiftCards: Record<
     },
   },
 };
+
+export type TelegramBuy = { kind: "stars"; quantity: number } | { kind: "premium"; months: 3 | 6 | 12 };
+
+// Telegram Stars / Premium, bought for the buyer's username (/telegram/*/buy).
+// The package is "<n> Stars" or "<3|6|12> Months"; anything else is not sold.
+export const fazerTelegram: Record<string, (packageAmt: string) => TelegramBuy | null> = {
+  tgstars: (amt) => {
+    const n = Number(/^(\d+) Stars$/.exec(amt)?.[1]);
+    return Number.isInteger(n) && n >= 50 && n <= 10_000 ? { kind: "stars", quantity: n } : null;
+  },
+  tgpremium: (amt) => {
+    const n = Number(/^(\d+) Months$/.exec(amt)?.[1]);
+    return n === 3 || n === 6 || n === 12 ? { kind: "premium", months: n } : null;
+  },
+};

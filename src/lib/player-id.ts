@@ -2,6 +2,14 @@ export type IdField = { label: string; placeholder: string; numeric?: boolean; o
 export type IdConfig = { primary: IdField; secondary?: IdField; requiresLookup?: boolean };
 
 const hoyoServers = ["Asia", "America", "Europe", "TW, HK, MO"] as const;
+
+// Telegram usernames: 5-32 characters, letters, digits and _, starting with a letter.
+const TELEGRAM_USERNAME = /^[A-Za-z][A-Za-z0-9_]{4,31}$/;
+
+/** The username FazerCards expects: without the @ some people type. */
+export function telegramUsername(id: string): string {
+  return id.trim().replace(/^@/, "");
+}
 const hoyoIdConfig: IdConfig = {
   primary: { label: "UID", placeholder: "UID", numeric: true },
   secondary: { label: "Server", placeholder: "Select server", options: hoyoServers },
@@ -15,6 +23,9 @@ export const idConfigs: Record<string, IdConfig> = {
   hok: { primary: { label: "Player ID", placeholder: "Player ID", numeric: true }, requiresLookup: true },
   magicchess: { primary: { label: "User ID", placeholder: "User ID", numeric: true }, secondary: { label: "Zone ID", placeholder: "Zone ID", numeric: true }, requiresLookup: true },
   roblox: { primary: { label: "Username", placeholder: "Roblox Username" }, requiresLookup: true },
+  // No name check exists for Telegram: a well-formed username may order.
+  tgstars: { primary: { label: "Telegram username", placeholder: "@username" } },
+  tgpremium: { primary: { label: "Telegram username", placeholder: "@username" } },
   codm: { primary: { label: "Player ID (UID)", placeholder: "Player ID (UID)", numeric: true }, requiresLookup: true },
   wildrift: { primary: { label: "Riot ID", placeholder: "Riot ID" }, secondary: { label: "Tagline", placeholder: "#XXXX" }, requiresLookup: true },
   bloodstrike: { primary: { label: "User ID", placeholder: "User ID", numeric: true }, requiresLookup: true },
@@ -46,6 +57,11 @@ export function validatePlayerId(gameId: string, primary: string, secondary = ""
     return hoyoServers.some((server) => server === secondary) ? null : "Please select a server.";
   }
   if (gameId === "roblox") return /^[a-zA-Z0-9_]+$/.test(id) ? null : "Please enter your Roblox username.";
+  if (gameId === "tgstars" || gameId === "tgpremium") {
+    return TELEGRAM_USERNAME.test(id.replace(/^@/, ""))
+      ? null
+      : "Please enter your Telegram username (5-32 letters, numbers or _).";
+  }
   if (gameId === "mlbb" || gameId === "magicchess") {
     if (!/^\d+$/.test(id)) return "User ID must be numeric.";
     return /^\d+$/.test(secondary.trim()) ? null : "Please enter a numeric Zone ID.";
