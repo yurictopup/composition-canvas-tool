@@ -91,8 +91,31 @@ function Monochrome() {
   );
 }
 
+const STAR =
+  "M24 6L29.17 17.88L42.07 19.13L32.37 27.72L35.17 40.37L24 33.8L12.83 40.37L15.63 27.72L5.93 19.13L18.83 17.88Z";
+
+// Telegram's rounded star: gold for Stars, purple for Premium.
+function TelegramStar({ id, from, to }: { id: string; from: string; to: string }) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={id} x1="1" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={from} />
+          <stop offset="1" stopColor={to} />
+        </linearGradient>
+      </defs>
+      <path d={STAR} fill={`url(#${id})`} stroke={`url(#${id})`} strokeWidth="4" strokeLinejoin="round" />
+      <path d="M16.5 30.5c4-4.5 9-7.2 14.5-8.4" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" fill="none" opacity="0.9" />
+    </>
+  );
+}
+
 function art(gameId: string) {
   switch (gameId) {
+    case "tgstars":
+      return <TelegramStar id="cur-tg-stars" from="#ffd84d" to="#ff9500" />;
+    case "tgpremium":
+      return <TelegramStar id="cur-tg-premium" from="#c084fc" to="#6d28d9" />;
     case "roblox":
       return <Robux />;
     case "pubg":

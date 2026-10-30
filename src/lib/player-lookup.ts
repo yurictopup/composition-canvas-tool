@@ -170,6 +170,42 @@ export async function lookupRoblox(username: string, fetchImpl: Fetch = fetch): 
   }
 }
 
+function decodeHtml(text: string): string {
+  return text
+    .replace(/&#(\d+);/g, (_, n: string) => String.fromCodePoint(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n: string) => String.fromCodePoint(parseInt(n, 16)))
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+}
+
+// Telegram has no name API, but the public page t.me/<username> shows the
+// account's name. A username nobody uses shows no name; a channel or group
+// shows "subscribers"/"members" and can't receive Stars or Premium.
+export async function lookupTelegram(username: string, fetchImpl: Fetch = fetch): Promise<LookupResult> {
+  const handle = username.trim().replace(/^@/, "");
+  try {
+    const res = await fetchImpl(`https://t.me/${encodeURIComponent(handle)}`, {
+      headers: { "Accept-Language": "en" },
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    if (!res.ok) return { status: "unavailable" };
+    const html = await res.text();
+    const name = decodeHtml(
+      /class="tgme_page_title"[^>]*>\s*<span[^>]*>([^<]*)</.exec(html)?.[1]?.trim() ?? "",
+    );
+    if (!name) return { status: "not_found" };
+    const extra = /class="tgme_page_extra"[^>]*>([^<]*)</.exec(html)?.[1] ?? "";
+    if (/subscriber|member|online/i.test(extra)) return { status: "not_found" };
+    return { status: "found", name: `${name} (@${handle})` };
+  } catch (error) {
+    console.error("[player-lookup] telegram", error instanceof Error ? error.message : error);
+    return { status: "unavailable" };
+  }
+}
+
 // Short-lived cache so repeated Check ID taps don't spend supplier quota.
 const CACHE_TTL_MS = 10 * 60 * 1000;
 const CACHE_MAX = 500;

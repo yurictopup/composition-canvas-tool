@@ -23,9 +23,9 @@ export const idConfigs: Record<string, IdConfig> = {
   hok: { primary: { label: "Player ID", placeholder: "Player ID", numeric: true }, requiresLookup: true },
   magicchess: { primary: { label: "User ID", placeholder: "User ID", numeric: true }, secondary: { label: "Zone ID", placeholder: "Zone ID", numeric: true }, requiresLookup: true },
   roblox: { primary: { label: "Username", placeholder: "Roblox Username" }, requiresLookup: true },
-  // No name check exists for Telegram: a well-formed username may order.
-  tgstars: { primary: { label: "Telegram username", placeholder: "@username" } },
-  tgpremium: { primary: { label: "Telegram username", placeholder: "@username" } },
+  // Checked against the public t.me/<username> page (lookupTelegram).
+  tgstars: { primary: { label: "Telegram username", placeholder: "@username" }, requiresLookup: true },
+  tgpremium: { primary: { label: "Telegram username", placeholder: "@username" }, requiresLookup: true },
   codm: { primary: { label: "Player ID (UID)", placeholder: "Player ID (UID)", numeric: true }, requiresLookup: true },
   wildrift: { primary: { label: "Riot ID", placeholder: "Riot ID" }, secondary: { label: "Tagline", placeholder: "#XXXX" }, requiresLookup: true },
   bloodstrike: { primary: { label: "User ID", placeholder: "User ID", numeric: true }, requiresLookup: true },

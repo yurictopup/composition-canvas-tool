@@ -6,6 +6,7 @@ import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import {
   cachedLookup,
   lookupRoblox,
+  lookupTelegram,
   lookupWithGamesDrop,
   parseOfferIds,
   type LookupResult,
@@ -30,6 +31,9 @@ export const lookupPlayer = createServerFn({ method: "POST" })
     const limit = await checkLimits([rule("lookupIp", ip), rule("lookupIpHour", ip)]);
     if (!limit.allowed) return { status: "unavailable" };
     if (data.gameId === "roblox") return cachedLookup(data, () => lookupRoblox(data.primary));
+    if (data.gameId === "tgstars" || data.gameId === "tgpremium") {
+      return cachedLookup(data, () => lookupTelegram(data.primary));
+    }
     const usesServerPicker = !!getIdConfig(data.gameId).secondary?.options;
     return cachedLookup(data, async () => {
       // FazerCards (the delivery supplier) checks the name first.

@@ -3,6 +3,7 @@ import { findGame, getPackages } from "@/lib/games";
 import { fazerTelegram } from "@/lib/fazercards-catalog";
 import { placeFazerTelegram } from "@/lib/fazercards";
 import { telegramUsername, validatePlayerId } from "@/lib/player-id";
+import { lookupTelegram } from "@/lib/player-lookup";
 
 type Route = { status?: number; body: unknown };
 
@@ -63,6 +64,35 @@ describe("Telegram usernames", () => {
 
   it("sends the username without @", () => {
     expect(telegramUsername(" @Yuric_Store ")).toBe("Yuric_Store");
+  });
+});
+
+describe("lookupTelegram", () => {
+  const page = (title: string | null, extra: string) => {
+    const html = `<div class="tgme_page_title"${title === null ? " hidden" : ""}><span dir="auto">${title ?? ""}</span></div><div class="tgme_page_extra">${extra}</div>`;
+    return vi.fn(async () => new Response(html, { status: 200 })) as unknown as typeof fetch;
+  };
+
+  it("shows the account name for a person", async () => {
+    expect(await lookupTelegram("@SAYBRACHNHA", page("SAY BRACHNHA", "@SAYBRACHNHA"))).toEqual({
+      status: "found",
+      name: "SAY BRACHNHA (@SAYBRACHNHA)",
+    });
+    expect(await lookupTelegram("tom_jerry", page("Tom &amp; Jerry", "@tom_jerry"))).toEqual({
+      status: "found",
+      name: "Tom & Jerry (@tom_jerry)",
+    });
+  });
+
+  it("does not accept unknown usernames, channels or groups", async () => {
+    expect((await lookupTelegram("nobody_here", page(null, ""))).status).toBe("not_found");
+    expect((await lookupTelegram("telegram", page("Telegram News", "9 221 106 subscribers"))).status).toBe("not_found");
+    expect((await lookupTelegram("somegroup", page("A Group", "1 200 members, 30 online"))).status).toBe("not_found");
+  });
+
+  it("says unavailable when t.me can't be reached", async () => {
+    const down = vi.fn(async () => new Response("", { status: 503 })) as unknown as typeof fetch;
+    expect((await lookupTelegram("yuric_store", down)).status).toBe("unavailable");
   });
 });
 
