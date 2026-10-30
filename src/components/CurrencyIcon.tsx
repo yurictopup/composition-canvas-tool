@@ -1,5 +1,6 @@
 // In-game currency artwork for package cards, so each game shows its own
 // currency (Robux, UC, Gems...) instead of one shared diamond.
+import diamond from "@/assets/diamond.png";
 
 type Props = { gameId: string; className?: string };
 
@@ -12,17 +13,6 @@ function Coin({ fill, ring, text, textColor = "#fff" }: { fill: string; ring: st
       <text x="24" y="29" textAnchor="middle" fontSize={text.length > 1 ? 13 : 16} fontWeight="800" fontFamily="system-ui, sans-serif" fill={textColor}>
         {text}
       </text>
-    </>
-  );
-}
-
-function Diamond() {
-  return (
-    <>
-      <path d="M14 8h20l10 12-20 22L4 20z" fill="#38bdf8" />
-      <path d="M4 20h40L24 42z" fill="#0ea5e9" />
-      <path d="M14 8l4 12h12l4-12z" fill="#bae6fd" />
-      <path d="M18 20l6 22 6-22z" fill="#7dd3fc" />
     </>
   );
 }
@@ -151,11 +141,14 @@ function art(gameId: string) {
     case "zzz":
       return <Monochrome />;
     default:
-      return <Diamond />;
+      return null;
   }
 }
 
 export function CurrencyIcon({ gameId, className }: Props) {
+  const drawn = art(gameId);
+  // Diamond games (MLBB, Free Fire, Magic Chess...) use the HD diamond picture.
+  if (!drawn) return <img src={diamond} alt="" aria-hidden="true" className={`object-contain ${className ?? ""}`} />;
   return (
     <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
       <defs>
@@ -164,7 +157,7 @@ export function CurrencyIcon({ gameId, className }: Props) {
           <stop offset="1" stopColor="#fff" stopOpacity="0" />
         </radialGradient>
       </defs>
-      {art(gameId)}
+      {drawn}
     </svg>
   );
 }
