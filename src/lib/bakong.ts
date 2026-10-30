@@ -93,13 +93,23 @@ export async function checkBakongPayment(cfg: BakongConfig, qrMd5: string): Prom
   }
   const body = (res.json ?? {}) as {
     responseCode?: unknown;
+    responseMessage?: unknown;
+    errorCode?: unknown;
     data?: Record<string, unknown> | null;
   };
+  if (res.status >= 500) {
+    return { status: "unavailable", message: `Bakong returned HTTP ${res.status}.` };
+  }
   if (body.responseCode !== 0 || !body.data || typeof body.data !== "object") {
-    // Not found yet (or not paid): keep waiting. Server errors are not "unpaid".
-    return res.status >= 500
-      ? { status: "unavailable", message: `Bakong returned HTTP ${res.status}.` }
-      : { status: "unpaid" };
+    // Only "transaction not found" (errorCode 1) means not paid yet. Anything
+    // else, e.g. 19 "Daily request limit of 100 exceeded", is NBC refusing to
+    // answer, never a sign the customer didn't pay.
+    if (body.errorCode === 1 || body.errorCode === undefined) return { status: "unpaid" };
+    const said = typeof body.responseMessage === "string" ? body.responseMessage : "";
+    return {
+      status: "unavailable",
+      message: `Bakong error ${String(body.errorCode)}${said ? `: ${said}` : ""}`,
+    };
   }
   // NBC answers with data only for a completed payment.
   const data = body.data;

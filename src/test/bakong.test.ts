@@ -105,6 +105,21 @@ describe("Bakong payment check", () => {
     );
   });
 
+  it("treats NBC's daily limit as unavailable, never unpaid", async () => {
+    const f = fakeFetch(200, {
+      responseCode: 1,
+      errorCode: 19,
+      responseMessage: "Daily request limit of 100 exceeded for this source.",
+      data: null,
+    });
+    expect(await checkBakongPayment({ ...nbc, fetchImpl: f }, "m")).toEqual({
+      status: "unavailable",
+      message: "Bakong error 19: Daily request limit of 100 exceeded for this source.",
+    });
+    const notFound = fakeFetch(200, { responseCode: 1, errorCode: 1, data: null });
+    expect((await checkBakongPayment({ ...nbc, fetchImpl: notFound }, "m")).status).toBe("unpaid");
+  });
+
   it("treats an NBC server error as unavailable, never unpaid", async () => {
     expect((await checkBakongPayment({ ...nbc, fetchImpl: fakeFetch(502, {}) }, "m")).status).toBe(
       "unavailable",
