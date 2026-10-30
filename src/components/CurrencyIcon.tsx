@@ -2,11 +2,16 @@
 // currency (Robux, UC, Gems...) instead of one shared diamond.
 import diamond from "@/assets/diamond.png";
 import mlbbDiamonds from "@/assets/mlbb-diamonds.png";
+import magicchessDiamonds from "@/assets/magicchess-diamonds.png";
 import pubgUc from "@/assets/pubg-uc.png";
 import { baseGameId } from "@/lib/games";
 
 // Games shown with a picture instead of drawn artwork (server variants use their main game's).
-const pictures: Record<string, string> = { mlbb: mlbbDiamonds, pubg: pubgUc };
+const pictures: Record<string, string> = {
+  mlbb: mlbbDiamonds,
+  pubg: pubgUc,
+  magicchess: magicchessDiamonds,
+};
 
 type Props = { gameId: string; className?: string };
 
