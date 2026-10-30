@@ -45,6 +45,12 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+// Supabase sends this project's email codes with 8 digits (6 is its default),
+// so both lengths are accepted.
+const CODE_MIN = 6;
+const CODE_MAX = 8;
+const CODE_PATTERN = /^\d{6,8}$/;
+
 function passwordStrength(pw: string): { score: number; label: string; km: string; color: string } {
   let score = 0;
   if (pw.length >= 8) score++;
@@ -66,7 +72,7 @@ function AuthPage() {
   const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  // After sign up, the email carries a 6-digit code (and a link); either one confirms the account.
+  // After sign up, the email carries a code (and a link); either one confirms the account.
   const [codeFor, setCodeFor] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [cooldown, setCooldown] = useState(0);
@@ -126,8 +132,8 @@ function AuthPage() {
     setMsg({
       ok: true,
       text: tx(
-        "បើ email នេះមានគណនី យើងបានផ្ញើកូដ 6 ខ្ទង់ និង link ទៅវាហើយ",
-        "If this email has an account, we sent it a 6-digit code and a link",
+        "បើ email នេះមានគណនី យើងបានផ្ញើកូដ និង link ទៅវាហើយ",
+        "If this email has an account, we sent it a code and a link",
       ),
     });
   }
@@ -136,8 +142,11 @@ function AuthPage() {
     e.preventDefault();
     if (!resetFor) return;
     setMsg(null);
-    if (!/^\d{6}$/.test(code.trim())) {
-      setMsg({ ok: false, text: tx("កូដត្រូវមាន 6 ខ្ទង់", "The code has 6 digits") });
+    if (!CODE_PATTERN.test(code.trim())) {
+      setMsg({
+        ok: false,
+        text: tx("សូមវាយកូដក្នុង email ឱ្យគ្រប់", "Type the whole code from the email"),
+      });
       return;
     }
     setBusy(true);
@@ -231,7 +240,7 @@ function AuthPage() {
           setCodeFor(email.trim());
           setCode("");
           setCooldown(60);
-          setMsg({ ok: true, text: "យើងបានផ្ញើកូដ 6 ខ្ទង់ទៅ email របស់អ្នក" });
+          setMsg({ ok: true, text: "យើងបានផ្ញើកូដទៅ email របស់អ្នក" });
           return;
         }
         navigate({ to: "/" });
@@ -245,8 +254,8 @@ function AuthPage() {
     e.preventDefault();
     if (!codeFor) return;
     setMsg(null);
-    if (!/^\d{6}$/.test(code.trim())) {
-      setMsg({ ok: false, text: "កូដត្រូវមាន 6 ខ្ទង់" });
+    if (!CODE_PATTERN.test(code.trim())) {
+      setMsg({ ok: false, text: "សូមវាយកូដក្នុង email ឱ្យគ្រប់" });
       return;
     }
     setBusy(true);
@@ -462,8 +471,8 @@ function AuthPage() {
                   </h1>
                   <p className={`mt-1 text-sm leading-[1.8] ${muted}`}>
                     {tx(
-                      "វាយកូដ 6 ខ្ទង់ ឬចុច link ក្នុង email ដែលបានផ្ញើទៅ",
-                      "Type the 6-digit code, or tap the link in the email sent to",
+                      "វាយកូដ ឬចុច link ក្នុង email ដែលបានផ្ញើទៅ",
+                      "Type the code, or tap the link in the email sent to",
                     )}{" "}
                     <span className="font-semibold text-current">{resetFor}</span>
                   </p>
@@ -478,7 +487,7 @@ function AuthPage() {
                 />
                 <Button
                   type="submit"
-                  disabled={busy || code.length < 6}
+                  disabled={busy || code.length < CODE_MIN}
                   className="btn-3d h-12 rounded-xl text-[15px] font-semibold"
                 >
                   {busy ? busyLabel : tx("បន្ត", "Continue")}
@@ -572,7 +581,7 @@ function AuthPage() {
                     {tx("ពិនិត្យ email របស់អ្នក", "Check your email")}
                   </h1>
                   <p className={`mt-1 text-sm leading-[1.8] ${muted}`}>
-                    {tx("យើងបានផ្ញើកូដ 6 ខ្ទង់ទៅ", "We sent a 6-digit code to")}{" "}
+                    {tx("យើងបានផ្ញើកូដទៅ", "We sent a code to")}{" "}
                     <span className="font-semibold text-current">{codeFor}</span>
                   </p>
                 </div>
@@ -586,7 +595,7 @@ function AuthPage() {
                 />
                 <Button
                   type="submit"
-                  disabled={busy || code.length < 6}
+                  disabled={busy || code.length < CODE_MIN}
                   className="btn-3d h-12 rounded-xl text-[15px] font-semibold"
                 >
                   {busy ? busyLabel : tx("បញ្ជាក់គណនី", "Confirm account")}
@@ -838,16 +847,16 @@ function CodeBoxes({
   onChange: (v: string) => void;
 }) {
   const refs = useRef<(HTMLInputElement | null)[]>([]);
-  const digits = Array.from({ length: 6 }, (_, i) => value[i] ?? "");
+  const digits = Array.from({ length: CODE_MAX }, (_, i) => value[i] ?? "");
   const put = (start: number, text: string) => {
     const clean = text.replace(/\D/g, "");
     if (!clean) return;
-    const next = (value.slice(0, start) + clean).slice(0, 6);
+    const next = (value.slice(0, start) + clean).slice(0, CODE_MAX);
     onChange(next);
-    refs.current[Math.min(next.length, 5)]?.focus();
+    refs.current[Math.min(next.length, CODE_MAX - 1)]?.focus();
   };
   return (
-    <div className="grid grid-cols-6 gap-2 sm:gap-2.5" aria-label="Code">
+    <div className="grid grid-cols-8 gap-1.5 sm:gap-2" aria-label="Code">
       {digits.map((d, i) => (
         <input
           key={i}
@@ -859,7 +868,7 @@ function CodeBoxes({
           autoComplete={i === 0 ? "one-time-code" : "off"}
           autoFocus={i === 0}
           aria-label={`Digit ${i + 1}`}
-          maxLength={6}
+          maxLength={CODE_MAX}
           onChange={(e) => put(i, e.target.value)}
           onPaste={(e) => {
             e.preventDefault();
@@ -874,7 +883,7 @@ function CodeBoxes({
               refs.current[cut]?.focus();
             }
           }}
-          className={`h-14 w-full rounded-xl border text-center font-display text-2xl font-bold outline-none transition focus:ring-4 ${
+          className={`h-12 w-full rounded-lg border text-center font-display text-xl font-bold sm:h-14 sm:rounded-xl sm:text-2xl outline-none transition focus:ring-4 ${
             light
               ? "border-[#d6e2f5] bg-[#f6f9ff] text-[#142650] focus:border-brand-500 focus:ring-brand-500/15"
               : "border-white/12 bg-white/[0.06] text-on-dark focus:border-brand-400 focus:ring-brand-400/20"
