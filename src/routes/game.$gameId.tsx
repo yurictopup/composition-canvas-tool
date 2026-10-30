@@ -136,7 +136,7 @@ function GamePage({ gameId }: { gameId: string }) {
         key={item.label}
         type="button"
         onClick={() => selectHot(i)}
-        className={`relative flex w-full items-center justify-between gap-2 overflow-hidden rounded-lg border-2 bg-gradient-to-br from-amber-50 via-white to-amber-50/60 ${wide ? "px-5 py-5 sm:px-6" : "py-2.5 pl-3.5 pr-3"} text-left shadow-[0_4px_14px_rgba(245,158,11,0.15)] transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(245,158,11,0.3)] ${hotPkg === i ? "border-amber-400 ring-2 ring-amber-300" : "border-amber-200"}`}
+        className={`relative flex w-full items-center justify-between gap-2 overflow-hidden rounded-[10px] border-2 bg-gradient-to-br from-amber-50 via-white to-amber-50/60 ${wide ? "px-5 py-5 sm:px-6" : "py-2.5 pl-3.5 pr-3"} text-left shadow-[0_4px_14px_rgba(245,158,11,0.15)] transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(245,158,11,0.3)] ${hotPkg === i ? "border-amber-400 ring-2 ring-amber-300" : "border-amber-200"}`}
       >
         <span className="absolute right-0 top-0 flex items-center gap-1 rounded-bl-xl bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[10px] font-bold text-white">
           <Star className="h-3 w-3 fill-current" /> {item.badge ?? "TOP"}
@@ -543,7 +543,7 @@ function GamePage({ gameId }: { gameId: string }) {
                     <button
                       key={p.amt}
                       onClick={() => selectPkg(i)}
-                      className={`relative flex items-center justify-between rounded-lg border px-2.5 py-2 text-left sm:px-4 sm:py-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${pkg === i && hotPkg === null ? "border-primary bg-primary/10 ring-2 ring-primary shadow-[0_0_16px_oklch(0.42_0.19_266/0.35)]" : "border-border/60 bg-white"}`}
+                      className={`relative flex items-center justify-between rounded-[10px] border px-2.5 py-2 text-left sm:px-4 sm:py-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${pkg === i && hotPkg === null ? "border-primary bg-primary/10 ring-2 ring-primary shadow-[0_0_16px_oklch(0.42_0.19_266/0.35)]" : "border-border/60 bg-white"}`}
                     >
                       {p.hot && (
                         <span className="absolute -top-2 right-2 rounded-full bg-accent px-2 text-[10px] font-bold text-accent-foreground">
@@ -603,7 +603,7 @@ function GamePage({ gameId }: { gameId: string }) {
                           key={item.label}
                           type="button"
                           onClick={() => selectHot(i)}
-                          className={`flex items-center justify-between gap-2 rounded-lg border px-3.5 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${on ? "border-primary bg-primary/10 ring-2 ring-primary" : "border-border/60 bg-white"}`}
+                          className={`flex items-center justify-between gap-2 rounded-[10px] border px-3.5 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${on ? "border-primary bg-primary/10 ring-2 ring-primary" : "border-border/60 bg-white"}`}
                         >
                           <div className="min-w-0">
                             <div
