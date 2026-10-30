@@ -23,6 +23,7 @@ import eafc from "@/assets/eafc.webp";
 import lol from "@/assets/lol.webp";
 import hi3 from "@/assets/hi3.webp";
 import telegram from "@/assets/telegram.svg";
+import telegramStars from "@/assets/telegram-stars.png";
 
 // Games FazerCards can top up for Cambodian accounts, plus Roblox, which the team delivers
 // by hand through the buyer's Game Pass. CODM (India-only there) and the Supercell games
@@ -35,7 +36,7 @@ export const games = [
   { id: "pubg", name: "PUBG Mobile", icon: pubg, unit: "UC", blurb: "Fast PUBG UC delivery" },
   { id: "roblox", name: "Roblox", icon: roblox, unit: "Robux", blurb: "Robux gift code · redeem at roblox.com/redeem" },
   // Bought by FazerCards for the buyer's Telegram username (see fazerTelegram).
-  { id: "tgstars", name: "Telegram Stars", icon: telegram, unit: "Stars", blurb: "Stars sent to your Telegram username" },
+  { id: "tgstars", name: "Telegram Stars", icon: telegramStars, unit: "Stars", blurb: "Stars sent to your Telegram username" },
   { id: "tgpremium", name: "Telegram Premium", icon: telegram, unit: "Months", blurb: "Premium for your Telegram username" },
   { id: "hok", name: "Honor of Kings", icon: hok, unit: "Tokens", blurb: "Tokens HoK ចូលភ្លាម" },
   { id: "wildrift", name: "League of Legends: Wild Rift", icon: wildrift, unit: "Wild Cores", blurb: "League of Legends: Wild Rift" },
