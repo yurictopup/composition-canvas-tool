@@ -45,11 +45,11 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-// Supabase sends this project's email codes with 8 digits (6 is its default),
-// so both lengths are accepted.
+// Email codes have 6 digits (Supabase → Authentication → Email → "Email OTP
+// Length" must stay 6, or customers can't type the whole code).
 const CODE_MIN = 6;
-const CODE_MAX = 8;
-const CODE_PATTERN = /^\d{6,8}$/;
+const CODE_MAX = 6;
+const CODE_PATTERN = /^\d{6}$/;
 
 function passwordStrength(pw: string): { score: number; label: string; km: string; color: string } {
   let score = 0;
@@ -856,7 +856,7 @@ function CodeBoxes({
     refs.current[Math.min(next.length, CODE_MAX - 1)]?.focus();
   };
   return (
-    <div className="grid grid-cols-8 gap-1.5 sm:gap-2" aria-label="Code">
+    <div className="grid grid-cols-6 gap-2 sm:gap-2.5" aria-label="Code">
       {digits.map((d, i) => (
         <input
           key={i}
@@ -883,7 +883,7 @@ function CodeBoxes({
               refs.current[cut]?.focus();
             }
           }}
-          className={`h-12 w-full rounded-lg border text-center font-display text-xl font-bold sm:h-14 sm:rounded-xl sm:text-2xl outline-none transition focus:ring-4 ${
+          className={`h-14 w-full rounded-xl border text-center font-display text-2xl font-bold outline-none transition focus:ring-4 ${
             light
               ? "border-[#d6e2f5] bg-[#f6f9ff] text-[#142650] focus:border-brand-500 focus:ring-brand-500/15"
               : "border-white/12 bg-white/[0.06] text-on-dark focus:border-brand-400 focus:ring-brand-400/20"
