@@ -1,6 +1,7 @@
 import mlbb from "@/assets/mlbb.webp";
 import mlbbWeeklyPass from "@/assets/mlbb-weekly-pass.png";
-import mlbbWeeklyX3 from "@/assets/mlbb-weekly-x3.png";
+import mlbbWeeklyElite from "@/assets/mlbb-weekly-elite.png";
+import mlbbMonthlyEpic from "@/assets/mlbb-monthly-epic.png";
 import mlbbTwilight from "@/assets/mlbb-twilight.png";
 import freefire from "@/assets/freefire.webp";
 import ffWeeklyLite from "@/assets/ff-weekly-lite.webp";
@@ -424,8 +425,8 @@ export function getPackages(gameId: string): GamePackage[] {
 export const hotItemsByGame: Record<string, HotItem[]> = {
   mlbb: [
     { label: "Weekly Pass", price: 1.55, img: mlbbWeeklyPass },
-    { label: "Weekly Elite Pack", price: 1.09, img: mlbbWeeklyX3 },
-    { label: "Monthly Elite Pack", price: 4.09 },
+    { label: "Weekly Elite Pack", price: 1.09, img: mlbbWeeklyElite },
+    { label: "Monthly Elite Pack", price: 4.09, img: mlbbMonthlyEpic },
     { label: "Twilight Pass", price: 8.39, img: mlbbTwilight },
     { label: "First Top-Up 50 + 5", price: 0.99 },
     { label: "First Top-Up 150 + 15", price: 2.49 },
@@ -442,8 +443,8 @@ export const hotItemsByGame: Record<string, HotItem[]> = {
   ],
   mlbb_my: [
     { label: "Weekly Pass", price: 2.19, img: mlbbWeeklyPass },
-    { label: "Weekly Elite Pack", price: 1.19, img: mlbbWeeklyX3 },
-    { label: "Monthly Elite Pack", price: 5.09 },
+    { label: "Weekly Elite Pack", price: 1.19, img: mlbbWeeklyElite },
+    { label: "Monthly Elite Pack", price: 5.09, img: mlbbMonthlyEpic },
     { label: "Twilight Pass", price: 9.19, img: mlbbTwilight },
     { label: "First Top-Up 50 + 5", price: 1.19 },
     { label: "First Top-Up 150 + 15", price: 3.09 },
