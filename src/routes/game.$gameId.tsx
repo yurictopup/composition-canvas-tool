@@ -527,7 +527,11 @@ function GamePage({ gameId }: { gameId: string }) {
                     {pictureHot.map((item) => (
                       <div
                         key={item.label}
-                        className="w-[calc(50%-0.375rem)] sm:w-[calc((100%-1.5rem)/3)]"
+                        className={`w-[calc(50%-0.375rem)] ${
+                          pictureHot.length >= 4
+                            ? "sm:w-[calc((100%-2.25rem)/4)]"
+                            : "sm:w-[calc((100%-1.5rem)/3)]"
+                        }`}
                       >
                         {renderHot(item)}
                       </div>
