@@ -12,6 +12,7 @@ export type Database = {
         Row: {
           created_at: string;
           delivered_at: string | null;
+          delivery_codes: string[] | null;
           game_id: string;
           game_name: string;
           id: string;
@@ -37,6 +38,7 @@ export type Database = {
         Insert: {
           created_at?: string;
           delivered_at?: string | null;
+          delivery_codes?: string[] | null;
           game_id: string;
           game_name: string;
           id?: string;
@@ -62,6 +64,7 @@ export type Database = {
         Update: {
           created_at?: string;
           delivered_at?: string | null;
+          delivery_codes?: string[] | null;
           game_id?: string;
           game_name?: string;
           id?: string;
