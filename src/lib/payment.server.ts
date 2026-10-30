@@ -17,6 +17,8 @@ export type PaymentState = {
   paid: boolean;
   status?: string;
   message?: string;
+  /** Gift card codes of a delivered order (Roblox), shown only to the order's buyer. */
+  codes?: string[];
 };
 
 export function bakongConfig(): BakongConfig | null {
@@ -41,6 +43,7 @@ type PayOrder = {
   payment_md5: string | null;
   payment_expires_at: string | null;
   paid_at: string | null;
+  delivery_codes?: string[] | null;
 };
 
 /** Whose order may be loaded: a user id, "guest" (a guest order whose link was checked), or null = the owner, any order. */
@@ -50,7 +53,7 @@ async function loadOrder(db: SupabaseClient, orderId: string, scope: OrderScope)
   let query = db
     .from("orders")
     .select(
-      "id, user_id, game_id, status, price_usd, payment_qr, payment_md5, payment_expires_at, paid_at",
+      "id, user_id, game_id, status, price_usd, payment_qr, payment_md5, payment_expires_at, paid_at, delivery_codes",
     )
     .eq("id", orderId);
   if (scope === "guest") query = query.is("user_id", null);
@@ -59,8 +62,9 @@ async function loadOrder(db: SupabaseClient, orderId: string, scope: OrderScope)
   return (data as PayOrder | null) ?? null;
 }
 
-function paidState(order: { status: string }): PaymentState {
-  return { available: true, paid: true, status: order.status };
+function paidState(order: { status: string; delivery_codes?: string[] | null }): PaymentState {
+  const codes = order.delivery_codes ?? [];
+  return { available: true, paid: true, status: order.status, ...(codes.length ? { codes } : {}) };
 }
 
 /** The KHQR for an unpaid order, made once and reused until it expires. */
@@ -230,7 +234,13 @@ async function settlePayment(
 
   try {
     const delivery = await deliverPaidOrder(db, order.id);
-    return { available: true, paid: true, status: delivery.status ?? "processing" };
+    // A gift card code is usually ready at once; send it back with this answer.
+    const { data: done } = await db
+      .from("orders")
+      .select("status, delivery_codes")
+      .eq("id", order.id)
+      .maybeSingle();
+    return done ? paidState(done) : { available: true, paid: true, status: delivery.status ?? "processing" };
   } catch (error) {
     // Paid but not delivered (e.g. GamesDrop not set up): the owner sees it as paid and pending.
     console.error("[payment] delivery failed", error instanceof Error ? error.message : error);

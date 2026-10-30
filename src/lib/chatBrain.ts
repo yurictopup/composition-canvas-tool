@@ -264,7 +264,7 @@ export function answer(
   // Roblox works differently from every other game.
   if (game?.id === "roblox") {
     return {
-      text: "យើងលក់ Robux តាម Game Pass សូមបង្កើត Game Pass ក្នុងហ្គេម Roblox របស់អ្នក ដាក់តម្លៃតាមដែលទំព័របង្ហាញ បញ្ចូល Username ហើយបង់ប្រាក់ យើងនឹងទិញ Game Pass នោះ Robux ចូលក្រោយ 5 ទៅ 7 ថ្ងៃ យើងមិនសុំលេខសម្ងាត់ទេ",
+      text: "យើងលក់ Robux ជាលេខកូដ (Gift Code) ៖ បញ្ចូល Username ជ្រើសចំនួន Robux ហើយបង់ប្រាក់តាម KHQR លេខកូដបង្ហាញភ្លាមៗ បន្ទាប់មកចូល roblox.com/redeem ក្នុង browser ហើយ Paste លេខកូដ Robux ចូលភ្លាមៗ យើងមិនសុំលេខសម្ងាត់ទេ",
       actions: [telegramAction],
       suggestions: ["ហ្គេមអ្វីខ្លះ?", "បង់ប្រាក់តាមអ្វី?"],
     };

@@ -20,6 +20,8 @@ export type DeliveryResult = {
   message?: string;
   /** False when GamesDrop refused before buying, so the order can be retried. */
   notPlaced?: boolean;
+  /** Gift card codes the buyer redeems (Roblox), once the supplier hands them over. */
+  codes?: string[];
 };
 
 // GamesDrop order statuses: SUBMITTED, PROCESSING, COMPLETED, CANCELED, FAILED, REFUND.

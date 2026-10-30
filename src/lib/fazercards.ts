@@ -2,7 +2,7 @@
 // Our order id is sent as the Idempotency-Key, so a retry of the same order can
 // never buy it twice.
 import type { DeliveryOrder, DeliveryResult } from "@/lib/delivery";
-import { fazerCatalog } from "@/lib/fazercards-catalog";
+import { fazerCatalog, fazerGiftCards } from "@/lib/fazercards-catalog";
 import type { LookupInput, LookupResult } from "@/lib/player-lookup";
 
 type Fetch = typeof fetch;
@@ -256,6 +256,112 @@ export async function placeFazerOrder(
   }
 }
 
+type GiftOffer = {
+  card_id: string | null;
+  name: string;
+  price_usd?: string | number;
+  stock?: number;
+};
+
+/**
+ * Buys one gift card code for a paid order (Roblox). Same safety rules as top-ups: the order
+ * id is the Idempotency-Key, a supplier price above what the buyer paid is refused, and an
+ * answer that never came back leaves the order UNKNOWN for the owner to check.
+ */
+export async function placeFazerGiftCard(
+  order: { id: string; game_id: string; package_amt: string; price_usd?: number | string | null },
+  opts: Opts & { picked?: string | null },
+): Promise<DeliveryResult> {
+  const game = fazerGiftCards[order.game_id];
+  const offerName = opts.picked || game?.offers[order.package_amt];
+  if (!game || !offerName) {
+    return {
+      status: "failed",
+      supplierStatus: "NO_OFFER",
+      message: `${order.package_amt} is delivered by hand.`,
+      notPlaced: true,
+    };
+  }
+  try {
+    const list = await call(
+      opts,
+      `/giftcards/cards?category_id=${encodeURIComponent(game.categoryId)}`,
+    );
+    const offers = Array.isArray(list.offers) ? (list.offers as GiftOffer[]) : [];
+    const offer = offers.find((o) => o.name.trim() === offerName);
+    if (!offer?.card_id) {
+      return {
+        status: "failed",
+        supplierStatus: "OFFER_NOT_FOUND",
+        message: `FazerCards has no "${offerName}" in ${game.category} now.`,
+        notPlaced: true,
+      };
+    }
+    if (typeof offer.stock === "number" && offer.stock < 1) {
+      return {
+        status: "failed",
+        supplierStatus: "OUT_OF_STOCK",
+        message: `${offerName} is out of stock at FazerCards.`,
+        notPlaced: true,
+      };
+    }
+    const cost = Number(offer.price_usd);
+    const paid = Number(order.price_usd);
+    if (order.price_usd != null && Number.isFinite(cost) && cost > paid) {
+      return {
+        status: "failed",
+        supplierStatus: "COST_ABOVE_PRICE",
+        message: `FazerCards cost ${cost.toFixed(2)} is above the paid ${paid.toFixed(2)}.`,
+        notPlaced: true,
+      };
+    }
+    const res = await call(opts, "/giftcards/order", {
+      method: "POST",
+      headers: { "Idempotency-Key": order.id },
+      body: { category_id: game.categoryId, card_id: offer.card_id, quantity: 1 },
+    });
+    const placed = (res.order ?? {}) as { id?: unknown; status?: unknown };
+    const codes = extractCodes(placed);
+    return {
+      status: codes.length ? "completed" : mapFazerStatus(placed.status),
+      supplierStatus: String(placed.status ?? "processing").toUpperCase(),
+      ...(placed.id != null ? { supplierOrderId: String(placed.id) } : {}),
+      ...(codes.length ? { codes } : {}),
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[delivery] gift card", message);
+    const code = error instanceof FazerCardsError ? (error.code ?? "") : "";
+    const status = error instanceof FazerCardsError ? error.httpStatus : undefined;
+    if (status !== undefined && inDoubtStatus(status)) {
+      return { status: "processing", supplierStatus: "UNKNOWN", message };
+    }
+    if (code && REJECTED.test(code)) {
+      return { status: "failed", supplierStatus: code.toUpperCase(), message, notPlaced: true };
+    }
+    if (status && status >= 400 && status < 500) {
+      return { status: "failed", supplierStatus: `HTTP_${status}`, message, notPlaced: true };
+    }
+    return { status: "processing", supplierStatus: "UNKNOWN", message };
+  }
+}
+
+/** The codes of a finished gift card order: strings, or objects holding a code/key/pin. */
+export function extractCodes(order: unknown): string[] {
+  const o = (order ?? {}) as { cards?: unknown; keys?: unknown; codes?: unknown };
+  const list = [o.cards, o.codes, o.keys].find((v) => Array.isArray(v) && v.length) as
+    | unknown[]
+    | undefined;
+  return (list ?? [])
+    .map((item) => {
+      if (typeof item === "string") return item.trim();
+      const c = (item ?? {}) as Record<string, unknown>;
+      const v = c.code ?? c.key ?? c.pin ?? c.card ?? c.serial;
+      return typeof v === "string" ? v.trim() : "";
+    })
+    .filter(Boolean);
+}
+
 export async function checkFazerOrder(
   supplierOrderId: string,
   opts: Opts,
@@ -263,10 +369,12 @@ export async function checkFazerOrder(
   try {
     const res = await call(opts, `/orders/${encodeURIComponent(supplierOrderId)}`);
     const order = (res.order ?? {}) as { status?: unknown };
+    const codes = extractCodes(order);
     return {
       status: mapFazerStatus(order.status),
       supplierStatus: String(order.status ?? "UNKNOWN").toUpperCase(),
       supplierOrderId,
+      ...(codes.length ? { codes } : {}),
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

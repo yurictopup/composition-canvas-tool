@@ -1,12 +1,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getIdConfig } from "@/lib/player-id";
+import { fazerGiftCards } from "@/lib/fazercards-catalog";
 import { checkGamesDropOrder, placeGamesDropOrder, type DeliveryResult } from "@/lib/delivery";
 import {
   checkFazerOrder,
   FazerCardsError,
   fetchFazerAccount,
   listFazerOrders,
+  placeFazerGiftCard,
   placeFazerOrder,
   type FazerAccount,
   type FazerOrder,
@@ -44,6 +46,7 @@ async function saveResult(db: SupabaseClient, orderId: string, result: DeliveryR
       status,
       supplier_status: result.supplierStatus,
       ...(result.supplierOrderId ? { supplier_order_id: result.supplierOrderId } : {}),
+      ...(result.codes?.length ? { delivery_codes: result.codes } : {}),
       ...(status === "completed" ? { delivered_at: new Date().toISOString() } : {}),
     })
     .eq("id", orderId);
@@ -105,7 +108,10 @@ export async function deliverPaidOrder(
       .eq("package_amt", order.package_amt)
       .maybeSingle();
     const fazerOffer = (offerRow as { fazer_offer?: string } | null)?.fazer_offer ?? null;
-    const result = await placeFazerOrder({ ...order, fazer_offer: fazerOffer }, { apiKey });
+    // Roblox is sold as a gift card code; every other game is a top-up to the player ID.
+    const result = fazerGiftCards[order.game_id]
+      ? await placeFazerGiftCard(order, { apiKey, picked: fazerOffer })
+      : await placeFazerOrder({ ...order, fazer_offer: fazerOffer }, { apiKey });
     if (result.supplierStatus === "NO_OFFER") {
       // Not sold through the API (Roblox, bundles): stays under Paid not delivered.
       await db

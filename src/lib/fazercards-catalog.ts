@@ -484,3 +484,24 @@ export const fazerCatalog: Record<
     },
   },
 };
+
+// Games sold as gift card codes instead of a top-up: the paid order buys one code and the
+// buyer redeems it. US Robux cards were checked on a Cambodian account on 2026-10-30.
+export const fazerGiftCards: Record<
+  string,
+  { category: string; categoryId: string; offers: Record<string, string> }
+> = {
+  roblox: {
+    category: "Roblox Robux (US)",
+    categoryId: "921a3771-b491-420b-b8ef-04d1fe277ffc",
+    offers: {
+      "50 Robux": "50 Robux",
+      "275 Robux": "275 Robux",
+      "555 Robux": "555 Robux",
+      "1000 Robux": "1000 Robux",
+      "2500 Robux": "2500 Robux",
+      "5250 Robux": "5250 Robux",
+      "11000 Robux": "11000 Robux",
+    },
+  },
+};

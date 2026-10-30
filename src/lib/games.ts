@@ -32,7 +32,7 @@ export const games = [
   { id: "ff", name: "Free Fire", icon: freefire, unit: "Diamonds", blurb: "Free Fire diamonds at the best price" },
   { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess, unit: "Diamonds", blurb: "Instant Magic Chess delivery" },
   { id: "pubg", name: "PUBG Mobile", icon: pubg, unit: "UC", blurb: "Fast PUBG UC delivery" },
-  { id: "roblox", name: "Roblox", icon: roblox, unit: "Robux", blurb: "Robux by Game Pass" },
+  { id: "roblox", name: "Roblox", icon: roblox, unit: "Robux", blurb: "Robux gift code · redeem at roblox.com/redeem" },
   { id: "hok", name: "Honor of Kings", icon: hok, unit: "Tokens", blurb: "Tokens HoK ចូលភ្លាម" },
   { id: "wildrift", name: "League of Legends: Wild Rift", icon: wildrift, unit: "Wild Cores", blurb: "League of Legends: Wild Rift" },
   { id: "bloodstrike", name: "Blood Strike", icon: bloodstrike, unit: "Gold", blurb: "Blood Strike" },
@@ -379,13 +379,17 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "6500", price: 49.99 },
     { amt: "14000", price: 99.99 },
   ],
-  // Robux the buyer receives. The team buys the buyer's Game Pass, priced by robloxGamePassPrice.
+  // Robux gift card codes (FazerCards Roblox Robux US), redeemed by the buyer.
   roblox: [
-    { amt: "80", price: 1.59 },
-    { amt: "500", price: 9.89 },
-    { amt: "1000", price: 19.69, hot: true },
-    { amt: "2000", price: 39.29 },
+    { amt: "50", price: 1.79 },
+    { amt: "275", price: 2.99 },
+    { amt: "555", price: 5.79 },
+    { amt: "1000", price: 9.79, hot: true },
+    { amt: "2500", price: 24.49 },
+    { amt: "5250", price: 49.49 },
+    { amt: "11000", price: 99.49 },
   ],
+
 };
 
 // Roblox keeps 30% of a Game Pass sale, so the pass must cost more than the Robux delivered.
