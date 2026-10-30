@@ -343,12 +343,25 @@ export async function placeFazerGiftCard(
       headers: { "Idempotency-Key": order.id },
       body: { category_id: categoryId, card_id: offer.card_id, quantity: 1 },
     });
-    const placed = (res.order ?? {}) as { id?: unknown; status?: unknown };
-    const codes = extractCodes(placed);
+    let placed = (res.order ?? {}) as { id?: unknown; status?: unknown };
+    const placedId = placed.id;
+    let codes = extractCodes(placed);
+    // FazerCards first answers "created"; the code is usually ready a second or two later.
+    for (let i = 0; i < 5 && !codes.length && placedId != null; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      try {
+        const now = await call(opts, `/orders/${encodeURIComponent(String(placedId))}`);
+        placed = (now.order ?? placed) as typeof placed;
+        codes = extractCodes(placed);
+        if (mapFazerStatus(placed.status) === "failed") break;
+      } catch {
+        // The order is placed either way; "Check delivery" picks the code up later.
+      }
+    }
     return {
       status: codes.length ? "completed" : mapFazerStatus(placed.status),
       supplierStatus: String(placed.status ?? "processing").toUpperCase(),
-      ...(placed.id != null ? { supplierOrderId: String(placed.id) } : {}),
+      ...(placedId != null ? { supplierOrderId: String(placedId) } : {}),
       ...(codes.length ? { codes } : {}),
     };
   } catch (error) {
