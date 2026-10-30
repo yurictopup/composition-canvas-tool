@@ -3,6 +3,12 @@ import mlbbWeeklyPass from "@/assets/mlbb-weekly-pass.png";
 import mlbbWeeklyElite from "@/assets/mlbb-weekly-elite.png";
 import mlbbMonthlyEpic from "@/assets/mlbb-monthly-epic.png";
 import mlbbTwilight from "@/assets/mlbb-twilight.png";
+import bs105 from "@/assets/bloodstrike-105.jpg";
+import bs320 from "@/assets/bloodstrike-320.jpg";
+import bs540 from "@/assets/bloodstrike-540.jpg";
+import bs1100 from "@/assets/bloodstrike-1100.jpg";
+import bs2260 from "@/assets/bloodstrike-2260.jpg";
+import bs5800 from "@/assets/bloodstrike-5800.jpg";
 import freefire from "@/assets/freefire.webp";
 import ffWeeklyLite from "@/assets/ff-weekly-lite.webp";
 import ffWeeklyCard from "@/assets/ff-weekly-card.webp";
@@ -85,6 +91,11 @@ export const gameServers: Record<string, { id: string; label: string }[]> = Obje
 export function findGame(id: string | undefined): Game | undefined {
   return games.find((g) => g.id === id) ?? serverGames.find((g) => g.id === id);
 }
+
+/** In-game pictures of single currency packages, by game and package amount. Uploads from /admin win. */
+export const packagePictures: Record<string, Record<string, string>> = {
+  bloodstrike: { "105": bs105, "320": bs320, "540": bs540, "1100": bs1100, "2260": bs2260, "5800": bs5800 },
+};
 
 /** The main game of a server variant (same Player ID rules and name check). */
 export function baseGameId(id: string): string {

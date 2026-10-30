@@ -7,6 +7,7 @@ import {
   findGame,
   getHotItems,
   getPackages,
+  packagePictures,
   payments,
   store,
 } from "@/lib/games";
@@ -562,9 +563,9 @@ function GamePage({ gameId }: { gameId: string }) {
                           {p.price !== null ? `$${p.price.toFixed(2)}` : "—"}
                         </div>
                       </div>
-                      {slotPic(packageSlotKey(gameId, p.amt)) ? (
+                      {slotPic(packageSlotKey(gameId, p.amt)) || packagePictures[gameId]?.[p.amt] ? (
                         <img
-                          src={slotPic(packageSlotKey(gameId, p.amt))}
+                          src={slotPic(packageSlotKey(gameId, p.amt)) ?? packagePictures[gameId]?.[p.amt]}
                           loading="lazy"
                           decoding="async"
                           alt={`${p.amt} ${game.unit}`}
