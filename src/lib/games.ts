@@ -7,7 +7,7 @@ import bs105 from "@/assets/bloodstrike-105.jpg";
 import bs320 from "@/assets/bloodstrike-320.png";
 import bs540 from "@/assets/bloodstrike-540.jpg";
 import bs1100 from "@/assets/bloodstrike-1100.png";
-import bs2260 from "@/assets/bloodstrike-2260.jpg";
+import bs2260 from "@/assets/bloodstrike-2260.png";
 import bs5800 from "@/assets/bloodstrike-5800.png";
 import freefire from "@/assets/freefire.webp";
 import ffWeeklyLite from "@/assets/ff-weekly-lite.webp";
