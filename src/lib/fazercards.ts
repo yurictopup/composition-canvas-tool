@@ -83,11 +83,15 @@ function readOffers(json: ApiJson): Offers {
   };
 }
 
-async function findCategoryId(opts: Opts, name: string): Promise<string | null> {
+async function findCategoryId(
+  opts: Opts,
+  name: string,
+  list = "/topups",
+): Promise<string | null> {
   let cursor: string | undefined;
   for (let page = 0; page < 20; page++) {
     const query = `?limit=100${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`;
-    const json = await call(opts, `/topups${query}`);
+    const json = await call(opts, `${list}${query}`);
     const items = Array.isArray(json.items)
       ? (json.items as { category_id: string; name: string }[])
       : [];
@@ -263,6 +267,29 @@ type GiftOffer = {
   stock?: number;
 };
 
+/** Offers of a gift card category. Falls back to looking the category up by name. */
+async function loadGiftOffers(
+  opts: Opts,
+  game: { category: string; categoryId: string },
+): Promise<{ categoryId: string; offers: GiftOffer[] }> {
+  const read = async (categoryId: string) => {
+    const json = await call(
+      opts,
+      `/giftcards/cards?category_id=${encodeURIComponent(categoryId)}`,
+    );
+    const offers = Array.isArray(json.offers) ? (json.offers as GiftOffer[]) : [];
+    return { categoryId, offers };
+  };
+  try {
+    return await read(game.categoryId);
+  } catch (error) {
+    if (!(error instanceof FazerCardsError) || error.httpStatus !== 404) throw error;
+    const found = await findCategoryId(opts, game.category, "/giftcards");
+    if (!found) throw error;
+    return read(found);
+  }
+}
+
 /**
  * Buys one gift card code for a paid order (Roblox). Same safety rules as top-ups: the order
  * id is the Idempotency-Key, a supplier price above what the buyer paid is refused, and an
@@ -283,11 +310,7 @@ export async function placeFazerGiftCard(
     };
   }
   try {
-    const list = await call(
-      opts,
-      `/giftcards/cards?category_id=${encodeURIComponent(game.categoryId)}`,
-    );
-    const offers = Array.isArray(list.offers) ? (list.offers as GiftOffer[]) : [];
+    const { categoryId, offers } = await loadGiftOffers(opts, game);
     const offer = offers.find((o) => o.name.trim() === offerName);
     if (!offer?.card_id) {
       return {
@@ -318,7 +341,7 @@ export async function placeFazerGiftCard(
     const res = await call(opts, "/giftcards/order", {
       method: "POST",
       headers: { "Idempotency-Key": order.id },
-      body: { category_id: game.categoryId, card_id: offer.card_id, quantity: 1 },
+      body: { category_id: categoryId, card_id: offer.card_id, quantity: 1 },
     });
     const placed = (res.order ?? {}) as { id?: unknown; status?: unknown };
     const codes = extractCodes(placed);

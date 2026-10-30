@@ -493,7 +493,7 @@ export const fazerGiftCards: Record<
 > = {
   roblox: {
     category: "Roblox Robux (US)",
-    categoryId: "921a3771-b491-420b-b8ef-04d1fe277ffc",
+    categoryId: "roblox_robux_us",
     offers: {
       "50 Robux": "50 Robux",
       "275 Robux": "275 Robux",
