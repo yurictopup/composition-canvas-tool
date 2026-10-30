@@ -6,7 +6,7 @@ import mlbbTwilight from "@/assets/mlbb-twilight.png";
 import bsTreasure from "@/assets/bloodstrike-treasure.png";
 import bs105 from "@/assets/bloodstrike-105.png";
 import bs320 from "@/assets/bloodstrike-320.png";
-import bs540 from "@/assets/bloodstrike-540.jpg";
+import bs540 from "@/assets/bloodstrike-540.png";
 import bs1100 from "@/assets/bloodstrike-1100.png";
 import bs2260 from "@/assets/bloodstrike-2260.png";
 import bs5800 from "@/assets/bloodstrike-5800.png";
