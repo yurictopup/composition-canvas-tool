@@ -77,12 +77,32 @@ export async function createNbcTestQr(amount: number) {
   };
 }
 
+/** NBC's own answer (HTTP status, code and message), which the payment check sums up as unpaid/paid. */
+async function nbcRawAnswer(cfg: { token: string; apiUrl?: string | undefined }, md5: string) {
+  try {
+    const base = (cfg.apiUrl || "https://api-bakong.nbc.gov.kh/v1").replace(/\/+$/, "");
+    const res = await fetch(`${base}/check_transaction_by_md5`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${cfg.token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ md5 }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    const json = (await res.json().catch(() => null)) as Record<string, unknown> | null;
+    return `HTTP ${res.status}, code ${String(json?.["responseCode"])}, error ${String(
+      json?.["errorCode"],
+    )}: ${String(json?.["responseMessage"] ?? "")}`;
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error);
+  }
+}
+
 export async function checkNbcTestQr(md5: string, amount: number) {
   const cfg = nbcTestConfig();
   if (!cfg) return { ok: false as const, message: NOT_SET };
   const colo = await workerColo();
+  const nbc = await nbcRawAnswer(cfg, md5);
   const check = await checkBakongPayment(cfg, md5);
-  if (check.status !== "paid") return { ok: true as const, colo, ...check };
+  if (check.status !== "paid") return { ok: true as const, colo, nbc, md5, ...check };
   // A bank transaction already linked to an order can never pay another one
   // (unique orders.payment_hash): show whether this one is.
   const { count } = check.hash
@@ -94,6 +114,8 @@ export async function checkNbcTestQr(md5: string, amount: number) {
   return {
     ok: true as const,
     colo,
+    nbc,
+    md5,
     status: check.status,
     amount: check.amount,
     currency: check.currency,

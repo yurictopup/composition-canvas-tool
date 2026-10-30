@@ -28,6 +28,8 @@ function Row({ label, got, want }: { label: string; got: unknown; want?: unknown
 
 function NbcTest() {
   const [amount, setAmount] = useState("0.01");
+  // Another KHQR's md5 to check, e.g. one made before "Make KHQR" was pressed again.
+  const [otherMd5, setOtherMd5] = useState("");
   const [created, setCreated] = useState<Created | null>(null);
   const [checks, setChecks] = useState<Checked[]>([]);
   const [busy, setBusy] = useState(false);
@@ -108,19 +110,29 @@ function NbcTest() {
             2. Scan and pay with your bank app, then check. Check again after paying to see that
             the same payment gives the same transaction.
           </p>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() =>
-              run(async () => {
-                const result = await checkNbcTest({ data: { md5: qr.md5, amount: value } });
-                setChecks((list) => [result, ...list]);
-              })
-            }
-            className="rounded bg-green-600 px-3 py-1 font-semibold text-white disabled:opacity-50"
-          >
-            Check payment
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() =>
+                run(async () => {
+                  const md5 = otherMd5.trim().toLowerCase() || qr.md5;
+                  const result = await checkNbcTest({ data: { md5, amount: value } });
+                  setChecks((list) => [result, ...list]);
+                })
+              }
+              className="rounded bg-green-600 px-3 py-1 font-semibold text-white disabled:opacity-50"
+            >
+              Check payment
+            </button>
+            <input
+              aria-label="Other KHQR md5 (optional)"
+              placeholder="other md5 (optional)"
+              value={otherMd5}
+              onChange={(e) => setOtherMd5(e.target.value)}
+              className="w-72 rounded border px-2 py-1 font-mono text-xs"
+            />
+          </div>
         </section>
       )}
 
@@ -132,7 +144,9 @@ function NbcTest() {
           ) : (
             <table className="w-full text-left">
               <tbody>
-                <Row label="NBC answer" got={c.status} />
+                <Row label="Result" got={c.status} />
+                <Row label="NBC said" got={c.nbc} />
+                <Row label="KHQR md5" got={c.md5} />
                 {"message" in c && <Row label="Message" got={c.message} />}
                 {"matches" in c && (
                   <>
