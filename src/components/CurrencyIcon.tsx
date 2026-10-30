@@ -1,6 +1,11 @@
 // In-game currency artwork for package cards, so each game shows its own
 // currency (Robux, UC, Gems...) instead of one shared diamond.
 import diamond from "@/assets/diamond.png";
+import mlbbDiamonds from "@/assets/mlbb-diamonds.png";
+import { baseGameId } from "@/lib/games";
+
+// Games shown with a picture instead of drawn artwork (server variants use their main game's).
+const pictures: Record<string, string> = { mlbb: mlbbDiamonds };
 
 type Props = { gameId: string; className?: string };
 
@@ -146,9 +151,19 @@ function art(gameId: string) {
 }
 
 export function CurrencyIcon({ gameId, className }: Props) {
-  const drawn = art(gameId);
-  // Diamond games (MLBB, Free Fire, Magic Chess...) use the HD diamond picture.
-  if (!drawn) return <img src={diamond} alt="" aria-hidden="true" className={`object-contain ${className ?? ""}`} />;
+  const picture = pictures[baseGameId(gameId)];
+  const drawn = picture ? null : art(gameId);
+  // Diamond games without their own picture (Free Fire, Magic Chess...) use the HD diamond.
+  if (!drawn) {
+    return (
+      <img
+        src={picture ?? diamond}
+        alt=""
+        aria-hidden="true"
+        className={`object-contain ${className ?? ""}`}
+      />
+    );
+  }
   return (
     <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
       <defs>
