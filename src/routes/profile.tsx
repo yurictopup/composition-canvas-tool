@@ -38,6 +38,7 @@ type Order = {
   status: string;
   payment: string;
   created_at: string;
+  delivery_codes?: string[] | null;
 };
 
 function Profile() {
@@ -127,7 +128,18 @@ function Profile() {
                   {orders.map((o) => (
                     <tr key={o.id} className="hover:bg-muted/30 transition-colors">
                       <td className="py-3 pr-4 font-semibold">{o.game_name}</td>
-                      <td className="py-3 pr-4">{o.package_amt}</td>
+                      <td className="py-3 pr-4">
+                        {o.package_amt}
+                        {o.delivery_codes?.map((code) => (
+                          <span
+                            key={code}
+                            className="mt-1 block w-fit select-all rounded-md border border-primary/40 bg-primary/5 px-2 py-0.5 font-mono text-xs font-bold tracking-wider text-primary"
+                            title="roblox.com/redeem"
+                          >
+                            {code}
+                          </span>
+                        ))}
+                      </td>
                       <td className="py-3 pr-4 text-xs font-mono">
                         {o.player_id}
                         {o.player_zone ? ` (${o.player_zone})` : ""}

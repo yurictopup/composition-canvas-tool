@@ -8,7 +8,6 @@ import {
   getHotItems,
   getPackages,
   payments,
-  robloxGamePassPrice,
   store,
 } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
@@ -583,11 +582,7 @@ function GamePage({ gameId }: { gameId: string }) {
                 <p className="text-sm text-muted-foreground">{t("No packages available yet.")}</p>
               )}
 
-              {gameId === "roblox" && (
-                <RobloxGamePassSteps
-                  robux={pkg !== null ? Number(availablePackages[pkg]?.amt) : null}
-                />
-              )}
+              {gameId === "roblox" && <RobloxCodeSteps />}
 
               {moreItems.length > 0 && (
                 <div className="mt-6">
@@ -852,39 +847,64 @@ function KhqrMark() {
   );
 }
 
-// Robux go to the buyer through a Game Pass the buyer creates, so they need its price before paying.
-function RobloxGamePassSteps({ robux }: { robux: number | null }) {
+// Robux are sold as gift card codes: the code shows after payment and the buyer redeems it.
+function RobloxCodeSteps() {
   const { lang } = useStorePrefs();
-  const pass = robux ? robloxGamePassPrice(robux) : null;
   const km = lang === "km";
-  const steps = km
+  const buy = km
     ? [
-        "ចូល create.roblox.com ហើយបង្កើត Game Pass ក្នុងហ្គេម (Experience) របស់អ្នក",
-        pass
-          ? `ដាក់តម្លៃ Game Pass ${pass} Robux (Roblox កាត់ 30% អ្នកនឹងទទួលបាន ${robux} Robux)`
-          : "ជ្រើសកញ្ចប់ខាងលើ ដើម្បីដឹងតម្លៃ Game Pass ដែលត្រូវដាក់",
-        "បញ្ចូល Username ខាងលើ ហើយបង់ប្រាក់ យើងនឹងទិញ Game Pass របស់អ្នក",
-        "Robux ចូលគណនីក្រោយ 5 ទៅ 7 ថ្ងៃ (Pending) យើងមិនសុំលេខសម្ងាត់ទេ",
+        "បញ្ចូល Roblox Username របស់អ្នក ហើយចុចពិនិត្យ ID",
+        "ជ្រើសចំនួន Robux ដែលចង់បាន",
+        "បង់ប្រាក់តាម KHQR (ABA, ACLEDA, Wing ឬធនាគារណាមួយ)",
+        "លេខកូដ Roblox បង្ហាញភ្លាមៗលើទំព័រនេះ (និងក្នុង My Orders)",
       ]
     : [
-        "Go to create.roblox.com and create a Game Pass in one of your experiences.",
-        pass
-          ? `Set the Game Pass price to ${pass} Robux (Roblox keeps 30%, so you receive ${robux} Robux).`
-          : "Pick a package above to see the Game Pass price to set.",
-        "Enter your username above and pay. We buy your Game Pass.",
-        "Robux arrive after 5 to 7 days (pending). We never ask for your password.",
+        "Enter your Roblox username and tap Check ID.",
+        "Pick how many Robux you want.",
+        "Pay with KHQR (ABA, ACLEDA, Wing or any bank app).",
+        "Your Roblox code shows on this page right away (and in My Orders).",
+      ];
+  const redeem = km
+    ? [
+        "ចុច Copy លេខកូដ",
+        "បើក roblox.com/redeem ក្នុង browser (មិនមែនកម្មវិធី Roblox) ហើយ log in",
+        "Paste លេខកូដ ហើយចុច Redeem · Robux ចូលភ្លាមៗ",
+      ]
+    : [
+        "Copy the code.",
+        "Open roblox.com/redeem in a browser (not the Roblox app) and sign in.",
+        "Paste the code and tap Redeem. Robux arrive at once.",
       ];
   return (
-    <div className="mt-5 rounded-2xl border border-primary/30 bg-primary/5 p-4">
-      <p className="mb-2 flex items-center gap-2 text-sm font-bold text-primary">
-        <Ticket className="h-4 w-4" />{" "}
-        {km ? "របៀបទទួល Robux តាម Game Pass" : "How to receive Robux by Game Pass"}
-      </p>
-      <ol className="list-decimal space-y-1 pl-5 font-sans text-sm leading-relaxed text-card-foreground">
-        {steps.map((step) => (
-          <li key={step}>{step}</li>
-        ))}
-      </ol>
+    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+      <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+        <p className="mb-2 flex items-center gap-2 text-sm font-bold text-primary">
+          <Ticket className="h-4 w-4" /> {km ? "របៀបទិញ" : "How to buy"}
+        </p>
+        <ol className="list-decimal space-y-1 pl-5 font-sans text-sm leading-relaxed text-card-foreground">
+          {buy.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ol>
+      </div>
+      <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+        <p className="mb-2 flex items-center gap-2 text-sm font-bold text-primary">
+          <Ticket className="h-4 w-4" /> {km ? "របៀប Redeem លេខកូដ" : "How to redeem the code"}
+        </p>
+        <ol className="list-decimal space-y-1 pl-5 font-sans text-sm leading-relaxed text-card-foreground">
+          {redeem.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ol>
+        <a
+          href="https://www.roblox.com/redeem"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-block text-sm font-semibold text-primary hover:underline"
+        >
+          roblox.com/redeem ↗
+        </a>
+      </div>
     </div>
   );
 }
