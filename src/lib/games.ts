@@ -1,6 +1,7 @@
 import mlbb from "@/assets/mlbb.webp";
 import mlbbWeeklyPass from "@/assets/mlbb-weekly-pass.png";
 import mlbbWeeklyElite from "@/assets/mlbb-weekly-elite.png";
+import pubgFirstPurchase from "@/assets/pubg-first-purchase.png";
 import mlbbMonthlyEpic from "@/assets/mlbb-monthly-epic.png";
 import mlbbTwilight from "@/assets/mlbb-twilight.png";
 import freefire from "@/assets/freefire.webp";
@@ -491,7 +492,7 @@ export const hotItemsByGame: Record<string, HotItem[]> = {
     { label: "Level Up Pack Lv30", price: 0.99 },
   ],
   pubg: [
-    { label: "First Purchase Pack", price: 1.19 },
+    { label: "First Purchase Pack", price: 1.19, img: pubgFirstPurchase },
     { label: "Weekly Deal Pack 1", price: 1.09 },
     { label: "Weekly Deal Pack 2", price: 2.89 },
     { label: "Upgradable Firearm Materials Pack", price: 2.89 },
