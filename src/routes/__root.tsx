@@ -121,8 +121,39 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+// The password reset link signs the customer in on whatever page Supabase
+// sends them to (often the home page, not /auth). Read it from the address
+// before Supabase clears it, so /auth can ask for the new password.
+const RECOVERY_FLAG = "yuric-password-recovery";
+const openedFromResetLink =
+  typeof window !== "undefined" && /(?:^|[#&?])type=recovery(?:&|$)/.test(window.location.hash);
+
+function useResetLinkRedirect() {
+  const router = useRouter();
+  useEffect(() => {
+    const toNewPassword = () => {
+      try {
+        sessionStorage.setItem(RECOVERY_FLAG, "1");
+      } catch {
+        // Private mode: /auth still sees the PASSWORD_RECOVERY event itself.
+      }
+      if (window.location.pathname !== "/auth") void router.navigate({ to: "/auth" });
+    };
+    if (openedFromResetLink) toNewPassword();
+    let unsubscribe = () => {};
+    void import("@/integrations/supabase/client").then(({ supabase }) => {
+      const { data } = supabase.auth.onAuthStateChange((event) => {
+        if (event === "PASSWORD_RECOVERY") toNewPassword();
+      });
+      unsubscribe = () => data.subscription.unsubscribe();
+    });
+    return () => unsubscribe();
+  }, [router]);
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useResetLinkRedirect();
 
   return (
     <QueryClientProvider client={queryClient}>

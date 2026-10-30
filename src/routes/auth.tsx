@@ -91,7 +91,26 @@ function AuthPage() {
     return () => clearTimeout(id);
   }, [cooldown]);
 
-  // The reset link in the email brings the customer back here, signed in for recovery.
+  // The reset link in the email brings the customer back signed in for recovery;
+  // the root sends them here with this flag set (see src/routes/__root.tsx).
+  useEffect(() => {
+    let flagged = false;
+    try {
+      flagged = sessionStorage.getItem("yuric-password-recovery") === "1";
+      sessionStorage.removeItem("yuric-password-recovery");
+    } catch {
+      // Private mode: the PASSWORD_RECOVERY event below still works.
+    }
+    if (flagged) {
+      void supabase.auth.getSession().then(({ data }) => {
+        if (data.session) {
+          setRecovering(true);
+          setPassword("");
+        }
+      });
+    }
+  }, []);
+
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
