@@ -59,7 +59,7 @@ const SECURITY_HEADERS: Record<string, string> = {
 };
 
 // Pages search engines should never list (the admin and sign-in screens).
-const PRIVATE_PATHS = /^\/(admin|auth|profile)(\/|$)/;
+const PRIVATE_PATHS = /^\/(admin|auth|profile|nbc-test)(\/|$)/;
 
 function withSecurityHeaders(response: Response, nonce: string, request?: Request): Response {
   const secured = new Response(response.body, response);
@@ -86,7 +86,15 @@ export default {
     const nonce = newCspNonce();
     const headers = new Headers(incoming.headers);
     headers.set(CSP_NONCE_HEADER, nonce);
-    const request = new Request(incoming, { headers });
+    // Built from its parts: in `vite dev` on Node, `incoming` is another fetch
+    // library's Request, which `new Request(incoming)` can't copy.
+    const request = new Request(incoming.url, {
+      method: incoming.method,
+      headers,
+      body: incoming.body,
+      // @ts-expect-error Node needs `duplex` for streamed bodies; Workers ignore it.
+      duplex: "half",
+    });
     try {
       // Bindings (Workers AI) for server functions, in case the host didn't share them already.
       const g = globalThis as { __env__?: unknown };

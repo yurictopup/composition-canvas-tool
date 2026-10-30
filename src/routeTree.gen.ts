@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as NbcTestRouteImport } from './routes/nbc-test'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as GameGameIdRouteImport } from './routes/game.$gameId'
 import { Route as OrderOrderIdRouteImport } from './routes/order.$orderId'
@@ -29,6 +30,11 @@ const AdminRoute = AdminRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NbcTestRoute = NbcTestRouteImport.update({
+  id: '/nbc-test',
+  path: '/nbc-test',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/nbc-test': typeof NbcTestRoute
   '/profile': typeof ProfileRoute
   '/game/$gameId': typeof GameGameIdRoute
   '/order/$orderId': typeof OrderOrderIdRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/nbc-test': typeof NbcTestRoute
   '/profile': typeof ProfileRoute
   '/game/$gameId': typeof GameGameIdRoute
   '/order/$orderId': typeof OrderOrderIdRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/nbc-test': typeof NbcTestRoute
   '/profile': typeof ProfileRoute
   '/game/$gameId': typeof GameGameIdRoute
   '/order/$orderId': typeof OrderOrderIdRoute
@@ -75,15 +84,28 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/admin' | '/auth' | '/profile' | '/game/$gameId' | '/order/$orderId'
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/nbc-test'
+    | '/profile'
+    | '/game/$gameId'
+    | '/order/$orderId'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/admin' | '/auth' | '/profile' | '/game/$gameId' | '/order/$orderId'
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/nbc-test'
+    | '/profile'
+    | '/game/$gameId'
+    | '/order/$orderId'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/auth'
+    | '/nbc-test'
     | '/profile'
     | '/game/$gameId'
     | '/order/$orderId'
@@ -93,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
+  NbcTestRoute: typeof NbcTestRoute
   ProfileRoute: typeof ProfileRoute
   GameGameIdRoute: typeof GameGameIdRoute
   OrderOrderIdRoute: typeof OrderOrderIdRoute
@@ -119,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nbc-test': {
+      id: '/nbc-test'
+      path: '/nbc-test'
+      fullPath: '/nbc-test'
+      preLoaderRoute: typeof NbcTestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -149,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
+  NbcTestRoute: NbcTestRoute,
   ProfileRoute: ProfileRoute,
   GameGameIdRoute: GameGameIdRoute,
   OrderOrderIdRoute: OrderOrderIdRoute,
