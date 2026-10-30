@@ -124,13 +124,32 @@ function AuthPage() {
 
   const pwStr = mode === "signup" || recovering ? passwordStrength(password) : null;
 
+  // Shown in red under each field (instead of the browser's own bubble).
+  const [errors, setErrors] = useState<{
+    email?: string | undefined;
+    password?: string | undefined;
+  }>({});
+  const emailError = (value: string) =>
+    !value.trim()
+      ? tx("សូមបញ្ចូល email របស់អ្នក", "Enter your email.")
+      : !/^\S+@\S+\.\S+$/.test(value.trim())
+        ? tx("Email នេះមិនត្រឹមត្រូវ", "This email doesn't look right.")
+        : undefined;
+  const passwordError = (value: string) =>
+    !value
+      ? tx("សូមបញ្ចូលពាក្យសម្ងាត់", "Enter your password.")
+      : value.length < 8
+        ? tx("ពាក្យសម្ងាត់ត្រូវមានយ៉ាងតិច 8 តួអក្សរ", "Use at least 8 characters.")
+        : undefined;
+
   async function sendReset(e?: React.FormEvent) {
     e?.preventDefault();
     setMsg(null);
     const to = resetFor ?? email.trim();
-    if (!/^\S+@\S+\.\S+$/.test(to)) {
-      setMsg({ ok: false, text: tx("សូមបញ្ចូល email ត្រឹមត្រូវ", "Please enter a valid email") });
-      return;
+    if (!resetFor) {
+      const bad = emailError(to);
+      setErrors({ email: bad });
+      if (bad) return;
     }
     setBusy(true);
     const { error } = await supabase.auth.resetPasswordForEmail(to, {
@@ -190,13 +209,9 @@ function AuthPage() {
   async function saveNewPassword(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
-    if (password.length < 8) {
-      setMsg({
-        ok: false,
-        text: tx("Password ត្រូវការយ៉ាងតិច 8 តួអក្សរ", "Use at least 8 characters"),
-      });
-      return;
-    }
+    const bad = passwordError(password);
+    setErrors({ password: bad });
+    if (bad) return;
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
@@ -219,19 +234,15 @@ function AuthPage() {
     setResetFor(null);
     setCode("");
     setMsg(null);
+    setErrors({});
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
-      setMsg({ ok: false, text: "សូមបញ្ចូល email ត្រឹមត្រូវ" });
-      return;
-    }
-    if (password.length < 8) {
-      setMsg({ ok: false, text: "Password ត្រូវការយ៉ាងតិច 8 តួអក្សរ" });
-      return;
-    }
+    const found = { email: emailError(email), password: passwordError(password) };
+    setErrors(found);
+    if (found.email || found.password) return;
     setBusy(true);
     try {
       if (mode === "login") {
@@ -318,6 +329,10 @@ function AuthPage() {
       ? "border-[#d6e2f5] bg-[#f6f9ff] text-[#142650] placeholder:text-[#9aa8c4] focus:border-brand-500 focus:ring-brand-500/15"
       : "border-white/12 bg-white/[0.06] text-on-dark placeholder:text-on-dark-muted/60 focus:border-brand-400 focus:ring-brand-400/20"
   }`;
+  // A field with a problem gets a red border; its message shows in red below it.
+  const withError = (cls: string, err?: string) =>
+    err ? `${cls} border-red-500! focus:border-red-500! focus:ring-red-500/20!` : cls;
+  const errorText = `text-xs font-normal leading-[1.6] ${light ? "text-red-600" : "text-red-400"}`;
   const fieldIcon = `pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 ${
     light ? "text-[#7b8db3]" : "text-on-dark-muted"
   }`;
@@ -418,7 +433,11 @@ function AuthPage() {
             className={`px-5 py-7 sm:px-12 sm:py-12 ${light ? "text-[#142650]" : "text-on-dark"}`}
           >
             {recovering ? (
-              <form onSubmit={saveNewPassword} className="mx-auto grid max-w-[400px] gap-5">
+              <form
+                onSubmit={saveNewPassword}
+                noValidate
+                className="mx-auto grid max-w-[400px] gap-5"
+              >
                 <span
                   className={`mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${
                     light ? "bg-[#eef3ff] text-brand-500" : "bg-white/[0.08] text-brand-400"
@@ -444,12 +463,13 @@ function AuthPage() {
                       onChange={(e) => {
                         setPassword(e.target.value);
                         setMsg(null);
+                        setErrors({});
                       }}
                       autoComplete="new-password"
                       autoFocus
-                      required
-                      minLength={8}
-                      className={`${field} pr-12`}
+                      aria-invalid={!!errors.password}
+                      aria-describedby={errors.password ? "new-password-error" : undefined}
+                      className={withError(`${field} pr-12`, errors.password)}
                     />
                     <button
                       type="button"
@@ -460,6 +480,11 @@ function AuthPage() {
                       {showPw ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
                     </button>
                   </span>
+                  {errors.password && (
+                    <span id="new-password-error" className={errorText}>
+                      {errors.password}
+                    </span>
+                  )}
                 </label>
                 {pwStr && password.length > 0 && (
                   <p className={`text-xs leading-[1.7] ${muted}`}>
@@ -539,7 +564,7 @@ function AuthPage() {
                 </p>
               </form>
             ) : forgot ? (
-              <form onSubmit={sendReset} className="mx-auto grid max-w-[400px] gap-5">
+              <form onSubmit={sendReset} noValidate className="mx-auto grid max-w-[400px] gap-5">
                 <div>
                   <h1 className="text-[22px] font-bold leading-[1.5] sm:text-[26px]">
                     {tx("ភ្លេចពាក្យសម្ងាត់?", "Forgot your password?")}
@@ -561,14 +586,20 @@ function AuthPage() {
                       onChange={(e) => {
                         setEmail(e.target.value);
                         setMsg(null);
+                        setErrors({});
                       }}
-                      placeholder="you@example.com"
                       autoComplete="email"
                       autoFocus
-                      required
-                      className={field}
+                      aria-invalid={!!errors.email}
+                      aria-describedby={errors.email ? "reset-email-error" : undefined}
+                      className={withError(field, errors.email)}
                     />
                   </span>
+                  {errors.email && (
+                    <span id="reset-email-error" className={errorText}>
+                      {errors.email}
+                    </span>
+                  )}
                 </label>
                 <Button
                   type="submit"
@@ -670,6 +701,7 @@ function AuthPage() {
                       onClick={() => {
                         setMode(m);
                         setMsg(null);
+                        setErrors({});
                         setPassword("");
                       }}
                       className={`relative z-10 h-10 rounded-xl text-sm font-semibold transition-colors ${
@@ -700,7 +732,7 @@ function AuthPage() {
                   </p>
                 </div>
 
-                <form onSubmit={submit} className="mt-6 grid gap-4">
+                <form onSubmit={submit} noValidate className="mt-6 grid gap-4">
                   <label className="grid gap-1.5 text-sm font-medium">
                     Email
                     <span className="relative">
@@ -711,13 +743,19 @@ function AuthPage() {
                         onChange={(e) => {
                           setEmail(e.target.value);
                           setMsg(null);
+                          setErrors((v) => ({ ...v, email: undefined }));
                         }}
-                        placeholder="you@example.com"
                         autoComplete="email"
-                        required
-                        className={field}
+                        aria-invalid={!!errors.email}
+                        aria-describedby={errors.email ? "email-error" : undefined}
+                        className={withError(field, errors.email)}
                       />
                     </span>
+                    {errors.email && (
+                      <span id="email-error" className={errorText}>
+                        {errors.email}
+                      </span>
+                    )}
                   </label>
 
                   <label className="grid gap-1.5 text-sm font-medium">
@@ -730,12 +768,12 @@ function AuthPage() {
                         onChange={(e) => {
                           setPassword(e.target.value);
                           setMsg(null);
+                          setErrors((v) => ({ ...v, password: undefined }));
                         }}
-                        placeholder={tx("យ៉ាងតិច 8 តួអក្សរ", "At least 8 characters")}
                         autoComplete={mode === "login" ? "current-password" : "new-password"}
-                        required
-                        minLength={8}
-                        className={`${field} pr-12`}
+                        aria-invalid={!!errors.password}
+                        aria-describedby={errors.password ? "password-error" : undefined}
+                        className={withError(`${field} pr-12`, errors.password)}
                       />
                       <button
                         type="button"
@@ -750,6 +788,11 @@ function AuthPage() {
                         )}
                       </button>
                     </span>
+                    {errors.password && (
+                      <span id="password-error" className={errorText}>
+                        {errors.password}
+                      </span>
+                    )}
                   </label>
 
                   {mode === "login" && (
@@ -758,6 +801,7 @@ function AuthPage() {
                       onClick={() => {
                         setForgot(true);
                         setMsg(null);
+                        setErrors({});
                       }}
                       className="-mt-1 justify-self-end text-sm font-semibold text-brand-500 underline-offset-2 hover:underline"
                     >
