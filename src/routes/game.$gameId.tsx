@@ -518,17 +518,13 @@ function GamePage({ gameId }: { gameId: string }) {
                   <p className="mb-3 flex items-center gap-2 text-sm font-bold text-amber-600">
                     <Sparkles className="h-4 w-4" /> {t("Recommended for You")}
                   </p>
-                  {featuredHot.length > 0 && (
-                    <div className="mb-3 space-y-3">
-                      {featuredHot.map((item) => renderHot(item, true))}
-                    </div>
-                  )}
+                  {/* Bundles (badge) and passes share one row: four side by side when there are four. */}
                   <div className="mb-3 flex flex-wrap justify-center gap-3">
-                    {pictureHot.map((item) => (
+                    {[...featuredHot, ...pictureHot].map((item, _, row) => (
                       <div
                         key={item.label}
                         className={`w-[calc(50%-0.375rem)] ${
-                          pictureHot.length >= 4
+                          row.length >= 4
                             ? "sm:w-[calc((100%-2.25rem)/4)]"
                             : "sm:w-[calc((100%-1.5rem)/3)]"
                         }`}
