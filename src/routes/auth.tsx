@@ -70,6 +70,11 @@ function AuthPage() {
   const [codeFor, setCodeFor] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [cooldown, setCooldown] = useState(0);
+  // Forgot password: ask for the email, then the email's code (or its link),
+  // then a new password. `recovering` = signed in by the code/link, new password next.
+  const [forgot, setForgot] = useState(false);
+  const [resetFor, setResetFor] = useState<string | null>(null);
+  const [recovering, setRecovering] = useState(false);
   const { lang, light } = useStorePrefs();
   const pic = useSiteImage();
   const tx = (km: string, en: string) => (lang === "km" ? km : en);
@@ -80,7 +85,113 @@ function AuthPage() {
     return () => clearTimeout(id);
   }, [cooldown]);
 
-  const pwStr = mode === "signup" ? passwordStrength(password) : null;
+  // The reset link in the email brings the customer back here, signed in for recovery.
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setRecovering(true);
+        setPassword("");
+        setMsg(null);
+      }
+    });
+    return () => data.subscription.unsubscribe();
+  }, []);
+
+  const pwStr = mode === "signup" || recovering ? passwordStrength(password) : null;
+
+  async function sendReset(e?: React.FormEvent) {
+    e?.preventDefault();
+    setMsg(null);
+    const to = resetFor ?? email.trim();
+    if (!/^\S+@\S+\.\S+$/.test(to)) {
+      setMsg({ ok: false, text: tx("សូមបញ្ចូល email ត្រឹមត្រូវ", "Please enter a valid email") });
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(to, {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+    setBusy(false);
+    if (error) {
+      setMsg({
+        ok: false,
+        text: tx("ផ្ញើមិនបាន សូមរង់ចាំ 1 នាទី ហើយសាកម្តងទៀត", "Couldn't send. Wait a minute and try again"),
+      });
+      return;
+    }
+    // Same answer whether or not the email has an account, so nobody can probe for accounts.
+    setResetFor(to);
+    setCode("");
+    setCooldown(60);
+    setMsg({
+      ok: true,
+      text: tx(
+        "បើ email នេះមានគណនី យើងបានផ្ញើកូដ 6 ខ្ទង់ និង link ទៅវាហើយ",
+        "If this email has an account, we sent it a 6-digit code and a link",
+      ),
+    });
+  }
+
+  async function verifyResetCode(e: React.FormEvent) {
+    e.preventDefault();
+    if (!resetFor) return;
+    setMsg(null);
+    if (!/^\d{6}$/.test(code.trim())) {
+      setMsg({ ok: false, text: tx("កូដត្រូវមាន 6 ខ្ទង់", "The code has 6 digits") });
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.auth.verifyOtp({
+      email: resetFor,
+      token: code.trim(),
+      type: "recovery",
+    });
+    setBusy(false);
+    if (error) {
+      setMsg({
+        ok: false,
+        text: tx("កូដខុស ឬផុតកំណត់ សូមសាកម្តងទៀត", "Wrong or expired code, please try again"),
+      });
+      return;
+    }
+    setResetFor(null);
+    setRecovering(true);
+    setPassword("");
+  }
+
+  async function saveNewPassword(e: React.FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    if (password.length < 8) {
+      setMsg({
+        ok: false,
+        text: tx("Password ត្រូវការយ៉ាងតិច 8 តួអក្សរ", "Use at least 8 characters"),
+      });
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.auth.updateUser({ password });
+    setBusy(false);
+    if (error) {
+      setMsg({
+        ok: false,
+        text: error.message.toLowerCase().includes("different")
+          ? tx("សូមប្រើ password ថ្មីដែលខុសពីចាស់", "Choose a password different from the old one")
+          : tx("រក្សាទុកមិនបាន សូមសាកម្តងទៀត", "Couldn't save it, please try again"),
+      });
+      return;
+    }
+    setRecovering(false);
+    setForgot(false);
+    navigate({ to: "/" });
+  }
+
+  function leaveForgot() {
+    setForgot(false);
+    setResetFor(null);
+    setCode("");
+    setMsg(null);
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -278,7 +389,176 @@ function AuthPage() {
           <section
             className={`px-5 py-7 sm:px-12 sm:py-12 ${light ? "text-[#142650]" : "text-on-dark"}`}
           >
-            {codeFor ? (
+            {recovering ? (
+              <form onSubmit={saveNewPassword} className="mx-auto grid max-w-[400px] gap-5">
+                <span
+                  className={`mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${
+                    light ? "bg-[#eef3ff] text-brand-500" : "bg-white/[0.08] text-brand-400"
+                  }`}
+                >
+                  <KeyRound className="h-8 w-8" aria-hidden="true" />
+                </span>
+                <div className="text-center">
+                  <h1 className="text-2xl font-bold leading-[1.6]">
+                    {tx("កំណត់ពាក្យសម្ងាត់ថ្មី", "Set a new password")}
+                  </h1>
+                  <p className={`mt-1 text-sm leading-[1.8] ${muted}`}>
+                    {tx("យ៉ាងតិច 8 តួអក្សរ", "At least 8 characters")}
+                  </p>
+                </div>
+                <label className="grid gap-1.5 text-sm font-medium">
+                  {tx("ពាក្យសម្ងាត់ថ្មី", "New password")}
+                  <span className="relative">
+                    <KeyRound className={fieldIcon} aria-hidden="true" />
+                    <input
+                      type={showPw ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setMsg(null);
+                      }}
+                      autoComplete="new-password"
+                      autoFocus
+                      required
+                      minLength={8}
+                      className={`${field} pr-12`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPw(!showPw)}
+                      className={`absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg ${muted} hover:text-current`}
+                      aria-label={showPw ? "Hide password" : "Show password"}
+                    >
+                      {showPw ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+                    </button>
+                  </span>
+                </label>
+                {pwStr && password.length > 0 && (
+                  <p className={`text-xs leading-[1.7] ${muted}`}>
+                    {tx("កម្លាំង", "Strength")}:{" "}
+                    <span className="font-semibold text-current">{tx(pwStr.km, pwStr.label)}</span>
+                  </p>
+                )}
+                <Button
+                  type="submit"
+                  disabled={busy}
+                  className="btn-3d h-12 rounded-xl text-[15px] font-semibold"
+                >
+                  {busy ? busyLabel : tx("រក្សាទុក ហើយចូល", "Save and sign in")}
+                </Button>
+              </form>
+            ) : resetFor ? (
+              <form onSubmit={verifyResetCode} className="mx-auto grid max-w-[400px] gap-5">
+                <span
+                  className={`mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${
+                    light ? "bg-[#eef3ff] text-brand-500" : "bg-white/[0.08] text-brand-400"
+                  }`}
+                >
+                  <MailCheck className="h-8 w-8" aria-hidden="true" />
+                </span>
+                <div className="text-center">
+                  <h1 className="text-2xl font-bold leading-[1.6]">
+                    {tx("ពិនិត្យ email របស់អ្នក", "Check your email")}
+                  </h1>
+                  <p className={`mt-1 text-sm leading-[1.8] ${muted}`}>
+                    {tx(
+                      "វាយកូដ 6 ខ្ទង់ ឬចុច link ក្នុង email ដែលបានផ្ញើទៅ",
+                      "Type the 6-digit code, or tap the link in the email sent to",
+                    )}{" "}
+                    <span className="font-semibold text-current">{resetFor}</span>
+                  </p>
+                </div>
+                <CodeBoxes
+                  value={code}
+                  light={light}
+                  onChange={(v) => {
+                    setCode(v);
+                    setMsg(null);
+                  }}
+                />
+                <Button
+                  type="submit"
+                  disabled={busy || code.length < 6}
+                  className="btn-3d h-12 rounded-xl text-[15px] font-semibold"
+                >
+                  {busy ? busyLabel : tx("បន្ត", "Continue")}
+                </Button>
+                <div className="flex items-center justify-between text-sm">
+                  <button
+                    type="button"
+                    onClick={leaveForgot}
+                    className={`inline-flex items-center gap-1 ${muted} hover:text-current`}
+                  >
+                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                    {tx("ត្រឡប់ទៅ login", "Back to sign in")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void sendReset()}
+                    disabled={busy || cooldown > 0}
+                    className="font-semibold text-brand-500 underline-offset-2 hover:underline disabled:opacity-50"
+                  >
+                    {cooldown > 0
+                      ? tx(`ផ្ញើម្តងទៀតក្នុង ${cooldown}s`, `Resend in ${cooldown}s`)
+                      : tx("ផ្ញើកូដម្តងទៀត", "Resend code")}
+                  </button>
+                </div>
+                <p className={`text-center text-xs leading-[1.8] ${muted}`}>
+                  {tx(
+                    "រកមិនឃើញ? សូមមើលក្នុង Spam ឬ Promotions",
+                    "Can't find it? Check Spam or Promotions",
+                  )}
+                </p>
+              </form>
+            ) : forgot ? (
+              <form onSubmit={sendReset} className="mx-auto grid max-w-[400px] gap-5">
+                <div>
+                  <h1 className="text-[22px] font-bold leading-[1.5] sm:text-[26px]">
+                    {tx("ភ្លេចពាក្យសម្ងាត់?", "Forgot your password?")}
+                  </h1>
+                  <p className={`mt-1 text-sm leading-[1.8] ${muted}`}>
+                    {tx(
+                      "វាយ email គណនីរបស់អ្នក យើងនឹងផ្ញើកូដដើម្បីកំណត់ពាក្យសម្ងាត់ថ្មី",
+                      "Enter your account email and we'll send a code to set a new password",
+                    )}
+                  </p>
+                </div>
+                <label className="grid gap-1.5 text-sm font-medium">
+                  Email
+                  <span className="relative">
+                    <Mail className={fieldIcon} aria-hidden="true" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setMsg(null);
+                      }}
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      autoFocus
+                      required
+                      className={field}
+                    />
+                  </span>
+                </label>
+                <Button
+                  type="submit"
+                  disabled={busy}
+                  className="btn-3d h-12 rounded-xl text-[15px] font-semibold"
+                >
+                  {busy ? busyLabel : tx("ផ្ញើកូដ", "Send code")}
+                </Button>
+                <button
+                  type="button"
+                  onClick={leaveForgot}
+                  className={`inline-flex items-center justify-center gap-1 text-sm ${muted} hover:text-current`}
+                >
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  {tx("ត្រឡប់ទៅ login", "Back to sign in")}
+                </button>
+              </form>
+            ) : codeFor ? (
               <form onSubmit={verifyCode} className="mx-auto grid max-w-[400px] gap-5">
                 <span
                   className={`mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${
@@ -443,6 +723,19 @@ function AuthPage() {
                       </button>
                     </span>
                   </label>
+
+                  {mode === "login" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForgot(true);
+                        setMsg(null);
+                      }}
+                      className="-mt-1 justify-self-end text-sm font-semibold text-brand-500 underline-offset-2 hover:underline"
+                    >
+                      {tx("ភ្លេចពាក្យសម្ងាត់?", "Forgot password?")}
+                    </button>
+                  )}
 
                   {pwStr && password.length > 0 && (
                     <div className="grid gap-1.5">
