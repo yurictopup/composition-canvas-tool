@@ -3,6 +3,7 @@ import mlbbWeeklyPass from "@/assets/mlbb-weekly-pass.png";
 import mlbbWeeklyElite from "@/assets/mlbb-weekly-elite.png";
 import mlbbMonthlyEpic from "@/assets/mlbb-monthly-epic.png";
 import mlbbTwilight from "@/assets/mlbb-twilight.png";
+import bsTreasure from "@/assets/bloodstrike-treasure.png";
 import bs105 from "@/assets/bloodstrike-105.jpg";
 import bs320 from "@/assets/bloodstrike-320.png";
 import bs540 from "@/assets/bloodstrike-540.jpg";
@@ -546,23 +547,23 @@ export const hotItemsByGame: Record<string, HotItem[]> = {
     { label: "Lukas's Battle Bounty", price: 0.99 },
   ],
   bloodstrike: [
-    { label: "Season Pass", price: 0.99 },
-    { label: "Level Up Pass", price: 1.79 },
-    { label: "Strike Pass Elite", price: 3.49 },
-    { label: "Strike Pass Premium", price: 7.59 },
-    { label: "Ultra Skin Lucky Chest", price: 0.49 },
-    { label: "Lucky Bag Week", price: 0.99 },
-    { label: "$0.49 Deal", price: 0.49 },
-    { label: "$0.99 Deal", price: 0.99 },
-    { label: "$1.99 Deal", price: 1.79 },
-    { label: "$2.99 Deal", price: 2.69 },
-    { label: "$3.99 Deal", price: 3.49 },
-    { label: "$4.99 Deal", price: 4.39 },
-    { label: "$5.99 Deal", price: 5.19 },
-    { label: "$6.99 Deal", price: 5.89 },
-    { label: "$7.99 Deal", price: 6.69 },
-    { label: "$8.99 Deal", price: 7.59 },
-    { label: "$9.99 Deal", price: 8.39 },
+    { label: "Season Pass", price: 0.99, icon: bsTreasure },
+    { label: "Level Up Pass", price: 1.79, icon: bsTreasure },
+    { label: "Strike Pass Elite", price: 3.49, icon: bsTreasure },
+    { label: "Strike Pass Premium", price: 7.59, icon: bsTreasure },
+    { label: "Ultra Skin Lucky Chest", price: 0.49, icon: bsTreasure },
+    { label: "Lucky Bag Week", price: 0.99, icon: bsTreasure },
+    { label: "$0.49 Deal", price: 0.49, icon: bsTreasure },
+    { label: "$0.99 Deal", price: 0.99, icon: bsTreasure },
+    { label: "$1.99 Deal", price: 1.79, icon: bsTreasure },
+    { label: "$2.99 Deal", price: 2.69, icon: bsTreasure },
+    { label: "$3.99 Deal", price: 3.49, icon: bsTreasure },
+    { label: "$4.99 Deal", price: 4.39, icon: bsTreasure },
+    { label: "$5.99 Deal", price: 5.19, icon: bsTreasure },
+    { label: "$6.99 Deal", price: 5.89, icon: bsTreasure },
+    { label: "$7.99 Deal", price: 6.69, icon: bsTreasure },
+    { label: "$8.99 Deal", price: 7.59, icon: bsTreasure },
+    { label: "$9.99 Deal", price: 8.39, icon: bsTreasure },
   ],
   genshin: [
     { label: "Blessing of the Welkin Moon", price: 5.59 },
