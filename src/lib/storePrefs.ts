@@ -108,6 +108,8 @@ const KM: Record<string, string> = {
   "3 days": "៣ ថ្ងៃ",
   "7 days": "៧ ថ្ងៃ",
   "30 days": "៣០ ថ្ងៃ",
+  "Once a week": "ទិញបាន ១ ដង/សប្តាហ៍",
+  "Once a month": "ទិញបាន ១ ដង/ខែ",
   "Recommended for You": "ណែនាំសម្រាប់អ្នក",
   "More items": "កញ្ចប់ និង Pass ផ្សេងៗ",
   "Choose your server": "ជ្រើសរើស Server របស់អ្នក",

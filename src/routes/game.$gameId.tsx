@@ -148,7 +148,7 @@ function GamePage({ gameId }: { gameId: string }) {
           </div>
           {item.note && (
             <div
-              className={`mt-0.5 text-[11px] text-muted-foreground ${wide ? "sm:text-xs" : "hidden sm:block"}`}
+              className={`mt-0.5 text-[11px] text-muted-foreground ${wide ? "sm:text-xs" : ""}`}
             >
               {t(item.note)}
             </div>

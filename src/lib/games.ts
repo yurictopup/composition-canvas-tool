@@ -425,8 +425,8 @@ export function getPackages(gameId: string): GamePackage[] {
 export const hotItemsByGame: Record<string, HotItem[]> = {
   mlbb: [
     { label: "Weekly Pass", price: 1.55, img: mlbbWeeklyPass },
-    { label: "Weekly Elite Pack", price: 1.09, img: mlbbWeeklyElite },
-    { label: "Monthly Elite Pack", price: 4.09, img: mlbbMonthlyEpic },
+    { label: "Weekly Elite Pack", price: 1.09, img: mlbbWeeklyElite, note: "Once a week" },
+    { label: "Monthly Elite Pack", price: 4.09, img: mlbbMonthlyEpic, note: "Once a month" },
     { label: "Twilight Pass", price: 8.39, img: mlbbTwilight },
     { label: "First Top-Up 50 + 5", price: 0.99 },
     { label: "First Top-Up 150 + 15", price: 2.49 },
@@ -443,8 +443,8 @@ export const hotItemsByGame: Record<string, HotItem[]> = {
   ],
   mlbb_my: [
     { label: "Weekly Pass", price: 2.19, img: mlbbWeeklyPass },
-    { label: "Weekly Elite Pack", price: 1.19, img: mlbbWeeklyElite },
-    { label: "Monthly Elite Pack", price: 5.09, img: mlbbMonthlyEpic },
+    { label: "Weekly Elite Pack", price: 1.19, img: mlbbWeeklyElite, note: "Once a week" },
+    { label: "Monthly Elite Pack", price: 5.09, img: mlbbMonthlyEpic, note: "Once a month" },
     { label: "Twilight Pass", price: 9.19, img: mlbbTwilight },
     { label: "First Top-Up 50 + 5", price: 1.19 },
     { label: "First Top-Up 150 + 15", price: 3.09 },
