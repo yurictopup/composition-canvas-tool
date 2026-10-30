@@ -10,6 +10,13 @@ import ffMonthlyCard from "@/assets/ff-monthly-card.webp";
 import ffMembershipBundle from "@/assets/ff-membership-bundle.webp";
 import magicchess from "@/assets/magicchess.webp";
 import pubg from "@/assets/pubg-clean.webp";
+import pubgFirstPurchase from "@/assets/pubg-first-purchase.webp";
+import pubgFirearm from "@/assets/pubg-firearm-materials.webp";
+import pubgMythicEmblem from "@/assets/pubg-mythic-emblem.webp";
+import pubgPrime from "@/assets/pubg-prime.webp";
+import pubgPrimePlus from "@/assets/pubg-prime-plus.webp";
+import pubgElitePass from "@/assets/pubg-elite-pass.webp";
+import pubgElitePassPlus from "@/assets/pubg-elite-pass-plus.webp";
 import roblox from "@/assets/roblox.png";
 import hok from "@/assets/hok.webp";
 import wildrift from "@/assets/wildrift.webp";
@@ -85,7 +92,8 @@ export function baseGameId(id: string): string {
 }
 
 export type GamePackage = { amt: string; price: number | null; hot?: boolean; img?: string };
-export type HotItem = { label: string; price: number; img?: string; note?: string; badge?: string };
+// img puts the item in "Recommended for You"; icon only replaces the currency icon in "More items".
+export type HotItem = { label: string; price: number; img?: string; icon?: string; note?: string; badge?: string };
 
 // Packages match what FazerCards sells for each game (read from the reseller panel on
 // 2026-10-27, Cambodia-usable regions only).
@@ -491,23 +499,23 @@ export const hotItemsByGame: Record<string, HotItem[]> = {
     { label: "Level Up Pack Lv30", price: 0.99 },
   ],
   pubg: [
-    { label: "First Purchase Pack", price: 1.19 },
+    { label: "First Purchase Pack", price: 1.19, icon: pubgFirstPurchase },
     { label: "Weekly Deal Pack 1", price: 1.09 },
     { label: "Weekly Deal Pack 2", price: 2.89 },
-    { label: "Upgradable Firearm Materials Pack", price: 2.89 },
-    { label: "Weekly Mythic Emblem Pack", price: 2.89 },
-    { label: "Mythic Emblem Pack", price: 4.89 },
-    { label: "Prime 1 Month", price: 1.19 },
-    { label: "Prime 3 Months", price: 2.99 },
-    { label: "Prime 6 Months", price: 5.79 },
-    { label: "Prime 12 Months", price: 11.49 },
-    { label: "Prime Plus 1 Month", price: 9.59 },
-    { label: "Prime Plus 3 Months", price: 27.99 },
-    { label: "Prime Plus 6 Months", price: 55.19 },
-    { label: "Prime Plus 12 Months", price: 111.39 },
-    { label: "Elite Pass LV1-50", price: 5.79 },
-    { label: "Elite Pass LV1-100", price: 11.59 },
-    { label: "Elite Pass Plus LV1-100", price: 26.89 },
+    { label: "Upgradable Firearm Materials Pack", price: 2.89, icon: pubgFirearm },
+    { label: "Weekly Mythic Emblem Pack", price: 2.89, icon: pubgMythicEmblem },
+    { label: "Mythic Emblem Pack", price: 4.89, icon: pubgMythicEmblem },
+    { label: "Prime 1 Month", price: 1.19, icon: pubgPrime },
+    { label: "Prime 3 Months", price: 2.99, icon: pubgPrime },
+    { label: "Prime 6 Months", price: 5.79, icon: pubgPrime },
+    { label: "Prime 12 Months", price: 11.49, icon: pubgPrime },
+    { label: "Prime Plus 1 Month", price: 9.59, icon: pubgPrimePlus },
+    { label: "Prime Plus 3 Months", price: 27.99, icon: pubgPrimePlus },
+    { label: "Prime Plus 6 Months", price: 55.19, icon: pubgPrimePlus },
+    { label: "Prime Plus 12 Months", price: 111.39, icon: pubgPrimePlus },
+    { label: "Elite Pass LV1-50", price: 5.79, icon: pubgElitePass },
+    { label: "Elite Pass LV1-100", price: 11.59, icon: pubgElitePass },
+    { label: "Elite Pass Plus LV1-100", price: 26.89, icon: pubgElitePassPlus },
   ],
   hok: [
     { label: "Weekly Card", price: 1.19 },

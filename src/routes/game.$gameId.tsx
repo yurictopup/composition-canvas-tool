@@ -616,9 +616,9 @@ function GamePage({ gameId }: { gameId: string }) {
                               {item.price !== null ? `$${item.price.toFixed(2)}` : "—"}
                             </div>
                           </div>
-                          {slotPic(`item:${gameId}:${item.label}`) ? (
+                          {slotPic(`item:${gameId}:${item.label}`) || item.icon ? (
                             <img
-                              src={slotPic(`item:${gameId}:${item.label}`)}
+                              src={slotPic(`item:${gameId}:${item.label}`) ?? item.icon}
                               loading="lazy"
                               decoding="async"
                               alt={item.label}

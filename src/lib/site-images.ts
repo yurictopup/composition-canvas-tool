@@ -40,7 +40,7 @@ function itemSlots(): ImageSlot[] {
         group: "item",
         gameId,
         name: game ? `${game.name} · ${item.label}` : item.label,
-        fallback: item.img ?? "",
+        fallback: item.img ?? item.icon ?? "",
         width: wide[0]!,
         height: wide[1]!,
       });
