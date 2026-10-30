@@ -15,4 +15,5 @@ export type AdminOrder = {
   supplier_status?: string | null;
   payment_md5?: string | null;
   paid_at?: string | null;
+  delivery_codes?: string[] | null;
 };

@@ -284,6 +284,14 @@ export function AdminOrders({
                               <p className="text-xs text-[var(--vx-muted)]">
                                 {t("Order ID")}: <span className="font-mono">{o.id}</span>
                               </p>
+                              {o.delivery_codes?.length ? (
+                                <p className="text-xs">
+                                  <span className="text-[var(--vx-muted)]">Code: </span>
+                                  <span className="select-all font-mono font-semibold text-[var(--vx-heading)]">
+                                    {o.delivery_codes.join(", ")}
+                                  </span>
+                                </p>
+                              ) : null}
                             </div>
                           </td>
                         </tr>
