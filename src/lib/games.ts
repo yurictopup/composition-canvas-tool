@@ -10,6 +10,7 @@ import bs540 from "@/assets/bloodstrike-540.png";
 import bs1100 from "@/assets/bloodstrike-1100.png";
 import bs2260 from "@/assets/bloodstrike-2260.png";
 import bs5800 from "@/assets/bloodstrike-5800.png";
+import mlbbFirstTopup from "@/assets/mlbb-first-topup.png";
 import freefire from "@/assets/freefire.webp";
 import ffWeeklyLite from "@/assets/ff-weekly-lite.webp";
 import ffWeeklyCard from "@/assets/ff-weekly-card.webp";
@@ -448,28 +449,28 @@ export const hotItemsByGame: Record<string, HotItem[]> = {
     { label: "Weekly Elite Pack", price: 1.09, img: mlbbWeeklyElite, note: "Once a week" },
     { label: "Monthly Elite Pack", price: 4.09, img: mlbbMonthlyEpic, note: "Once a month" },
     { label: "Twilight Pass", price: 8.39, img: mlbbTwilight },
-    { label: "First Top-Up 50 + 5", price: 0.99 },
-    { label: "First Top-Up 150 + 15", price: 2.49 },
-    { label: "First Top-Up 250 + 25", price: 3.89 },
-    { label: "First Top-Up 500 + 65", price: 7.69 },
+    { label: "First Top-Up 50 + 5", price: 0.99, icon: mlbbFirstTopup },
+    { label: "First Top-Up 150 + 15", price: 2.49, icon: mlbbFirstTopup },
+    { label: "First Top-Up 250 + 25", price: 3.89, icon: mlbbFirstTopup },
+    { label: "First Top-Up 500 + 65", price: 7.69, icon: mlbbFirstTopup },
   ],
   mlbb_ph: [
     { label: "Weekly Pass", price: 1.99, img: mlbbWeeklyPass },
     { label: "Twilight Pass", price: 9.09, img: mlbbTwilight },
-    { label: "First Top-Up 50 + 5", price: 1.09 },
-    { label: "First Top-Up 150 + 15", price: 2.69 },
-    { label: "First Top-Up 250 + 25", price: 4.49 },
-    { label: "First Top-Up 500 + 65", price: 8.79 },
+    { label: "First Top-Up 50 + 5", price: 1.09, icon: mlbbFirstTopup },
+    { label: "First Top-Up 150 + 15", price: 2.69, icon: mlbbFirstTopup },
+    { label: "First Top-Up 250 + 25", price: 4.49, icon: mlbbFirstTopup },
+    { label: "First Top-Up 500 + 65", price: 8.79, icon: mlbbFirstTopup },
   ],
   mlbb_my: [
     { label: "Weekly Pass", price: 2.19, img: mlbbWeeklyPass },
     { label: "Weekly Elite Pack", price: 1.19, img: mlbbWeeklyElite, note: "Once a week" },
     { label: "Monthly Elite Pack", price: 5.09, img: mlbbMonthlyEpic, note: "Once a month" },
     { label: "Twilight Pass", price: 9.19, img: mlbbTwilight },
-    { label: "First Top-Up 50 + 5", price: 1.19 },
-    { label: "First Top-Up 150 + 15", price: 3.09 },
-    { label: "First Top-Up 250 + 25", price: 5.09 },
-    { label: "First Top-Up 500 + 65", price: 9.89 },
+    { label: "First Top-Up 50 + 5", price: 1.19, icon: mlbbFirstTopup },
+    { label: "First Top-Up 150 + 15", price: 3.09, icon: mlbbFirstTopup },
+    { label: "First Top-Up 250 + 25", price: 5.09, icon: mlbbFirstTopup },
+    { label: "First Top-Up 500 + 65", price: 9.89, icon: mlbbFirstTopup },
   ],
   ff: [
     { label: "Weekly Lite", price: 0.39, img: ffWeeklyLite, note: "7 days" },
