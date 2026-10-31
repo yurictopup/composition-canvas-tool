@@ -4,7 +4,7 @@ import { Clock, QrCode } from "lucide-react";
 import banner from "@/assets/banner-angkor.webp";
 import { useSiteImage } from "@/lib/site-images";
 import mascot from "@/assets/mascot-cut.webp";
-import { games, serverGames } from "@/lib/games";
+import { games, listedGames, serverGames } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { useStorePrefs } from "@/lib/storePrefs";
 import { useStoreStatus } from "@/lib/store-status";
@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const mainServerTile: Record<string, string> = { mlbb: "Mobile Legends KH", ff: "Free Fire MY/SG" };
 
 const gameTabs = [
-  { id: "all", label: "All", items: games },
+  { id: "all", label: "All", items: listedGames },
   ...["mlbb", "ff", "roblox", "pubg"].map((id) => ({
     id,
     label: games.find((game) => game.id === id)?.name ?? id,
@@ -27,7 +27,7 @@ const gameTabs = [
   {
     id: "other",
     label: "Others",
-    items: games.filter((game) => !["mlbb", "ff", "roblox", "pubg"].includes(game.id)),
+    items: listedGames.filter((game) => !["mlbb", "ff", "roblox", "pubg"].includes(game.id)),
   },
 ];
 

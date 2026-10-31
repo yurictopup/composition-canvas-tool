@@ -70,6 +70,15 @@ export const games = [
 
 export type Game = (typeof games)[number];
 
+/** Telegram has one tile (Premium); its page switches between Premium and Stars. */
+export const telegramTabs = [
+  { id: "tgpremium", label: "Telegram Premium" },
+  { id: "tgstars", label: "Telegram Stars" },
+];
+
+/** Game tiles on the home and profile pages (Telegram Stars sits inside the Telegram tile). */
+export const listedGames = games.filter((g) => g.id !== "tgstars");
+
 // Other servers of a game. Each is its own game id (own packages, prices and FazerCards
 // category) but is reached from the main game's page through the server tabs.
 export const serverGames: (Game & { base: string; server: string })[] = [

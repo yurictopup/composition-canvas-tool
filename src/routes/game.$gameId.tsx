@@ -10,6 +10,7 @@ import {
   packagePictures,
   payments,
   store,
+  telegramTabs,
 } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { useStorePrefs } from "@/lib/storePrefs";
@@ -76,6 +77,17 @@ function GamePage({ gameId }: { gameId: string }) {
   const game = findGame(gameId);
   const [uid, setUid] = useState("");
   const [zone, setZone] = useState("");
+  const isTelegram = telegramTabs.some((tab) => tab.id === gameId);
+  // Keep the typed username when switching between Telegram Premium and Stars.
+  useEffect(() => {
+    if (!isTelegram) return;
+    try {
+      const saved = sessionStorage.getItem(TG_USERNAME_KEY);
+      if (saved) setUid(saved);
+    } catch {
+      // storage blocked: the field just starts empty
+    }
+  }, [isTelegram]);
   const [check, setCheck] = useState<{ ok: boolean; msg: string; name?: string } | null>(null);
   const [checking, setChecking] = useState(false);
   const checkSeq = useRef(0);
@@ -484,6 +496,13 @@ function GamePage({ gameId }: { gameId: string }) {
                     onChange={(e) => {
                       setUid(e.target.value);
                       resetCheck();
+                      if (isTelegram) {
+                        try {
+                          sessionStorage.setItem(TG_USERNAME_KEY, e.target.value);
+                        } catch {
+                          // storage blocked: switching tabs just clears the field
+                        }
+                      }
                     }}
                     placeholder={idConfig.primary.placeholder}
                     inputMode={idConfig.primary.numeric ? "numeric" : "text"}
@@ -557,6 +576,7 @@ function GamePage({ gameId }: { gameId: string }) {
                 </span>
                 {t("Choose a package")}
               </h2>
+              {isTelegram && <TelegramSwitch current={gameId} />}
 
               {featuredHot.length + pictureHot.length > 0 && (
                 <div className="mb-5">
@@ -999,6 +1019,35 @@ function AbaMark() {
       <span className="text-xl font-extrabold leading-none tracking-wide">ABA</span>
       <span className="mt-1.5 text-[9px] font-bold leading-none tracking-[0.2em] text-white/80">KHQR</span>
     </span>
+  );
+}
+
+const TG_USERNAME_KEY = "yuric-tg-username";
+
+// One Telegram page with a Premium / Stars switch (each is its own game id underneath).
+function TelegramSwitch({ current }: { current: string }) {
+  return (
+    <div className="mb-4 grid grid-cols-2 gap-1 rounded-2xl border border-[#dfe8f6] bg-[#eef3fb] p-1">
+      {telegramTabs.map((tab) => {
+        const on = tab.id === current;
+        return (
+          <Link
+            key={tab.id}
+            to="/game/$gameId"
+            params={{ gameId: tab.id }}
+            replace
+            aria-current={on ? "page" : undefined}
+            className={`flex items-center justify-center rounded-xl px-3 py-2.5 text-center text-sm font-bold transition sm:py-3 sm:text-base ${
+              on
+                ? "bg-gradient-to-r from-[#3b6cf0] to-[#1f42b8] text-white shadow-[0_6px_16px_rgb(47_95_224/0.35)]"
+                : "text-[#5b6b8c] hover:bg-white/70 hover:text-[#142650]"
+            }`}
+          >
+            {tab.label}
+          </Link>
+        );
+      })}
+    </div>
   );
 }
 

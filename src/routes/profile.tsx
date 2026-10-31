@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Gamepad2, Inbox, Package } from "lucide-react";
 import banner from "@/assets/banner-angkor.webp";
 import { useSiteImage } from "@/lib/site-images";
-import { games, store } from "@/lib/games";
+import { listedGames, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -175,7 +175,7 @@ function Profile() {
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">Tap a game to top up.</p>
           <div className="mt-6 grid grid-cols-3 gap-4 sm:grid-cols-6 sm:gap-5">
-            {games.map((g, i) => (
+            {listedGames.map((g, i) => (
               <Link
                 key={g.id}
                 to="/game/$gameId"
