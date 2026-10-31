@@ -326,20 +326,22 @@ export function ChatWidget({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="group fixed bottom-6 right-[5.5rem] z-40 hidden items-center gap-3 rounded-2xl border border-white/15 bg-[linear-gradient(135deg,oklch(0.3_0.12_268/0.95),oklch(0.22_0.1_285/0.95))] py-2.5 pl-3 pr-4 text-left leading-snug text-white shadow-[0_14px_36px_oklch(0.12_0.08_268/0.6),0_0_30px_oklch(0.6_0.2_280/0.35)] backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_18px_44px_oklch(0.12_0.08_268/0.7),0_0_40px_oklch(0.6_0.22_280/0.5)] animate-in fade-in slide-in-from-right-2 duration-500 sm:flex"
+          className="group fixed bottom-[0.95rem] right-[4.4rem] z-40 flex items-center gap-2 rounded-xl border border-white/15 bg-[linear-gradient(135deg,oklch(0.3_0.12_268/0.95),oklch(0.22_0.1_285/0.95))] py-1.5 pl-1.5 pr-3 text-left leading-snug text-white shadow-[0_8px_22px_oklch(0.12_0.08_268/0.55),0_0_18px_oklch(0.6_0.2_280/0.3)] backdrop-blur transition hover:-translate-y-0.5 animate-in fade-in slide-in-from-right-2 duration-500 sm:bottom-[1.4rem] sm:right-[5rem] sm:gap-2.5 sm:pr-3.5"
         >
-          <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))] shadow-[0_0_18px_oklch(0.6_0.22_280/0.6)]">
-            <Sparkles className="h-5 w-5" />
-            <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5">
+          <span className="relative grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))] shadow-[0_0_12px_oklch(0.6_0.22_280/0.6)] sm:h-8 sm:w-8">
+            <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
-              <span className="relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-[oklch(0.25_0.1_268)] bg-emerald-400" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full border border-[oklch(0.25_0.1_268)] bg-emerald-400" />
             </span>
           </span>
           <span className="block">
-            <span className="block text-[13.5px] font-bold">មានសំណួរ? សួរ Yuric Bot</span>
-            <span className="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-white/70">
-              <Zap className="h-3 w-3 text-amber-300" />
-              តម្លៃ · បង់ប្រាក់ · លេខកូដបញ្ចុះ · ការបញ្ជាទិញ
+            <span className="block whitespace-nowrap text-[12px] font-bold sm:text-[12.5px]">
+              មានសំណួរ? សួរ Yuric Bot
+            </span>
+            <span className="hidden items-center gap-1 whitespace-nowrap text-[10px] font-medium text-white/65 sm:flex">
+              <Zap className="h-2.5 w-2.5 text-amber-300" />
+              តម្លៃ · បង់ប្រាក់ · លេខកូដបញ្ចុះ
             </span>
           </span>
         </button>
