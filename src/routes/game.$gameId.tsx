@@ -459,8 +459,6 @@ function GamePage({ gameId }: { gameId: string }) {
           <span className="tile-clean block w-14 shrink-0 rounded-[26%] sm:w-24">
             <img
               src={pic(game.icon)}
-              loading="lazy"
-              decoding="async"
               alt={game.name}
               width={151}
               height={151}
@@ -635,8 +633,6 @@ function GamePage({ gameId }: { gameId: string }) {
                       {slotPic(packageSlotKey(gameId, p.amt)) || packagePictures[gameId]?.[p.amt] ? (
                         <img
                           src={slotPic(packageSlotKey(gameId, p.amt)) ?? packagePictures[gameId]?.[p.amt]}
-                          loading="lazy"
-                          decoding="async"
                           alt={`${p.amt} ${game.unit}`}
                           className={`h-10 w-10 shrink-0 rounded-lg object-contain transition-transform sm:h-14 sm:w-14 ${pkg === i && hotPkg === null ? "scale-110" : ""}`}
                         />
@@ -689,8 +685,6 @@ function GamePage({ gameId }: { gameId: string }) {
                           {slotPic(`item:${gameId}:${item.label}`) || item.icon ? (
                             <img
                               src={slotPic(`item:${gameId}:${item.label}`) ?? item.icon}
-                              loading="lazy"
-                              decoding="async"
                               alt={item.label}
                               className={`h-11 w-11 shrink-0 rounded-lg object-contain transition-transform ${on ? "scale-110" : ""}`}
                             />
