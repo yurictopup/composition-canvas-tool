@@ -33,10 +33,10 @@ function Brand() {
 function KhqrBadge() {
   return (
     <span className="inline-flex items-center gap-2 rounded-lg bg-white px-2.5 py-1.5 shadow-sm">
-      <span className="rounded-[3px] bg-[#E1232E] px-1.5 py-0.5 text-[11px] font-extrabold leading-none tracking-wide text-white">
-        KHQR
+      <span className="rounded-[3px] bg-[#0B4F71] px-1.5 py-0.5 text-[11px] font-extrabold leading-none tracking-wide text-white">
+        ABA
       </span>
-      <span className="text-xs font-semibold text-[#142650]">Bakong</span>
+      <span className="text-xs font-semibold text-[#142650]">KHQR</span>
     </span>
   );
 }
