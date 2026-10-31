@@ -589,16 +589,8 @@ export function ChatWidget({
                     <Send className="h-4 w-4 shrink-0 text-[var(--chat-accent)]" />
                   </a>
                 </div>
-                <div className="relative px-3 pb-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={startChat}
-                    className="flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-[linear-gradient(120deg,oklch(0.68_0.15_250),oklch(0.55_0.24_290))] text-sm font-bold text-white shadow-[0_0_28px_oklch(0.6_0.22_280/0.45)] transition hover:brightness-110"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    ចាប់ផ្តើមជជែកជាមួយ Yuric Bot
-                  </button>
-                </div>
+                {/* The big "start chat" button is gone: typing here starts the chat. */}
+                {footer}
               </>
             )}
           </div>
