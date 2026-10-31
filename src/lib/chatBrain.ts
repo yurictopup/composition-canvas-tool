@@ -1,8 +1,10 @@
 // Yuric Bot's answers: matches a customer's question (Khmer or English) to a topic and a game,
 // and answers from the shop's real catalogue (src/lib/games.ts) and ID rules (src/lib/player-id.ts).
-// Never quotes prices: the live prices are in Supabase (src/lib/prices.ts), so the bot points to the game page.
-import { games, getPackages, payments, store } from "@/lib/games";
+// Prices come from the live price table (src/lib/prices.ts) when the widget has loaded it;
+// without it the bot lists the packages and points to the game page.
+import { games, getHotItems, getPackages, store } from "@/lib/games";
 import { getIdConfig } from "@/lib/player-id";
+import type { PriceMap } from "@/lib/prices";
 
 export type BotAction = { label: string; href: string };
 export type BotReply = { text: string; actions?: BotAction[]; suggestions?: string[] };
@@ -13,10 +15,10 @@ const TELEGRAM = store.telegram; // "@Yuricccc"
 const TELEGRAM_URL = "https://t.me/" + TELEGRAM.replace(/^@/, "");
 
 export const DEFAULT_SUGGESTIONS = [
-  "របៀបបញ្ចូលពេជ្រ",
-  "តម្លៃប៉ុន្មាន?",
+  "តម្លៃ MLBB",
+  "តម្លៃ Free Fire",
+  "លេខកូដបញ្ចុះតម្លៃ",
   "បង់ប្រាក់តាមអ្វី?",
-  "រក Player ID",
   "ហ្គេមអ្វីខ្លះ?",
 ];
 
@@ -35,6 +37,12 @@ const GAME_ALIASES: Record<string, string[]> = {
   bloodstrike: ["blood strike", "bloodstrike"],
   genshin: ["genshin", "genshin impact", "genesis"],
   starrail: ["star rail", "honkai", "hsr"],
+  tgstars: ["telegram stars", "telegram star", "tg stars", "stars", "ផ្កាយ telegram"],
+  tgpremium: ["telegram premium", "tg premium", "premium"],
+  deltaforce: ["delta force", "deltaforce"],
+  arenabreakout: ["arena breakout"],
+  zzz: ["zenless", "zzz"],
+  valorant: ["valorant", "vp"],
 };
 
 // Topic keywords. Each topic's score is the number of its keywords found in the message.
@@ -177,6 +185,7 @@ const TOPICS: Record<string, string[]> = {
     "list",
   ],
   refund: ["ដកលុយ", "សងលុយ", "បង្វិល", "refund", "cancel", "បោះបង់"],
+  promo: ["promo", "promo code", "coupon", "voucher", "discount", "កូដ", "លេខកូដ", "បញ្ចុះ", "បញ្ចុះតម្លៃ", "ប្រូម៉ូ"],
 };
 
 const isLatin = (w: string) => [...w].every((c) => c.charCodeAt(0) < 128);
@@ -224,6 +233,34 @@ function packagesLine(g: Game) {
   return `កញ្ចប់ដែលមាន៖ ${pk.map((p) => p.amt).join(", ")} ${g.unit}${hot ? ` (ពេញនិយម៖ ${hot.amt})` : ""}`;
 }
 
+/**
+ * Today's prices from the live table: a few currency packs (cheapest first) and the
+ * passes. Packages the owner switched off are left out. Null without live prices.
+ */
+export function priceLines(g: Game, prices: PriceMap | null | undefined, max = 8): string | null {
+  if (!prices) return null;
+  const live = (amt: string) => {
+    const row = prices.get(`${g.id}|${amt} ${g.unit}`);
+    return row && row.active ? row.price_usd : null;
+  };
+  const packs = getPackages(g.id)
+    .map((p) => ({ name: `${p.amt} ${g.unit}`, price: live(p.amt), hot: !!p.hot }))
+    .filter((p): p is { name: string; price: number; hot: boolean } => p.price !== null)
+    .sort((a, b) => a.price - b.price);
+  const passes = getHotItems(g.id)
+    .map((h) => ({ name: h.label, price: live(h.label) }))
+    .filter((p): p is { name: string; price: number } => p.price !== null)
+    .slice(0, 4);
+  if (!packs.length && !passes.length) return null;
+  const lines = packs.slice(0, max).map((p) => `• ${p.name} = $${p.price.toFixed(2)}${p.hot ? " (ពេញនិយម)" : ""}`);
+  if (packs.length > max) lines.push(`… និង ${packs.length - max} កញ្ចប់ទៀតនៅទំព័រហ្គេម`);
+  if (passes.length) {
+    lines.push("Pass / កញ្ចប់ពិសេស៖");
+    lines.push(...passes.map((p) => `• ${p.name} = $${p.price.toFixed(2)}`));
+  }
+  return lines.join("\n");
+}
+
 const gameAction = (g: Game, href: (id: string) => string): BotAction => ({
   label: `បញ្ចូល ${g.name}`,
   href: href(g.id),
@@ -255,18 +292,40 @@ export function isOrderQuestion(raw: string): boolean {
 export function answer(
   raw: string,
   gameHref: (id: string) => string = (id) => `/game/${id}`,
+  prices?: PriceMap | null,
 ): BotReply {
   const text = raw.toLowerCase().replace(/\s+/g, " ").trim();
   const game = detectGame(text);
   const topics = topScores(text);
   const has_ = (t: string) => topics.includes(t);
 
+  // Promo codes: how to use one; the bot never makes up a code.
+  if (has_("promo") && !has_("late") && !has_("refund")) {
+    return {
+      text: `បាទ យើងមានលេខកូដបញ្ចុះតម្លៃ (Promo Code) ម្តងម្កាល ៖\n១. ជ្រើសហ្គេម និងកញ្ចប់\n២. នៅ "សង្ខេបការបញ្ជាទិញ" វាយលេខកូដក្នុងប្រអប់ លេខកូដបញ្ចុះតម្លៃ ហើយចុច ប្រើ\n៣. តម្លៃថ្មីបង្ហាញភ្លាមៗ រួចចុច បញ្ជាទិញ\nលេខកូដថ្មីៗ ប្រកាសនៅ Telegram ${TELEGRAM} លេខកូដមួយមានកំណត់ចំនួនដង និងថ្ងៃផុតកំណត់ ហើយមិនប្រើបានលើ Roblox និង Telegram ទេ`,
+      actions: [telegramAction],
+      suggestions: ["តម្លៃ MLBB", "តម្លៃ Free Fire"],
+    };
+  }
+
   // Roblox works differently from every other game.
   if (game?.id === "roblox") {
+    const list = priceLines(game, prices);
     return {
-      text: "យើងលក់ Robux ជាលេខកូដ (Gift Code) ៖ បញ្ចូល Username ជ្រើសចំនួន Robux ហើយបង់ប្រាក់តាម KHQR លេខកូដបង្ហាញភ្លាមៗ បន្ទាប់មកចូល roblox.com/redeem ក្នុង browser ហើយ Paste លេខកូដ Robux ចូលភ្លាមៗ យើងមិនសុំលេខសម្ងាត់ទេ",
-      actions: [telegramAction],
+      text: `យើងលក់ Robux ជាលេខកូដ (Gift Code) ៖ ជ្រើសចំនួន Robux ហើយបង់ប្រាក់តាម ABA KHQR លេខកូដបង្ហាញភ្លាមៗនៅទំព័រការបញ្ជាទិញ បន្ទាប់មកចូល roblox.com/redeem ក្នុង browser ហើយ Paste លេខកូដ Robux ចូលភ្លាមៗ យើងមិនសុំលេខសម្ងាត់ទេ${list ? `\n\nតម្លៃថ្ងៃនេះ៖\n${list}` : ""}`,
+      actions: [gameAction(game, gameHref), telegramAction],
       suggestions: ["ហ្គេមអ្វីខ្លះ?", "បង់ប្រាក់តាមអ្វី?"],
+    };
+  }
+
+  // Telegram Stars and Premium go to a Telegram username, not a game ID.
+  if (game?.id === "tgstars" || game?.id === "tgpremium") {
+    const list = priceLines(game, prices);
+    const what = game.id === "tgstars" ? "Telegram Stars" : "Telegram Premium (3, 6 ឬ 12 ខែ)";
+    return {
+      text: `យើងលក់ ${what} ដោយស្វ័យប្រវត្តិ ៖ វាយ Telegram username របស់អ្នក (ឧ. @username) ចុច ពិនិត្យ ID ជ្រើសកញ្ចប់ ហើយបង់តាម ABA KHQR វាចូលគណនី Telegram របស់អ្នកក្នុងពីរបីនាទី នៅទំព័រ Telegram អាចប្តូររវាង Premium និង Stars បាន${list ? `\n\nតម្លៃថ្ងៃនេះ៖\n${list}` : ""}`,
+      actions: [gameAction(game, gameHref), telegramAction],
+      suggestions: [game.id === "tgstars" ? "តម្លៃ Telegram Premium" : "តម្លៃ Telegram Stars", "បង់ប្រាក់តាមអ្វី?"],
     };
   }
 
@@ -286,9 +345,13 @@ export function answer(
 
   if (has_("price")) {
     if (game) {
+      const list = priceLines(game, prices);
       return {
-        text: `${packagesLine(game)} តម្លៃថ្មីបំផុតនៃកញ្ចប់នីមួយៗ បង្ហាញនៅទំព័រ ${g(game)} ចុចប៊ូតុងខាងក្រោមដើម្បីមើល`,
-        actions: [gameAction(game, gameHref), telegramAction],
+        text: list
+          ? `តម្លៃ ${g(game)} ថ្ងៃនេះ៖\n${list}\n\nចុចប៊ូតុងខាងក្រោមដើម្បីទិញ មានលេខកូដបញ្ចុះតម្លៃ? ដាក់វានៅពេលបញ្ជាទិញ`
+          : `${packagesLine(game)} តម្លៃថ្មីបំផុតនៃកញ្ចប់នីមួយៗ បង្ហាញនៅទំព័រ ${g(game)} ចុចប៊ូតុងខាងក្រោមដើម្បីមើល`,
+        actions: [gameAction(game, gameHref)],
+        suggestions: [`ID ${g(game)}`, "បង់ប្រាក់តាមអ្វី?", "លេខកូដបញ្ចុះតម្លៃ"],
       };
     }
     return {
@@ -306,9 +369,9 @@ export function answer(
   }
 
   if (game && (has_("topup") || topics.length === 0)) {
-    const pk = packagesLine(game);
+    const list = priceLines(game, prices, 5);
     return {
-      text: `${game.name} ប្រើ ${game.unit} ${idHelp(game)} ${pk} ជំហាន៖ បញ្ចូល ID → ជ្រើសកញ្ចប់ → ជ្រើសវិធីបង់ប្រាក់ → បញ្ជាទិញ`,
+      text: `${game.name} ប្រើ ${game.unit} ${idHelp(game)} ជំហាន៖ បញ្ចូល ID → ចុច ពិនិត្យ ID → ជ្រើសកញ្ចប់ → បញ្ជាទិញ → បង់តាម ABA KHQR${list ? `\n\nតម្លៃថ្ងៃនេះ៖\n${list}` : ` ${packagesLine(game)}`}`,
       actions: [gameAction(game, gameHref)],
       suggestions: [`តម្លៃ ${game.name}`, "បង់ប្រាក់តាមអ្វី?", "ប៉ុន្មាននាទីចូល?"],
     };
@@ -338,8 +401,8 @@ export function answer(
       };
     case "payment":
       return {
-        text: `យើងទទួលការបង់ប្រាក់តាម ${payments.join(", ")} សូមជ្រើសវិធីបង់ប្រាក់នៅជំហានទី ៣ លើទំព័រហ្គេម មុនពេលចុច បញ្ជាទិញ`,
-        suggestions: ["របៀបបញ្ចូលពេជ្រ", "ប៉ុន្មាននាទីចូល?"],
+        text: "យើងទទួលការបង់ប្រាក់តាម ABA KHQR ៖ បង់បានពីកម្មវិធីធនាគារណាមួយ (ABA, ACLEDA, Wing, Bakong, Canadia …) នៅលើទូរស័ព្ទ ពេលចុច បញ្ជាទិញ កម្មវិធីធនាគារនឹងបើកដោយខ្លួនឯង ដោយមិនចាំបាច់ថតរូប QR ទេ នៅលើកុំព្យូទ័រ សូមស្កេន QR ដោយទូរស័ព្ទ ប្រព័ន្ធបញ្ជាក់ការបង់ប្រាក់ដោយស្វ័យប្រវត្តិ",
+        suggestions: ["របៀបបញ្ចូលពេជ្រ", "ប៉ុន្មាននាទីចូល?", "លេខកូដបញ្ចុះតម្លៃ"],
       };
     case "playerId":
       return {
@@ -363,13 +426,13 @@ export function answer(
       };
     case "safety":
       return {
-        text: `Yuric Topup អាចទុកចិត្តបាន អ្នកបង់ប្រាក់តាម KHQR ផ្ទាល់ពីកម្មវិធីធនាគាររបស់អ្នក (${payments.join(", ")}) យើងមិនដែលសុំពាក្យសម្ងាត់គណនីហ្គេមទេ ត្រូវការតែ Player ID ប៉ុណ្ណោះ ហើយការបញ្ជាទិញនីមួយៗអាចពិនិត្យបាន បើមានបញ្ហាអ្វី សូមទាក់ទង Admin តាម Telegram ${TELEGRAM}`,
+        text: `Yuric Topup អាចទុកចិត្តបាន អ្នកបង់ប្រាក់តាម ABA KHQR ផ្ទាល់ពីកម្មវិធីធនាគាររបស់អ្នក យើងមិនដែលសុំពាក្យសម្ងាត់គណនីហ្គេមទេ ត្រូវការតែ Player ID ប៉ុណ្ណោះ ហើយការបញ្ជាទិញនីមួយៗអាចពិនិត្យបាន បើមានបញ្ហាអ្វី សូមទាក់ទង Admin តាម Telegram ${TELEGRAM}`,
         actions: [telegramAction],
       };
     case "games":
       return {
-        text: `ហ្គេមដែលយើងមាន៖ ${games.map((x) => x.name).join(", ")} សរសេរឈ្មោះហ្គេម ខ្ញុំនឹងប្រាប់កញ្ចប់ និង ID ដែលត្រូវការ`,
-        suggestions: ["Mobile Legends", "Free Fire", "Genshin Impact"],
+        text: `ហ្គេម និងទំនិញដែលយើងមាន៖ ${games.map((x) => x.name).join(", ")} សរសេរឈ្មោះហ្គេម ខ្ញុំនឹងប្រាប់តម្លៃថ្ងៃនេះ និង ID ដែលត្រូវការ`,
+        suggestions: ["តម្លៃ MLBB", "តម្លៃ PUBG", "តម្លៃ Telegram Stars"],
       };
     case "refund":
       return {
@@ -379,8 +442,9 @@ export function answer(
   }
 
   if (game) {
+    const list = priceLines(game, prices, 5);
     return {
-      text: `${game.name} ប្រើ ${game.unit} ${idHelp(game)} ${packagesLine(game)}`,
+      text: `${game.name} ប្រើ ${game.unit} ${idHelp(game)}${list ? `\n\nតម្លៃថ្ងៃនេះ៖\n${list}` : ` ${packagesLine(game)}`}`,
       actions: [gameAction(game, gameHref)],
     };
   }

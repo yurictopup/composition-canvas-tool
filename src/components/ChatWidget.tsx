@@ -18,7 +18,9 @@ import {
   Sparkles,
   SquarePen,
   Sun,
+  Ticket,
   X,
+  Zap,
 } from "lucide-react";
 import { BotLogo } from "./BotLogo";
 import {
@@ -30,6 +32,7 @@ import {
 } from "@/lib/chatBrain";
 import { askBot, checkMyOrders } from "@/lib/chat.functions";
 import { MAX_TEXT, MAX_TURNS } from "@/lib/chatAi";
+import { fetchPrices, type PriceMap } from "@/lib/prices";
 import { setStoreTheme, useStorePrefs } from "@/lib/storePrefs";
 
 /** Workers AI answers (slow, about 5-10 seconds); off until a faster model is chosen. */
@@ -60,8 +63,14 @@ export const defaultFaqs: ChatFaq[] = [
   },
   {
     q: "តើអាចបង់ប្រាក់តាមវិធីណាខ្លះ?",
-    a: "យើងទទួលការបង់ប្រាក់តាម Bakong បន្ទាប់ពីដាក់ការបញ្ជាទិញ វេបសាយនឹងបង្ហាញចំនួនទឹកប្រាក់ និងលេខកូដសម្រាប់ផ្ទេរ",
+    a: "យើងទទួលការបង់ប្រាក់តាម ABA KHQR ៖ បង់បានពីកម្មវិធីធនាគារណាមួយ (ABA, ACLEDA, Wing, Bakong …) នៅលើទូរស័ព្ទ ពេលចុច បញ្ជាទិញ កម្មវិធីធនាគារនឹងបើកដោយខ្លួនឯង ដោយមិនចាំបាច់ថតរូប QR ទេ នៅលើកុំព្យូទ័រ សូមស្កេន QR ដោយទូរស័ព្ទ",
     icon: CreditCard,
+  },
+  {
+    q: "តើមានលេខកូដបញ្ចុះតម្លៃទេ?",
+    a: "បាទ លេខកូដបញ្ចុះតម្លៃប្រកាសនៅ Telegram របស់ហាងម្តងម្កាល ពេលបញ្ជាទិញ វាយលេខកូដក្នុងប្រអប់ លេខកូដបញ្ចុះតម្លៃ នៅ សង្ខេបការបញ្ជាទិញ ហើយចុច ប្រើ តម្លៃថ្មីបង្ហាញភ្លាមៗ",
+    icon: Ticket,
+    telegram: true,
   },
   {
     q: "តើរក Player ID នៅឯណា?",
@@ -108,6 +117,18 @@ export function ChatWidget({
   const [typing, setTyping] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Today's prices, so the bot can quote them; loaded the first time the chat opens.
+  const [prices, setPrices] = useState<PriceMap | null>(null);
+  useEffect(() => {
+    if (!open || prices) return;
+    let cancelled = false;
+    void fetchPrices()
+      .then((map) => !cancelled && setPrices(map))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [open, prices]);
   // Bot messages already shown in full; only new answers type out.
   const seen = useRef(new Set<string>());
 
@@ -157,7 +178,7 @@ export function ChatWidget({
       messages: [
         {
           role: "bot",
-          text: "សួស្តី! ខ្ញុំជា Yuric Bot ជំនួយការរបស់ហាង តើខ្ញុំអាចជួយអ្វីបាន? សួរអំពីហ្គេម តម្លៃ ការបង់ប្រាក់ ឬបញ្ហាការបញ្ជាទិញបាន",
+          text: "សួស្តី! ខ្ញុំជា Yuric Bot ជំនួយការរបស់ហាង ខ្ញុំអាចប្រាប់តម្លៃថ្ងៃនេះ របៀបបញ្ចូល ការបង់ប្រាក់តាម ABA លេខកូដបញ្ចុះតម្លៃ ឬពិនិត្យការបញ្ជាទិញរបស់អ្នក តើអ្នកចង់បានអ្វី?",
           suggestions: DEFAULT_SUGGESTIONS,
         },
       ],
@@ -207,7 +228,7 @@ export function ChatWidget({
       setTyping(false);
     };
     const keywords = () => {
-      const reply = answer(text, gameHref);
+      const reply = answer(text, gameHref, prices);
       const wait = 350 + Math.min(500, reply.text.length * 2) - (Date.now() - started);
       timer.current = setTimeout(() => post(reply), Math.max(0, wait));
     };
@@ -305,12 +326,22 @@ export function ChatWidget({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="fixed bottom-7 right-20 z-40 hidden items-center gap-2 rounded-full border border-[var(--chat-line)] bg-[var(--chat-pill)] py-2 pl-2 pr-4 text-sm font-semibold leading-6 text-[var(--chat-fg)] shadow-[0_10px_30px_oklch(0.15_0.08_268/0.5),0_0_24px_oklch(0.6_0.2_280/0.3)] backdrop-blur transition hover:-translate-y-0.5 animate-in fade-in slide-in-from-right-2 duration-500 sm:flex"
+          className="group fixed bottom-6 right-[5.5rem] z-40 hidden items-center gap-3 rounded-2xl border border-white/15 bg-[linear-gradient(135deg,oklch(0.3_0.12_268/0.95),oklch(0.22_0.1_285/0.95))] py-2.5 pl-3 pr-4 text-left leading-snug text-white shadow-[0_14px_36px_oklch(0.12_0.08_268/0.6),0_0_30px_oklch(0.6_0.2_280/0.35)] backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_18px_44px_oklch(0.12_0.08_268/0.7),0_0_40px_oklch(0.6_0.22_280/0.5)] animate-in fade-in slide-in-from-right-2 duration-500 sm:flex"
         >
-          <span className="grid h-7 w-7 place-items-center rounded-full bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))]">
-            <Sparkles className="h-3.5 w-3.5" />
+          <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))] shadow-[0_0_18px_oklch(0.6_0.22_280/0.6)]">
+            <Sparkles className="h-5 w-5" />
+            <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+              <span className="relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-[oklch(0.25_0.1_268)] bg-emerald-400" />
+            </span>
           </span>
-          មានសំណួរ? សួរ Yuric Bot
+          <span className="block">
+            <span className="block text-[13.5px] font-bold">មានសំណួរ? សួរ Yuric Bot</span>
+            <span className="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-white/70">
+              <Zap className="h-3 w-3 text-amber-300" />
+              តម្លៃ · បង់ប្រាក់ · លេខកូដបញ្ចុះ · ការបញ្ជាទិញ
+            </span>
+          </span>
         </button>
       )}
       <button

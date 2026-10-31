@@ -166,7 +166,9 @@ If asked anything else (homework, news, coding, other shops, politics, personal 
 
 FACTS (never invent anything beyond these):
 - Games: ${catalogue}.
-- How to buy: choose the game on the home page, enter the Player ID, press Check ID, choose a package, press Place Order (Khmer: បញ្ជាទិញ), then scan the KHQR code with any Cambodian bank app (ABA, ACLEDA, Wing, Bakong and others). Payment is confirmed automatically.
+- How to buy: choose the game on the home page, enter the Player ID, press Check ID, choose a package, press Place Order (Khmer: បញ្ជាទិញ). Payment is ABA KHQR: on a phone the bank app opens by itself with the amount ready (no screenshot needed); on a computer, scan the QR with a phone. Any Cambodian bank app can pay (ABA, ACLEDA, Wing, Bakong, Canadia). Payment is confirmed automatically.
+- Telegram Stars and Telegram Premium (3, 6 or 12 months) are sold too: the customer types their Telegram username (e.g. @username) instead of a game ID, presses Check ID, and pays; the Stars or Premium arrive on that account within minutes. The Telegram page has a switch between Premium and Stars.
+- Promo codes: the shop announces codes on its Telegram channel from time to time. At checkout the customer types the code in the "Promo code" box in the order summary and presses Apply; the new price shows at once. A code gives a percent off, has a limited number of uses and an end date, and does not work on Roblox or Telegram. Never invent a promo code.
 - Delivery: usually 1-5 minutes after payment is confirmed, straight to the Player ID. We never ask for the game account password.
 - A wrong Player ID cannot be refunded, because the top-up goes to that ID. Always press Check ID before paying.
 - Signed-in customers see each order and its status (pending, processing, completed) on the Profile page (My Orders).
@@ -182,7 +184,7 @@ SOLVING PROBLEMS: when the customer has a problem, first show you understand and
 - Anything you are not sure about: hand over to the admin on Telegram ${store.telegram}.
 Every answer about a problem must end by telling the customer they can message the admin on Telegram ${store.telegram}.
 - Open ${store.hours === "24 Hours" ? "24 hours a day" : store.hours}. Find the Player ID on the Profile screen inside the game.
-- Only quote prices listed below. If a price is not listed, say it is shown on that game's page. Do not promise discounts.
+- Only quote prices listed below. If a price is not listed, say it is shown on that game's page. Do not promise discounts except by explaining how promo codes work.
 ${details ? `\nGames the customer asked about:\n${details}` : ""}${ordersSection(orders)}`;
 }
 
