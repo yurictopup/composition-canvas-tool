@@ -88,7 +88,7 @@ export function PaymentView({
   now: number;
   summary: OrderSummary;
 }) {
-  const { t } = useStorePrefs();
+  const { t, lang } = useStorePrefs();
 
   if (!state) {
     return (
@@ -127,6 +127,24 @@ export function PaymentView({
           {summary.game} · {summary.item}
         </p>
       </div>
+
+      {/* On a phone: open the bank app with this payment ready, no screenshot needed. */}
+      {state.appLink && !expired && (
+        <div className="mx-auto mb-4 w-full max-w-[300px]">
+          <a
+            href={state.appLink}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0B4F71] px-4 py-3.5 font-sans text-base font-bold text-white shadow-[0_6px_18px_rgb(11_79_113/0.35)] transition hover:brightness-110"
+          >
+            <ExternalLink className="h-5 w-5" />
+            {lang === "km" ? "បើកកម្មវិធី ABA ដើម្បីបង់" : "Open ABA app to pay"}
+          </a>
+          <p className="mt-2 text-center font-sans text-[11px] text-muted-foreground">
+            {lang === "km"
+              ? "នៅលើកុំព្យូទ័រ? ស្កេន QR ខាងក្រោមជំនួសវិញ"
+              : "On a computer? Scan the QR below instead."}
+          </p>
+        </div>
+      )}
 
       {/* KHQR card, laid out like the official Bakong KHQR sticker */}
       <div className="mx-auto w-full max-w-[300px] overflow-hidden rounded-2xl bg-white text-[#1a1a1a] shadow-[0_10px_30px_rgb(15_23_42/0.18)] ring-1 ring-black/5">

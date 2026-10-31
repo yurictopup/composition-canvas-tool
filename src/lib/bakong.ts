@@ -52,12 +52,13 @@ async function post(
   cfg: BakongConfig,
   path: string,
   body: unknown,
+  timeoutMs = TIMEOUT_MS,
 ): Promise<{ status: number; json: unknown }> {
   const res = await (cfg.fetchImpl ?? fetch)(`${apiUrl(cfg)}${path}`, {
     method: "POST",
     headers: { Authorization: `Bearer ${cfg.token}`, "Content-Type": "application/json" },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   return { status: res.status, json: await res.json().catch(() => null) };
 }
@@ -92,6 +93,27 @@ export async function createPaymentQr(
     expiresAt,
   });
   return { qr, md5: md5(qr), expiresAt };
+}
+
+/**
+ * A link that opens the customer's bank app with this KHQR ready to pay (KHQR.dev
+ * only). Null when it can't be made: the QR still works, so this never blocks paying.
+ */
+export async function createPaymentLink(cfg: BakongConfig, qr: string): Promise<string | null> {
+  if (!isRelayToken(cfg.token)) return null;
+  try {
+    // Short wait: the QR is shown either way, the link only saves a screenshot.
+    const { status, json } = await post(cfg, "/generate_deeplink_by_qr", { qr }, 4000);
+    const body = (json as { responseCode?: unknown; data?: { shortLink?: unknown } } | null) ?? {};
+    const link = body.data?.shortLink;
+    if (status >= 400 || body.responseCode !== 0 || typeof link !== "string") return null;
+    // Only real app or web links end up in the page's href.
+    return /^[a-z][a-z0-9+.-]*:/i.test(link) && !/^(javascript|data|vbscript|file):/i.test(link)
+      ? link
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function checkBakongPayment(cfg: BakongConfig, qrMd5: string): Promise<PaymentCheck> {

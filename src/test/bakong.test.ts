@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { buildKhqr, crc16, formatKhqrAmount } from "@/lib/khqr";
-import { checkBakongPayment, createPaymentQr, md5, paymentMatches } from "@/lib/bakong";
+import {
+  checkBakongPayment,
+  createPaymentLink,
+  createPaymentQr,
+  md5,
+  paymentMatches,
+} from "@/lib/bakong";
 
 describe("KHQR payload", () => {
   it("uses CRC-16/CCITT-FALSE", () => {
@@ -126,6 +132,36 @@ describe("Bakong payment check", () => {
     expect(await checkBakongPayment({ ...nbc, token: "rbk_x", fetchImpl: f }, "m")).toEqual({
       status: "unpaid",
     });
+  });
+});
+
+describe("Bank app link", () => {
+  const relay = { ...nbc, token: "rbk_test" };
+
+  it("asks KHQR.dev for the link that opens the bank app", async () => {
+    const f = fakeFetch(200, { responseCode: 0, data: { shortLink: "abamobilebank://pay?x=1" } });
+    expect(await createPaymentLink({ ...relay, fetchImpl: f }, "000201...")).toBe(
+      "abamobilebank://pay?x=1",
+    );
+    expect(String(f.mock.calls[0]![0])).toBe("https://api.khqr.dev/v1/generate_deeplink_by_qr");
+    expect(JSON.parse(String((f.mock.calls[0]![1] as RequestInit).body))).toEqual({ qr: "000201..." });
+  });
+
+  it("gives no link (the QR still works) when KHQR.dev fails or answers oddly", async () => {
+    expect(await createPaymentLink({ ...relay, fetchImpl: fakeFetch(500, {}) }, "q")).toBeNull();
+    expect(
+      await createPaymentLink({ ...relay, fetchImpl: fakeFetch(200, { responseCode: 1 }) }, "q"),
+    ).toBeNull();
+    const bad = fakeFetch(200, { responseCode: 0, data: { shortLink: "javascript:alert(1)" } });
+    expect(await createPaymentLink({ ...relay, fetchImpl: bad }, "q")).toBeNull();
+    const boom = vi.fn().mockRejectedValue(new Error("offline"));
+    expect(await createPaymentLink({ ...relay, fetchImpl: boom }, "q")).toBeNull();
+  });
+
+  it("is not asked for with an NBC token", async () => {
+    const f = fakeFetch(200, { responseCode: 0, data: { shortLink: "https://x" } });
+    expect(await createPaymentLink({ ...nbc, fetchImpl: f }, "q")).toBeNull();
+    expect(f).not.toHaveBeenCalled();
   });
 });
 

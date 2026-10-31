@@ -3,10 +3,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 const checkBakongPayment = vi.fn();
 const createPaymentQr = vi.fn();
+const createPaymentLink = vi.fn();
 const deliverPaidOrder = vi.fn();
 
 vi.mock("@/lib/bakong", () => ({
   checkBakongPayment: (...a: unknown[]) => checkBakongPayment(...a),
+  createPaymentLink: (...a: unknown[]) => createPaymentLink(...a),
   createPaymentQr: (...a: unknown[]) => createPaymentQr(...a),
   isRelayToken: () => true,
   paymentMatches: () => true,
@@ -69,6 +71,7 @@ beforeEach(() => {
     md5: "new-md5",
     expiresAt: Date.now() + 600_000,
   });
+  createPaymentLink.mockResolvedValue(null);
   deliverPaidOrder.mockResolvedValue({ ok: true, message: "", status: "processing" });
 });
 
@@ -89,7 +92,17 @@ describe("expired KHQR", () => {
     const { db, updates } = fakeDb();
     const state = await startOrderPayment(db, expiredOrder.id, "guest");
     expect(state).toMatchObject({ paid: false, qr: "new-qr" });
+    expect(state.appLink).toBeUndefined();
     expect(updates[0]).toMatchObject({ payment_md5: "new-md5" });
+  });
+
+  it("adds the bank app link for the new QR when KHQR.dev gives one", async () => {
+    checkBakongPayment.mockResolvedValue({ status: "unpaid" });
+    createPaymentLink.mockResolvedValue("abamobilebank://pay?x=1");
+    const { db } = fakeDb();
+    const state = await startOrderPayment(db, expiredOrder.id, "guest");
+    expect(createPaymentLink).toHaveBeenCalledWith(expect.anything(), "new-qr");
+    expect(state.appLink).toBe("abamobilebank://pay?x=1");
   });
 
   it("remembers every new QR, so a payment with an older one is still found", async () => {

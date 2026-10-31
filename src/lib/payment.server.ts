@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   checkBakongPayment,
+  createPaymentLink,
   createPaymentQr,
   isRelayToken,
   paymentMatches,
@@ -12,6 +13,8 @@ import { salesOpenFor } from "@/lib/store-status";
 export type PaymentState = {
   available: boolean;
   qr?: string;
+  /** Opens the bank app with this QR on a phone (made fresh each time the page opens). */
+  appLink?: string;
   amount?: number;
   expiresAt?: string;
   paid: boolean;
@@ -92,10 +95,12 @@ export async function startOrderPayment(
     order.payment_expires_at &&
     new Date(order.payment_expires_at).getTime() > Date.now() + 60_000
   ) {
+    const appLink = await createPaymentLink(cfg, order.payment_qr);
     return {
       available: true,
       paid: false,
       qr: order.payment_qr,
+      ...(appLink ? { appLink } : {}),
       amount,
       expiresAt: order.payment_expires_at,
     };
@@ -130,7 +135,8 @@ export async function startOrderPayment(
     .update({ payment_qr: qr.qr, payment_md5: qr.md5, payment_expires_at: expiresAt })
     .eq("id", order.id)
     .is("paid_at", null);
-  return { available: true, paid: false, qr: qr.qr, amount, expiresAt };
+  const appLink = await createPaymentLink(cfg, qr.qr);
+  return { available: true, paid: false, qr: qr.qr, ...(appLink ? { appLink } : {}), amount, expiresAt };
 }
 
 /**
