@@ -389,7 +389,8 @@ function GamePage({ gameId }: { gameId: string }) {
   // ── Main Order Form ───────────────────────────────────────────────────
   return (
     <SiteChrome>
-      <main className="mx-auto w-full max-w-[1200px] px-3 py-4 sm:px-6 sm:py-8">
+      {/* Extra bottom room so the floating Yuric Bot never covers the Order button. */}
+      <main className="mx-auto w-full max-w-[1200px] px-3 pb-24 pt-4 sm:px-6 sm:pb-28 sm:pt-8">
         <Link
           to="/"
           hash="games"
@@ -745,16 +746,19 @@ function GamePage({ gameId }: { gameId: string }) {
               </div>
 
               {signedIn === false && (
-                <div className="mt-4 rounded-xl border border-border/70 bg-muted/40 p-3">
-                  <label className="grid gap-1.5 text-sm font-semibold">
-                    {t("Phone or Telegram (optional)")}
+                <div className="mt-4 rounded-xl border border-[#e6edf8] bg-white/70 p-3.5">
+                  <label className="grid gap-2 text-sm font-semibold text-[#142650]">
+                    <span className="flex items-center gap-1.5">
+                      <Send className="h-4 w-4 text-[#2f5fe0]" />
+                      {t("Phone or Telegram (optional)")}
+                    </span>
                     <input
                       value={contact}
                       onChange={(e) => setContact(e.target.value)}
                       maxLength={64}
                       placeholder="012 345 678 / @username"
                       autoComplete="tel"
-                      className="min-w-0 rounded-lg border bg-input px-3 py-2 font-normal outline-none focus:border-primary"
+                      className="min-w-0 rounded-lg border border-[#dfe8f6] bg-white px-3 py-2.5 font-normal outline-none transition focus:border-[#2f5fe0] focus:ring-4 focus:ring-[#2f5fe0]/10"
                     />
                   </label>
                   <p className="mt-2 font-sans text-xs leading-[1.7] text-muted-foreground">
@@ -779,17 +783,17 @@ function GamePage({ gameId }: { gameId: string }) {
               <button
                 disabled={!canBuy}
                 onClick={handleBuy}
-                className={`mt-4 w-full rounded-xl bg-gradient-to-r from-[#3b6cf0] to-[#1f42b8] py-3.5 font-display text-base font-bold text-white transition sm:mt-5 sm:py-4 ${
-                  canBuy
-                    ? "glow-pulse shadow-[0_10px_28px_rgb(47_95_224/0.4)] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0"
-                    : "cursor-not-allowed opacity-40"
+                className={`mt-4 w-full rounded-xl py-3.5 font-display text-base font-bold transition sm:mt-5 sm:py-4 ${
+                  canBuy || busy
+                    ? "glow-pulse bg-gradient-to-r from-[#3b6cf0] to-[#1f42b8] text-white shadow-[0_10px_28px_rgb(47_95_224/0.4)] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0"
+                    : "cursor-not-allowed border border-[#dfe8f6] bg-[#eef3fb] text-[#8a9abb]"
                 }`}
               >
                 {busy ? (
                   t("Processing…")
                 ) : (
                   <span className="inline-flex items-center gap-2">
-                    <ShoppingCart className="h-5 w-5" />
+                    {canBuy ? <ShoppingCart className="h-5 w-5" /> : <Lock className="h-4 w-4" />}
                     {t("Place Order")}
                     {canBuy && selected?.price != null && (
                       <span className="rounded-md bg-white/20 px-2 py-0.5 text-sm">
