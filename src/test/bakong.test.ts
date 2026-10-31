@@ -111,6 +111,16 @@ describe("Bakong payment check", () => {
     );
   });
 
+  it("sends the proxy key only when one is set", async () => {
+    const f = fakeFetch(200, { responseCode: 1 });
+    await checkBakongPayment({ ...nbc, proxyKey: "k123", fetchImpl: f }, "m");
+    await checkBakongPayment({ ...nbc, fetchImpl: f }, "m");
+    const headers = f.mock.calls.map((c) => (c[1] as RequestInit).headers as Record<string, string>);
+    expect(headers[0]!["X-Proxy-Key"]).toBe("k123");
+    expect(headers[0]!["Authorization"]).toBe(`Bearer ${nbc.token}`);
+    expect(headers[1]).not.toHaveProperty("X-Proxy-Key");
+  });
+
   it("treats NBC's daily limit as unavailable, never unpaid", async () => {
     const f = fakeFetch(200, {
       responseCode: 1,

@@ -1,6 +1,13 @@
 // Owner-only check of the NBC (Bakong Open API) setup with the same config as
 // customer payments. It creates no orders and buys nothing from FazerCards.
-import { checkBakongPayment, createPaymentQr, paymentMatches } from "@/lib/bakong";
+import {
+  apiUrl,
+  checkBakongPayment,
+  createPaymentQr,
+  nbcHeaders,
+  paymentMatches,
+  type BakongConfig,
+} from "@/lib/bakong";
 import { adminDb } from "@/lib/delivery.server";
 import { bakongConfig as nbcTestConfig } from "@/lib/payment.server";
 
@@ -78,12 +85,11 @@ export async function createNbcTestQr(amount: number) {
 }
 
 /** NBC's own answer (HTTP status, code and message), which the payment check sums up as unpaid/paid. */
-async function nbcRawAnswer(cfg: { token: string; apiUrl?: string | undefined }, md5: string) {
+async function nbcRawAnswer(cfg: BakongConfig, md5: string) {
   try {
-    const base = (cfg.apiUrl || "https://api-bakong.nbc.gov.kh/v1").replace(/\/+$/, "");
-    const res = await fetch(`${base}/check_transaction_by_md5`, {
+    const res = await fetch(`${apiUrl(cfg)}/check_transaction_by_md5`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${cfg.token}`, "Content-Type": "application/json" },
+      headers: nbcHeaders(cfg),
       body: JSON.stringify({ md5 }),
       signal: AbortSignal.timeout(10_000),
     });

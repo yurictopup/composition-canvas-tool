@@ -33,6 +33,7 @@ export function bakongConfig(): BakongConfig | null {
     accountId,
     merchantName: process.env["BAKONG_NBC_MERCHANT_NAME"] || "Yuric Store",
     apiUrl: process.env["BAKONG_NBC_API_URL"],
+    proxyKey: process.env["BAKONG_NBC_PROXY_KEY"],
   };
 }
 

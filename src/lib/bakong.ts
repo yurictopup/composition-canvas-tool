@@ -2,7 +2,10 @@
 // 90 days). Server-side only: the token must never reach the browser. The QR
 // is built here for the shop's own Bakong account and checked at
 // api-bakong.nbc.gov.kh, which blocks some foreign addresses; it answered
-// Cloudflare Workers in tests. An optional apiUrl points at another gateway.
+// Cloudflare Workers in tests. An optional apiUrl points at another gateway:
+// NBC allows 100 checks a day per source address and Cloudflare's addresses are
+// shared, so production goes through the shop's own proxy (VPS), which only
+// forwards requests carrying proxyKey.
 import { createHash } from "node:crypto";
 import { buildKhqr } from "@/lib/khqr";
 
@@ -13,6 +16,8 @@ export type BakongConfig = {
   accountId: string;
   merchantName: string;
   apiUrl?: string | undefined;
+  /** Sent as X-Proxy-Key so the shop's proxy forwards the request. */
+  proxyKey?: string | undefined;
   fetchImpl?: Fetch;
 };
 
@@ -37,8 +42,16 @@ export function md5(text: string): string {
   return createHash("md5").update(text, "utf8").digest("hex");
 }
 
-function apiUrl(cfg: BakongConfig): string {
+export function apiUrl(cfg: Pick<BakongConfig, "apiUrl">): string {
   return (cfg.apiUrl || NBC_URL).replace(/\/+$/, "");
+}
+
+export function nbcHeaders(cfg: Pick<BakongConfig, "token" | "proxyKey">): Record<string, string> {
+  return {
+    Authorization: `Bearer ${cfg.token}`,
+    "Content-Type": "application/json",
+    ...(cfg.proxyKey ? { "X-Proxy-Key": cfg.proxyKey } : {}),
+  };
 }
 
 async function post(
@@ -48,7 +61,7 @@ async function post(
 ): Promise<{ status: number; json: unknown }> {
   const res = await (cfg.fetchImpl ?? fetch)(`${apiUrl(cfg)}${path}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${cfg.token}`, "Content-Type": "application/json" },
+    headers: nbcHeaders(cfg),
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
