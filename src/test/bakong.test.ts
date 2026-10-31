@@ -74,6 +74,32 @@ describe("Bakong payment check", () => {
     expect(String(f.mock.calls[0]![0])).toBe("https://api.khqr.dev/v1/generate_qr");
   });
 
+  it("waits and asks once more when KHQR.dev says too many requests", async () => {
+    const f = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("{}", { status: 429 }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ responseCode: 0, data: { qr: "000201...", md5: "abc" } })),
+      ) as unknown as typeof fetch & ReturnType<typeof vi.fn>;
+    const qr = await createPaymentQr(
+      { ...nbc, token: "rbk_test", fetchImpl: f, retryDelayMs: 0 },
+      { amount: 1.09, billNumber: "AB12CD34" },
+    );
+    expect(qr).toMatchObject({ md5: "abc" });
+    expect(f).toHaveBeenCalledTimes(2);
+  });
+
+  it("gives up after one retry so the shop is not locked out", async () => {
+    const f = fakeFetch(429, { responseCode: 1, responseMessage: "Too many requests" });
+    await expect(
+      createPaymentQr(
+        { ...nbc, token: "rbk_test", fetchImpl: f, retryDelayMs: 0 },
+        { amount: 1.09, billNumber: "AB12CD34" },
+      ),
+    ).rejects.toThrow(/HTTP 429.*Too many requests/);
+    expect(f).toHaveBeenCalledTimes(2);
+  });
+
   it("reads a paid transaction", async () => {
     const f = fakeFetch(200, {
       responseCode: 0,

@@ -15,6 +15,8 @@ export type BakongConfig = {
   merchantName: string;
   apiUrl?: string | undefined;
   fetchImpl?: Fetch;
+  /** How long to wait after KHQR.dev's "too many requests" before trying again. */
+  retryDelayMs?: number;
 };
 
 export type PaymentQr = { qr: string; md5: string; expiresAt: number };
@@ -35,6 +37,9 @@ const RELAY_URL = "https://api.khqr.dev/v1";
 const TIMEOUT_MS = 10000;
 export const QR_LIFETIME_MS = 30 * 60 * 1000;
 const PAID_STATUSES = new Set(["PAID", "SUCCESS", "COMPLETED"]);
+// KHQR.dev makes one QR per second per shop and locks it for 3 s after a second
+// one (HTTP 429), so two customers paying at once would otherwise see an error.
+const RATE_LIMIT_WAIT_MS = 3200;
 
 export function isRelayToken(token: string): boolean {
   return token.startsWith("rbk");
@@ -70,11 +75,13 @@ export async function createPaymentQr(
 ): Promise<PaymentQr> {
   const expiresAt = now + QR_LIFETIME_MS;
   if (isRelayToken(cfg.token)) {
-    const { status, json } = await post(cfg, "/generate_qr", {
-      amount: order.amount,
-      currency: "USD",
-      bill_number: order.billNumber,
-    });
+    const body = { amount: order.amount, currency: "USD", bill_number: order.billNumber };
+    let { status, json } = await post(cfg, "/generate_qr", body);
+    if (status === 429) {
+      // Only once: spamming KHQR.dev while locked blocks the shop for 60 s.
+      await new Promise((resolve) => setTimeout(resolve, cfg.retryDelayMs ?? RATE_LIMIT_WAIT_MS));
+      ({ status, json } = await post(cfg, "/generate_qr", body));
+    }
     const data =
       (json as {
         responseCode?: unknown;
