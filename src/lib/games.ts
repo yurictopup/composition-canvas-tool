@@ -1,16 +1,16 @@
-﻿import mlbb from "@/assets/mlbb.webp";
-import mlbbWeeklyPass from "@/assets/mlbb-weekly-pass.png";
-import mlbbWeeklyElite from "@/assets/mlbb-weekly-elite.png";
-import mlbbMonthlyEpic from "@/assets/mlbb-monthly-epic.png";
-import mlbbTwilight from "@/assets/mlbb-twilight.png";
-import bsTreasure from "@/assets/bloodstrike-treasure.png";
-import bs105 from "@/assets/bloodstrike-105.png";
-import bs320 from "@/assets/bloodstrike-320.png";
-import bs540 from "@/assets/bloodstrike-540.png";
-import bs1100 from "@/assets/bloodstrike-1100.png";
-import bs2260 from "@/assets/bloodstrike-2260.png";
-import bs5800 from "@/assets/bloodstrike-5800.png";
-import mlbbFirstTopup from "@/assets/mlbb-first-topup.png";
+import mlbb from "@/assets/mlbb.webp";
+import mlbbWeeklyPass from "@/assets/mlbb-weekly-pass.webp";
+import mlbbWeeklyElite from "@/assets/mlbb-weekly-elite.webp";
+import mlbbMonthlyEpic from "@/assets/mlbb-monthly-epic.webp";
+import mlbbTwilight from "@/assets/mlbb-twilight.webp";
+import bsTreasure from "@/assets/bloodstrike-treasure.webp";
+import bs105 from "@/assets/bloodstrike-105.webp";
+import bs320 from "@/assets/bloodstrike-320.webp";
+import bs540 from "@/assets/bloodstrike-540.webp";
+import bs1100 from "@/assets/bloodstrike-1100.webp";
+import bs2260 from "@/assets/bloodstrike-2260.webp";
+import bs5800 from "@/assets/bloodstrike-5800.webp";
+import mlbbFirstTopup from "@/assets/mlbb-first-topup.webp";
 import freefire from "@/assets/freefire.webp";
 import ffWeeklyLite from "@/assets/ff-weekly-lite.webp";
 import ffWeeklyCard from "@/assets/ff-weekly-card.webp";
@@ -25,7 +25,7 @@ import pubgPrime from "@/assets/pubg-prime.webp";
 import pubgPrimePlus from "@/assets/pubg-prime-plus.webp";
 import pubgElitePass from "@/assets/pubg-elite-pass.webp";
 import pubgElitePassPlus from "@/assets/pubg-elite-pass-plus.webp";
-import roblox from "@/assets/roblox.png";
+import roblox from "@/assets/roblox.webp";
 import hok from "@/assets/hok.webp";
 import wildrift from "@/assets/wildrift.webp";
 import bloodstrike from "@/assets/bloodstrike.webp";
@@ -39,7 +39,7 @@ import eafc from "@/assets/eafc.webp";
 import lol from "@/assets/lol.webp";
 import hi3 from "@/assets/hi3.webp";
 import telegram from "@/assets/telegram.svg";
-import telegramStars from "@/assets/telegram-stars.png";
+import telegramStars from "@/assets/telegram-stars.webp";
 
 // Games FazerCards can top up for Cambodian accounts, plus Roblox, which the team delivers
 // by hand through the buyer's Game Pass. CODM (India-only there) and the Supercell games

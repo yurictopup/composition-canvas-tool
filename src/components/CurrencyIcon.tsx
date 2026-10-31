@@ -1,9 +1,9 @@
 // In-game currency artwork for package cards, so each game shows its own
 // currency (Robux, UC, Gems...) instead of one shared diamond.
-import diamond from "@/assets/diamond.png";
-import mlbbDiamonds from "@/assets/mlbb-diamonds.png";
-import magicchessDiamonds from "@/assets/magicchess-diamonds.png";
-import pubgUc from "@/assets/pubg-uc.png";
+import diamond from "@/assets/diamond.webp";
+import mlbbDiamonds from "@/assets/mlbb-diamonds.webp";
+import magicchessDiamonds from "@/assets/magicchess-diamonds.webp";
+import pubgUc from "@/assets/pubg-uc.webp";
 import { baseGameId } from "@/lib/games";
 
 // Games shown with a picture instead of drawn artwork (server variants use their main game's).
@@ -154,6 +154,12 @@ function art(gameId: string) {
     default:
       return null;
   }
+}
+
+/** The picture a game's package tiles show instead of a drawn icon, if any (for preloading). */
+export function currencyPicture(gameId: string): string | undefined {
+  const picture = pictures[baseGameId(gameId)];
+  return picture ?? (art(gameId) ? undefined : diamond);
 }
 
 export function CurrencyIcon({ gameId, className }: Props) {

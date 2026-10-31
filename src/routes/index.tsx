@@ -5,6 +5,7 @@ import banner from "@/assets/banner-angkor.webp";
 import { useSiteImage } from "@/lib/site-images";
 import mascot from "@/assets/mascot-cut.webp";
 import { games, listedGames, serverGames } from "@/lib/games";
+import { gameImageUrls, warmImages } from "@/lib/image-preload";
 import { SiteChrome } from "@/components/SiteChrome";
 import { useStorePrefs } from "@/lib/storePrefs";
 import { useStoreStatus } from "@/lib/store-status";
@@ -149,11 +150,15 @@ function Index() {
                     params={{ gameId: g.id }}
                     className="block text-center"
                     style={{ "--shine-delay": `${i * 0.5}s` } as CSSProperties}
+                    // Fetch this game's pictures before the click so its page opens complete.
+                    onPointerEnter={() => warmImages(gameImageUrls(g.id))}
+                    onTouchStart={() => warmImages(gameImageUrls(g.id))}
                   >
                     <span className="tile-clean block rounded-[26%]">
                       <img
                         src={pic(g.icon)}
-                        loading="lazy"
+                        // The first rows load at once; only the far ones wait for scrolling.
+                        loading={i < 14 ? "eager" : "lazy"}
                         decoding="async"
                         alt={g.name}
                         width={151}

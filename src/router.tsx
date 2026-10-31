@@ -19,6 +19,8 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
+    // Hovering or touching a link loads the next page's code ahead of the click.
+    defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
     ...(nonce ? { ssr: { nonce } } : {}),
   });

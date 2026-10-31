@@ -69,7 +69,15 @@ describe("Per-game packages", () => {
   });
 
   it("Roblox sells Robux packages by username", () => {
-    expect(getPackages("roblox").map((p) => p.amt)).toEqual(["80", "500", "1000", "2000"]);
+    expect(getPackages("roblox").map((p) => p.amt)).toEqual([
+      "50",
+      "275",
+      "555",
+      "1000",
+      "2500",
+      "5250",
+      "11000",
+    ]);
   });
 
   it("unknown games get no packages rather than inherited ones", () => {

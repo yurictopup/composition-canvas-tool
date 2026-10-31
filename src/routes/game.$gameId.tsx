@@ -21,6 +21,7 @@ import { lookupPlayer } from "@/lib/player-lookup.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { placeGuestOrder } from "@/lib/guest-order.functions";
 import { checkPromo } from "@/lib/promo.functions";
+import { gameImageUrls } from "@/lib/image-preload";
 import { guestOrderPath, saveGuestOrder } from "@/lib/guest-orders";
 import {
   ArrowUp,
@@ -59,6 +60,10 @@ export const Route = createFileRoute("/game/$gameId")({
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" },
       ],
+      // Pictures the page will show, fetched while its code loads (no pieces popping in).
+      links: gameImageUrls(params.gameId)
+        .slice(0, 14)
+        .map((href) => ({ rel: "preload", as: "image", href })),
     };
   },
   component: GameRoute,
