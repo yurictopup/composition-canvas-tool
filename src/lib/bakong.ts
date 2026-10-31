@@ -76,9 +76,14 @@ export async function createPaymentQr(
       bill_number: order.billNumber,
     });
     const data =
-      (json as { responseCode?: unknown; data?: { qr?: unknown; md5?: unknown } } | null) ?? {};
+      (json as {
+        responseCode?: unknown;
+        responseMessage?: unknown;
+        data?: { qr?: unknown; md5?: unknown };
+      } | null) ?? {};
     if (status >= 400 || data.responseCode !== 0 || typeof data.data?.qr !== "string") {
-      throw new Error(`KHQR.dev could not create the QR (HTTP ${status}).`);
+      const said = typeof data.responseMessage === "string" ? `: ${data.responseMessage.slice(0, 200)}` : "";
+      throw new Error(`KHQR.dev could not create the QR (HTTP ${status})${said}`);
     }
     const qr = data.data.qr;
     return { qr, md5: typeof data.data.md5 === "string" ? data.data.md5 : md5(qr), expiresAt };

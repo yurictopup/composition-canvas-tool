@@ -117,6 +117,20 @@ describe("expired KHQR", () => {
     ]);
   });
 
+  it("shows a try-again message (no crash) when KHQR.dev can't make the QR", async () => {
+    checkBakongPayment.mockResolvedValue({ status: "unpaid" });
+    createPaymentQr.mockRejectedValue(new Error("KHQR.dev could not create the QR (HTTP 500)"));
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { db, updates } = fakeDb();
+    const state = await startOrderPayment(db, expiredOrder.id, "guest");
+    expect(state).toMatchObject({ available: true, paid: false });
+    expect(state.message).toMatch(/try again|reload/i);
+    expect(state.qr).toBeUndefined();
+    expect(updates).toHaveLength(0);
+    expect(errors).toHaveBeenCalled();
+    errors.mockRestore();
+  });
+
   it("makes no new QR while the owner has sales switched off", async () => {
     checkBakongPayment.mockResolvedValue({ status: "unpaid" });
     const { db, updates } = fakeDb(false);

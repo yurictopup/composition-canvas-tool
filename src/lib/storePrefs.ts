@@ -155,6 +155,8 @@ const KM: Record<string, string> = {
   "Scan to pay": "ស្កេនដើម្បីបង់ប្រាក់",
   "Preparing KHQR…": "កំពុងរៀបចំ KHQR…",
   "KHQR is not available for this order.": "KHQR មិនអាចប្រើបានសម្រាប់ការកម្មង់នេះទេ",
+  "Couldn't make the KHQR right now. Please reload this page in a minute.":
+    "មិនអាចបង្កើត KHQR បានទេពេលនេះ។ សូមចុច reload ទំព័រនេះម្តងទៀតក្នុងរយៈពេល ១ នាទី",
   "min left": "នាទីទៀត",
   "Scan with ABA, ACLEDA, Wing or any bank app. This page updates by itself once you pay.":
     "ស្កេនជាមួយ ABA, ACLEDA, Wing ឬកម្មវិធីធនាគារណាមួយ ពេលបង់រួច ទំព័រនេះនឹងប្តូរដោយស្វ័យប្រវត្តិ",

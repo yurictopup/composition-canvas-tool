@@ -49,6 +49,8 @@ type PayOrder = {
   delivery_codes?: string[] | null;
 };
 
+export const QR_FAILED = "Couldn't make the KHQR right now. Please reload this page in a minute.";
+
 /** Whose order may be loaded: a user id, "guest" (a guest order whose link was checked), or null = the owner, any order. */
 export type OrderScope = string | null;
 
@@ -122,7 +124,14 @@ export async function startOrderPayment(
     };
   }
 
-  const qr = await createPaymentQr(cfg, { amount, billNumber: order.id.slice(0, 8).toUpperCase() });
+  let qr: Awaited<ReturnType<typeof createPaymentQr>>;
+  try {
+    qr = await createPaymentQr(cfg, { amount, billNumber: order.id.slice(0, 8).toUpperCase() });
+  } catch (error) {
+    // Kept in the Worker logs with KHQR.dev's own reason; the customer can simply retry.
+    console.error("[payment] KHQR not created", order.id, error instanceof Error ? error.message : error);
+    return { available: true, paid: false, message: QR_FAILED };
+  }
   const expiresAt = new Date(qr.expiresAt).toISOString();
   // Remember every QR this order was given, so a payment made later with an
   // older one (a screenshot, an app that ignores the expiry) is still found.
