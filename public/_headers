@@ -1,0 +1,6 @@
+# Static files (scripts, styles, pictures, icons) are served by Cloudflare without
+# going through src/server.ts, so they get the same two protections here:
+# no MIME sniffing and HTTPS only.
+/*
+  X-Content-Type-Options: nosniff
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
