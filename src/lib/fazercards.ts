@@ -472,7 +472,7 @@ export function extractCodes(order: unknown): string[] {
     .map((item) => {
       if (typeof item === "string") return item.trim();
       const c = (item ?? {}) as Record<string, unknown>;
-      const v = c.code ?? c.key ?? c.pin ?? c.card ?? c.serial;
+      const v = c["code"] ?? c["key"] ?? c["pin"] ?? c["card"] ?? c["serial"];
       return typeof v === "string" ? v.trim() : "";
     })
     .filter(Boolean);
@@ -631,7 +631,7 @@ function orderCost(o: Record<string, unknown>): number {
     const n =
       asMoney(value) ??
       (value && typeof value === "object"
-        ? asMoney((value as Record<string, unknown>).usd ?? (value as Record<string, unknown>).amount)
+        ? asMoney((value as Record<string, unknown>)["usd"] ?? (value as Record<string, unknown>)["amount"])
         : null);
     if (n !== null) return n;
   }
@@ -642,18 +642,22 @@ function orderCost(o: Record<string, unknown>): number {
 export async function listFazerOrders(opts: Opts, limit = 50): Promise<FazerOrder[]> {
   const json = await call(opts, `/orders?page=1&limit=${limit}`);
   const items = Array.isArray(json.items) ? (json.items as Record<string, unknown>[]) : [];
+  // The first text among these fields: FazerCards names them differently per order kind.
+  const pick = (o: Record<string, unknown>, ...keys: string[]) =>
+    firstText(...keys.map((key) => o[key]));
   return items
     .map((o) => ({
-      id: firstText(o.id, o.order_id, o.orderId),
-      status: firstText(o.status).toLowerCase(),
-      game: firstText(
-        o.gameName, o.game_name, o.categoryName, o.category_name, o.category,
-        o.serviceName, o.service_name, o.game, o.title,
+      id: pick(o, "id", "order_id", "orderId"),
+      status: pick(o, "status").toLowerCase(),
+      game: pick(
+        o,
+        ...["gameName", "game_name", "categoryName", "category_name", "category"],
+        ...["serviceName", "service_name", "game", "title"],
       ),
-      product: firstText(o.productName, o.product_name, o.offerName, o.offer_name, o.item),
+      product: pick(o, "productName", "product_name", "offerName", "offer_name", "item"),
       cost: orderCost(o),
-      createdAt: firstText(o.createdAt, o.created_at),
-      image: firstText(o.image, o.image_url, o.imageUrl, o.icon_url) || null,
+      createdAt: pick(o, "createdAt", "created_at"),
+      image: pick(o, "image", "image_url", "imageUrl", "icon_url") || null,
     }))
     .filter((o) => o.id);
 }

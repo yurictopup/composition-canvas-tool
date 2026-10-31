@@ -1,9 +1,8 @@
-// Bakong KHQR payments. Server-side only: the token must never reach the browser.
-// Two token kinds work:
-//  - an NBC developer token (eyJ…): the QR is built here and checked at
-//    api-bakong.nbc.gov.kh, which only answers Cambodian IP addresses, so a
-//    BAKONG_API_URL proxy in Cambodia may be needed;
-//  - a KHQR.dev token (rbk…): KHQR.dev builds and checks the QR from anywhere.
+// Bakong KHQR payments with an NBC Bakong Open API token (eyJ…, renewed every
+// 90 days). Server-side only: the token must never reach the browser. The QR
+// is built here for the shop's own Bakong account and checked at
+// api-bakong.nbc.gov.kh, which blocks some foreign addresses; it answered
+// Cloudflare Workers in tests. An optional apiUrl points at another gateway.
 import { createHash } from "node:crypto";
 import { buildKhqr } from "@/lib/khqr";
 
@@ -31,21 +30,15 @@ export type PaymentCheck =
   | { status: "unavailable"; message: string };
 
 const NBC_URL = "https://api-bakong.nbc.gov.kh/v1";
-const RELAY_URL = "https://api.khqr.dev/v1";
 const TIMEOUT_MS = 10000;
 export const QR_LIFETIME_MS = 30 * 60 * 1000;
-const PAID_STATUSES = new Set(["PAID", "SUCCESS", "COMPLETED"]);
-
-export function isRelayToken(token: string): boolean {
-  return token.startsWith("rbk");
-}
 
 export function md5(text: string): string {
   return createHash("md5").update(text, "utf8").digest("hex");
 }
 
 function apiUrl(cfg: BakongConfig): string {
-  return (cfg.apiUrl || (isRelayToken(cfg.token) ? RELAY_URL : NBC_URL)).replace(/\/+$/, "");
+  return (cfg.apiUrl || NBC_URL).replace(/\/+$/, "");
 }
 
 async function post(
@@ -68,20 +61,6 @@ export async function createPaymentQr(
   now = Date.now(),
 ): Promise<PaymentQr> {
   const expiresAt = now + QR_LIFETIME_MS;
-  if (isRelayToken(cfg.token)) {
-    const { status, json } = await post(cfg, "/generate_qr", {
-      amount: order.amount,
-      currency: "USD",
-      bill_number: order.billNumber,
-    });
-    const data =
-      (json as { responseCode?: unknown; data?: { qr?: unknown; md5?: unknown } } | null) ?? {};
-    if (status >= 400 || data.responseCode !== 0 || typeof data.data?.qr !== "string") {
-      throw new Error(`KHQR.dev could not create the QR (HTTP ${status}).`);
-    }
-    const qr = data.data.qr;
-    return { qr, md5: typeof data.data.md5 === "string" ? data.data.md5 : md5(qr), expiresAt };
-  }
   const qr = buildKhqr({
     accountId: cfg.accountId,
     merchantName: cfg.merchantName,
@@ -114,24 +93,31 @@ export async function checkBakongPayment(cfg: BakongConfig, qrMd5: string): Prom
   }
   const body = (res.json ?? {}) as {
     responseCode?: unknown;
+    responseMessage?: unknown;
+    errorCode?: unknown;
     data?: Record<string, unknown> | null;
   };
+  if (res.status >= 500) {
+    return { status: "unavailable", message: `Bakong returned HTTP ${res.status}.` };
+  }
   if (body.responseCode !== 0 || !body.data || typeof body.data !== "object") {
-    // Not found yet (or not paid): keep waiting. Server errors are not "unpaid".
-    return res.status >= 500
-      ? { status: "unavailable", message: `Bakong returned HTTP ${res.status}.` }
-      : { status: "unpaid" };
+    // Only "transaction not found" (errorCode 1) means not paid yet. Anything
+    // else, e.g. 19 "Daily request limit of 100 exceeded", is NBC refusing to
+    // answer, never a sign the customer didn't pay.
+    if (body.errorCode === 1 || body.errorCode === undefined) return { status: "unpaid" };
+    const said = typeof body.responseMessage === "string" ? body.responseMessage : "";
+    return {
+      status: "unavailable",
+      message: `Bakong error ${String(body.errorCode)}${said ? `: ${said}` : ""}`,
+    };
   }
-  const data = body.data;
-  // KHQR.dev adds a status; NBC answers only for completed payments and has none.
-  // Only a known "paid" word counts: anything else (FAILED, REFUNDED, a new
-  // word) is never taken as money received.
-  const relayStatus = String(data["status"] ?? "").toUpperCase();
-  if (relayStatus === "SCANNED" || relayStatus === "UNPAID" || relayStatus === "EXPIRED")
-    return { status: "unpaid" };
-  if (relayStatus !== "" && !PAID_STATUSES.has(relayStatus)) {
-    return { status: "unavailable", message: `Bakong answered with status ${relayStatus}.` };
-  }
+  // NBC answers with data only for a completed payment.
+  return paidFrom(body.data);
+}
+
+type PaidCheck = Extract<PaymentCheck, { status: "paid" }>;
+
+function paidFrom(data: Record<string, unknown>): PaidCheck {
   const amount = Number(data["amount"]);
   return {
     status: "paid",
@@ -142,21 +128,58 @@ export async function checkBakongPayment(cfg: BakongConfig, qrMd5: string): Prom
   };
 }
 
+/** NBC takes at most this many md5s in one list check. */
+export const MD5_LIST_MAX = 50;
+
 /**
- * A paid answer only counts when it is for the full amount in USD.
- * With our own account (NBC token) NBC always sends the currency and the
- * receiving account, so both must be there and match: a missing one is not a
- * match. accountId null = the QR came from KHQR.dev for the account linked
- * there; its answer is checked for amount, and for currency when sent.
+ * Asks NBC about many KHQRs in one request (one of the 100 a day), for the
+ * cron. Gives the paid ones by md5; every md5 not in the map is not paid yet.
+ */
+export async function checkBakongPayments(
+  cfg: BakongConfig,
+  md5s: string[],
+): Promise<{ status: "ok"; paid: Map<string, PaidCheck> } | { status: "unavailable"; message: string }> {
+  let res: { status: number; json: unknown };
+  try {
+    res = await post(cfg, "/check_transaction_by_md5_list", md5s.slice(0, MD5_LIST_MAX));
+  } catch (error) {
+    return { status: "unavailable", message: error instanceof Error ? error.message : String(error) };
+  }
+  const body = (res.json ?? {}) as {
+    responseCode?: unknown;
+    responseMessage?: unknown;
+    errorCode?: unknown;
+    data?: unknown;
+  };
+  if (res.status !== 200 || body.responseCode !== 0 || !Array.isArray(body.data)) {
+    const said = typeof body.responseMessage === "string" ? `: ${body.responseMessage}` : "";
+    return {
+      status: "unavailable",
+      message: `Bakong list check failed (HTTP ${res.status}, error ${String(body.errorCode)})${said}`,
+    };
+  }
+  const paid = new Map<string, PaidCheck>();
+  for (const item of body.data as Record<string, unknown>[]) {
+    const md5 = item?.["md5"];
+    const data = item?.["data"];
+    // Each row says SUCCESS with the transaction, or NOT_FOUND.
+    if (typeof md5 === "string" && item["status"] === "SUCCESS" && data && typeof data === "object") {
+      paid.set(md5, paidFrom(data as Record<string, unknown>));
+    }
+  }
+  return { status: "ok", paid };
+}
+
+/**
+ * A paid answer only counts when it is for the full amount in USD to the
+ * shop's account. NBC always sends the currency and the receiving account, so
+ * both must be there and match: a missing one is not a match.
  */
 export function paymentMatches(
   check: Extract<PaymentCheck, { status: "paid" }>,
-  expected: { amount: number; accountId: string | null },
+  expected: { amount: number; accountId: string },
 ): boolean {
   if (check.amount === null || Math.abs(check.amount - expected.amount) > 0.005) return false;
-  if (expected.accountId === null) {
-    return check.currency === null || check.currency.toUpperCase() === "USD";
-  }
   return (
     check.currency?.toUpperCase() === "USD" &&
     check.toAccountId?.toLowerCase() === expected.accountId.toLowerCase()

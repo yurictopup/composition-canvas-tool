@@ -64,11 +64,17 @@ export const LIMITS = {
   chatIp: { capacity: 12, perSeconds: 60 },
   chatIpDay: { capacity: 150, perSeconds: 86_400 },
   chatOrdersIp: { capacity: 12, perSeconds: 60 },
-  // At most one Bakong question per order every 4 s, however many tabs,
-  // visitors or Workers poll it, so the Bakong token is never flooded.
-  bankCheckOrder: { capacity: 1, perSeconds: 4 },
-  // Replaced (older) QRs of an unpaid order: the cron asks every 10 minutes.
-  earlierQrCheck: { capacity: 1, perSeconds: 600 },
+  // NBC answers at most 100 payment checks a day ("Daily request limit of 100
+  // exceeded", error 19). The shop spends at most 90, leaving room for the
+  // owner's tests; past that the owner confirms payments by hand.
+  nbcDay: { capacity: 90, perSeconds: 86_400 },
+  // At most one Bakong question per order every 30 s, however many tabs,
+  // visitors or Workers poll it.
+  bankCheckOrder: { capacity: 1, perSeconds: 30 },
+  // The cron's one-request list check: every 15 minutes while orders made in
+  // the last hour wait, every 6 hours for older QRs.
+  nbcSweepRecent: { capacity: 1, perSeconds: 900 },
+  nbcSweepOld: { capacity: 1, perSeconds: 21_600 },
 } satisfies Record<string, Budget>;
 
 export function rule(name: keyof typeof LIMITS, subject: string): Rule {

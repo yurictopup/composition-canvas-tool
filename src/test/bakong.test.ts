@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { buildKhqr, crc16, formatKhqrAmount } from "@/lib/khqr";
-import { checkBakongPayment, createPaymentQr, md5, paymentMatches } from "@/lib/bakong";
+import {
+  checkBakongPayment,
+  checkBakongPayments,
+  createPaymentQr,
+  md5,
+  paymentMatches,
+} from "@/lib/bakong";
 
 describe("KHQR payload", () => {
   it("uses CRC-16/CCITT-FALSE", () => {
@@ -58,16 +64,6 @@ describe("Bakong payment check", () => {
     expect(f).not.toHaveBeenCalled();
   });
 
-  it("asks KHQR.dev to build the QR for an rbk token", async () => {
-    const f = fakeFetch(200, { responseCode: 0, data: { qr: "000201...", md5: "abc" } });
-    const qr = await createPaymentQr(
-      { ...nbc, token: "rbk_test", fetchImpl: f },
-      { amount: 1.09, billNumber: "AB12CD34" },
-    );
-    expect(qr).toMatchObject({ qr: "000201...", md5: "abc" });
-    expect(String(f.mock.calls[0]![0])).toBe("https://api.khqr.dev/v1/generate_qr");
-  });
-
   it("reads a paid transaction", async () => {
     const f = fakeFetch(200, {
       responseCode: 0,
@@ -100,7 +96,14 @@ describe("Bakong payment check", () => {
     );
   });
 
-  it("uses BAKONG_API_URL when set, e.g. a proxy in Cambodia", async () => {
+  it("treats a wrong or expired token as unavailable, never unpaid", async () => {
+    expect(await checkBakongPayment({ ...nbc, fetchImpl: fakeFetch(401, {}) }, "m")).toEqual({
+      status: "unavailable",
+      message: "Bakong token is wrong or expired.",
+    });
+  });
+
+  it("uses BAKONG_NBC_API_URL when set, e.g. a proxy in Cambodia", async () => {
     const f = fakeFetch(200, { responseCode: 1 });
     await checkBakongPayment({ ...nbc, apiUrl: "https://kh-proxy.example/v1/", fetchImpl: f }, "m");
     expect(String(f.mock.calls[0]![0])).toBe(
@@ -108,23 +111,73 @@ describe("Bakong payment check", () => {
     );
   });
 
-  it("never counts an unknown KHQR.dev status as paid", async () => {
-    for (const status of ["FAILED", "REFUNDED", "PENDING"]) {
-      const f = fakeFetch(200, { responseCode: 0, data: { status, amount: 1.09, hash: "h" } });
-      expect((await checkBakongPayment({ ...nbc, token: "rbk_x", fetchImpl: f }, "m")).status).toBe(
-        "unavailable",
-      );
-    }
-    const paidF = fakeFetch(200, { responseCode: 0, data: { status: "PAID", amount: 1.09 } });
-    expect(
-      (await checkBakongPayment({ ...nbc, token: "rbk_x", fetchImpl: paidF }, "m")).status,
-    ).toBe("paid");
+  it("treats NBC's daily limit as unavailable, never unpaid", async () => {
+    const f = fakeFetch(200, {
+      responseCode: 1,
+      errorCode: 19,
+      responseMessage: "Daily request limit of 100 exceeded for this source.",
+      data: null,
+    });
+    expect(await checkBakongPayment({ ...nbc, fetchImpl: f }, "m")).toEqual({
+      status: "unavailable",
+      message: "Bakong error 19: Daily request limit of 100 exceeded for this source.",
+    });
+    const notFound = fakeFetch(200, { responseCode: 1, errorCode: 1, data: null });
+    expect((await checkBakongPayment({ ...nbc, fetchImpl: notFound }, "m")).status).toBe("unpaid");
   });
 
-  it("does not count a scanned-but-unpaid KHQR.dev answer", async () => {
-    const f = fakeFetch(200, { responseCode: 0, data: { status: "SCANNED" } });
-    expect(await checkBakongPayment({ ...nbc, token: "rbk_x", fetchImpl: f }, "m")).toEqual({
-      status: "unpaid",
+  it("treats an NBC server error as unavailable, never unpaid", async () => {
+    expect((await checkBakongPayment({ ...nbc, fetchImpl: fakeFetch(502, {}) }, "m")).status).toBe(
+      "unavailable",
+    );
+  });
+});
+
+describe("Bakong list check", () => {
+  it("asks about many md5s in one request and returns only the paid ones", async () => {
+    const f = fakeFetch(200, {
+      responseCode: 0,
+      data: [
+        {
+          md5: "a",
+          status: "SUCCESS",
+          data: { hash: "h1", amount: 1.09, currency: "USD", toAccountId: "brachnha_say@bkrt" },
+        },
+        { md5: "b", status: "NOT_FOUND", data: null },
+      ],
+    });
+    const result = await checkBakongPayments({ ...nbc, fetchImpl: f }, ["a", "b"]);
+    expect(String(f.mock.calls[0]![0])).toBe(
+      "https://api-bakong.nbc.gov.kh/v1/check_transaction_by_md5_list",
+    );
+    expect(JSON.parse(String((f.mock.calls[0]![1] as RequestInit).body))).toEqual(["a", "b"]);
+    expect(result.status).toBe("ok");
+    if (result.status !== "ok") return;
+    expect([...result.paid.keys()]).toEqual(["a"]);
+    expect(result.paid.get("a")).toMatchObject({ amount: 1.09, hash: "h1" });
+  });
+
+  it("sends at most 50 md5s", async () => {
+    const f = fakeFetch(200, { responseCode: 0, data: [] });
+    await checkBakongPayments(
+      { ...nbc, fetchImpl: f },
+      Array.from({ length: 60 }, (_, i) => `m${i}`),
+    );
+    expect(JSON.parse(String((f.mock.calls[0]![1] as RequestInit).body))).toHaveLength(50);
+  });
+
+  it("reports the daily limit as unavailable", async () => {
+    const f = fakeFetch(200, {
+      responseCode: 1,
+      errorCode: 19,
+      responseMessage: "Daily request limit of 100 exceeded for this source.",
+      data: null,
+    });
+    const result = await checkBakongPayments({ ...nbc, fetchImpl: f }, ["a"]);
+    expect(result).toEqual({
+      status: "unavailable",
+      message:
+        "Bakong list check failed (HTTP 200, error 19): Daily request limit of 100 exceeded for this source.",
     });
   });
 });
@@ -151,11 +204,5 @@ describe("Matching a payment to the order", () => {
     expect(paymentMatches({ ...paid, currency: null }, expected)).toBe(false);
     expect(paymentMatches({ ...paid, toAccountId: null }, expected)).toBe(false);
     expect(paymentMatches({ ...paid, toAccountId: "BRACHNHA_SAY@bkrt" }, expected)).toBe(true);
-  });
-  it("skips the account check when the QR came from KHQR.dev", () => {
-    const relay = { amount: 1.09, accountId: null };
-    expect(paymentMatches({ ...paid, toAccountId: "shop@abaa" }, relay)).toBe(true);
-    expect(paymentMatches({ ...paid, toAccountId: "shop@abaa", amount: 1.0 }, relay)).toBe(false);
-    expect(paymentMatches({ ...paid, currency: "KHR" }, relay)).toBe(false);
   });
 });

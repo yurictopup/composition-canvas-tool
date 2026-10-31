@@ -1,10 +1,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   checkBakongPayment,
+  checkBakongPayments,
   createPaymentQr,
-  isRelayToken,
+  MD5_LIST_MAX,
   paymentMatches,
   type BakongConfig,
+  type PaymentCheck,
 } from "@/lib/bakong";
 import { deliverPaidOrder } from "@/lib/delivery.server";
 import { salesOpenFor } from "@/lib/store-status";
@@ -21,15 +23,16 @@ export type PaymentState = {
   codes?: string[];
 };
 
+// The NBC token and the shop's own Bakong account, from Worker secrets.
 export function bakongConfig(): BakongConfig | null {
-  const token = process.env["BAKONG_TOKEN"];
-  const accountId = process.env["BAKONG_ACCOUNT_ID"];
+  const token = process.env["BAKONG_NBC_TOKEN"];
+  const accountId = process.env["BAKONG_NBC_ACCOUNT_ID"];
   if (!token || !accountId) return null;
   return {
     token,
     accountId,
-    merchantName: process.env["BAKONG_MERCHANT_NAME"] || "Yuric Topup",
-    apiUrl: process.env["BAKONG_API_URL"],
+    merchantName: process.env["BAKONG_NBC_MERCHANT_NAME"] || "Yuric Store",
+    apiUrl: process.env["BAKONG_NBC_API_URL"],
   };
 }
 
@@ -162,23 +165,35 @@ export async function checkOrderPayment(
   return settlePayment(db, cfg, order, order.payment_md5);
 }
 
-/** Asks Bakong about the order's current KHQR; when paid, marks it and starts the delivery. */
+// Shown when the shop's NBC requests for the day are used up.
+const BUSY =
+  "We're confirming your payment. If you paid, your order is safe: the shop will confirm it shortly.";
+
+/** One NBC check, if the shop's daily NBC budget allows it. */
+async function askBakong(cfg: BakongConfig, md5: string): Promise<PaymentCheck> {
+  const { nbcBudgetAllowed } = await import("@/lib/rate-limit.server");
+  if (!(await nbcBudgetAllowed())) return { status: "unavailable", message: BUSY };
+  return checkBakongPayment(cfg, md5);
+}
+
+/**
+ * Asks Bakong about the order's KHQR (or uses `known`, the answer of the cron's
+ * list check); when paid, marks it and starts the delivery.
+ */
 async function settlePayment(
   db: SupabaseClient,
   cfg: BakongConfig,
   order: PayOrder,
   md5: string,
+  known?: PaymentCheck,
 ): Promise<PaymentState> {
-  const check = await checkBakongPayment(cfg, md5);
+  const check = known ?? (await askBakong(cfg, md5));
   if (check.status === "unavailable")
     return { available: true, paid: false, message: check.message };
   if (check.status === "unpaid") return { available: true, paid: false };
 
   const amount = Number(order.price_usd);
-  // With a KHQR.dev token the QR is made by KHQR.dev for the account linked
-  // there (e.g. an ABA merchant), so only the amount is compared.
-  const accountId = isRelayToken(cfg.token) ? null : cfg.accountId;
-  if (!paymentMatches(check, { amount, accountId })) {
+  if (!paymentMatches(check, { amount, accountId: cfg.accountId })) {
     return {
       available: true,
       paid: false,
@@ -269,4 +284,56 @@ export async function checkEarlierQr(
   // The newest QR counts too: once it expired, only this sweep still asks about it.
   if (order.status !== "pending") return { available: true, paid: false };
   return settlePayment(db, cfg, order, md5);
+}
+
+/** New orders' QRs are in every 15-minute list check for this long. */
+export const RECENT_QR_WINDOW_MS = 60 * 60 * 1000;
+
+/**
+ * The cron's payment check: every unpaid QR of the last day in ONE NBC request
+ * (NBC allows 100 a day), then each paid one is marked and delivered exactly
+ * as when the customer's page sees it. Runs every 15 minutes while an order
+ * from the last hour waits, otherwise every 6 hours.
+ */
+export async function sweepBakongPayments(
+  db: SupabaseClient,
+  now = Date.now(),
+): Promise<{ checked: number; paid: number }> {
+  const cfg = bakongConfig();
+  if (!cfg) return { checked: 0, paid: 0 };
+  const { data } = await db
+    .from("order_payments")
+    .select("md5, order_id, created_at")
+    .is("paid_at", null)
+    .gt("created_at", new Date(now - EARLIER_QR_WINDOW_MS).toISOString())
+    .order("created_at", { ascending: false })
+    .limit(MD5_LIST_MAX);
+  const rows = (data ?? []) as { md5: string; order_id: string; created_at: string }[];
+  if (!rows.length) return { checked: 0, paid: 0 };
+
+  const recent = rows.some((r) => Date.parse(r.created_at) > now - RECENT_QR_WINDOW_MS);
+  const { rule } = await import("@/lib/rate-limit");
+  const { checkLimits, nbcBudgetAllowed } = await import("@/lib/rate-limit.server");
+  const gate = rule(recent ? "nbcSweepRecent" : "nbcSweepOld", "all");
+  if (!(await checkLimits([gate])).allowed || !(await nbcBudgetAllowed())) {
+    return { checked: 0, paid: 0 };
+  }
+
+  const answer = await checkBakongPayments(
+    cfg,
+    rows.map((r) => r.md5),
+  );
+  if (answer.status !== "ok") {
+    console.error("[sweep] bakong list check", answer.message);
+    return { checked: rows.length, paid: 0 };
+  }
+  let paid = 0;
+  for (const row of rows) {
+    const check = answer.paid.get(row.md5);
+    if (!check) continue;
+    const order = await loadOrder(db, row.order_id, null);
+    if (!order || order.paid_at || order.status !== "pending") continue;
+    if ((await settlePayment(db, cfg, order, row.md5, check)).paid) paid++;
+  }
+  return { checked: rows.length, paid };
 }
