@@ -28,14 +28,17 @@ import {
   Link2,
   CircleAlert,
   CircleCheck,
+  Lock,
   Package,
   Receipt,
   Send,
+  ShieldCheck,
   ShoppingCart,
   Sparkles,
   Star,
   Ticket,
   Wallet,
+  Zap,
 } from "lucide-react";
 import { livePackages, livePrice, packageKey, useLivePrices } from "@/lib/prices";
 import { gameOnSale, useStoreStatus } from "@/lib/store-status";
@@ -65,7 +68,8 @@ function GameRoute() {
 }
 
 function GamePage({ gameId }: { gameId: string }) {
-  const { t } = useStorePrefs();
+  const { t, lang } = useStorePrefs();
+  const km = lang === "km";
   const pic = useSiteImage();
   const slotPic = useSlotImage();
   const game = findGame(gameId);
@@ -647,63 +651,95 @@ function GamePage({ gameId }: { gameId: string }) {
                 </span>
                 {t("Choose a payment method")}
               </h2>
-              <div className="flex flex-wrap gap-3">
+              <div className="grid gap-3">
                 {payments.map((m) => (
                   <button
                     key={m}
                     type="button"
                     onClick={() => setPay(m)}
                     aria-pressed={pay === m}
-                    className={`relative flex aspect-square w-36 flex-col items-center justify-center gap-2 sm:w-44 sm:gap-2.5 rounded-2xl border-2 bg-white px-4 text-center text-[#142650] transition ${
+                    className={`relative flex w-full items-center gap-3.5 rounded-2xl border-2 bg-gradient-to-br from-white to-[#f2f6ff] p-3.5 text-left text-[#142650] transition sm:gap-4 sm:p-4 ${
                       pay === m
-                        ? "border-[#2f5fe0] shadow-[0_6px_18px_rgb(47_95_224/0.25)]"
+                        ? "border-[#2f5fe0] shadow-[0_8px_24px_rgb(47_95_224/0.18)] ring-4 ring-[#2f5fe0]/10"
                         : "border-[#dfe8f6] hover:border-[#2f5fe0]/50"
                     }`}
                   >
+                    <AbaMark />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="text-base font-bold sm:text-lg">ABA KHQR</span>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                          <Zap className="h-3 w-3" />
+                          {km ? "ភ្លាមៗ" : "Instant"}
+                        </span>
+                      </span>
+                      <span className="mt-0.5 block text-xs leading-snug text-[#5b6b8c]">
+                        {t("Scan with ABA, ACLEDA, Wing or any bank app")}
+                      </span>
+                      <span className="mt-2 flex flex-wrap gap-1.5">
+                        {["ABA", "ACLEDA", "Wing", "Bakong", "Canadia"].map((bank) => (
+                          <span
+                            key={bank}
+                            className="rounded-md border border-[#dfe8f6] bg-white px-1.5 py-0.5 text-[10px] font-semibold text-[#3a4a6b]"
+                          >
+                            {bank}
+                          </span>
+                        ))}
+                      </span>
+                    </span>
                     <span
-                      className={`absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full border-2 ${
-                        pay === m ? "border-[#2f5fe0] bg-[#2f5fe0]" : "border-[#c5d3ea]"
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition ${
+                        pay === m ? "border-[#2f5fe0] bg-[#2f5fe0] text-white" : "border-[#c5d3ea]"
                       }`}
                     >
-                      {pay === m && <span className="h-2 w-2 rounded-full bg-white" />}
-                    </span>
-                    <AbaMark />
-                    <span className="block text-base font-bold">ABA KHQR</span>
-                    <span className="block text-[11px] leading-snug text-[#5b6b8c]">
-                      {t("Scan with ABA, ACLEDA, Wing or any bank app")}
+                      {pay === m && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
                     </span>
                   </button>
                 ))}
               </div>
+              <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Zap className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                {km
+                  ? "នៅលើទូរស័ព្ទ កម្មវិធីធនាគារនឹងបើកដោយខ្លួនឯង ពេលអ្នកចុចបញ្ជាទិញ"
+                  : "On a phone, your bank app opens by itself when you place the order."}
+              </p>
             </section>
 
             {/* Summary */}
             <aside className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
-              <h3 className="font-khmer text-base sm:text-lg">{t("Order summary")}</h3>
-              <dl className="mt-4 space-y-2 text-sm">
-                <div className="flex justify-between">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="font-khmer text-base sm:text-lg">{t("Order summary")}</h3>
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  {km ? "មានសុវត្ថិភាព" : "Secure"}
+                </span>
+              </div>
+              <dl className="mt-4 divide-y divide-[#e6edf8] rounded-xl border border-[#e6edf8] bg-white/70 text-sm">
+                <div className="flex justify-between gap-3 px-3.5 py-2.5">
                   <dt className="text-muted-foreground">{t("Game")}</dt>
-                  <dd>{game.name}</dd>
+                  <dd className="text-right font-semibold">{game.name}</dd>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-3 px-3.5 py-2.5">
                   <dt className="text-muted-foreground">{t("Player ID")}</dt>
-                  <dd>
+                  <dd className="text-right font-semibold">
                     {uid || "—"}
                     {zone && ` (${zone})`}
                   </dd>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-3 px-3.5 py-2.5">
                   <dt className="text-muted-foreground">{t("Package")}</dt>
-                  <dd>{selected ? `${selected.amt} ${game.unit}` : "—"}</dd>
+                  <dd className="text-right font-semibold">
+                    {selected ? `${selected.amt} ${game.unit}` : "—"}
+                  </dd>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-3 px-3.5 py-2.5">
                   <dt className="text-muted-foreground">{t("Payment")}</dt>
-                  <dd>ABA KHQR</dd>
+                  <dd className="text-right font-semibold">ABA KHQR</dd>
                 </div>
               </dl>
-              <div className="mt-4 flex items-end justify-between border-t pt-4">
-                <span className="text-muted-foreground">{t("Total")}</span>
-                <span className="font-display text-2xl font-black text-accent sm:text-3xl">
+              <div className="mt-3 flex items-center justify-between rounded-xl bg-gradient-to-r from-[#2f5fe0]/10 to-[#2f5fe0]/[0.03] px-3.5 py-3">
+                <span className="text-sm font-semibold text-[#142650]">{t("Total")}</span>
+                <span className="font-display text-2xl font-black text-[#2f5fe0] sm:text-3xl">
                   {selected?.price != null ? `$${selected.price.toFixed(2)}` : "—"}
                 </span>
               </div>
@@ -743,17 +779,34 @@ function GamePage({ gameId }: { gameId: string }) {
               <button
                 disabled={!canBuy}
                 onClick={handleBuy}
-                className="btn-3d glow-pulse mt-4 w-full rounded-xl py-3 sm:mt-5 sm:py-4 font-display font-bold disabled:opacity-40"
+                className={`mt-4 w-full rounded-xl bg-gradient-to-r from-[#3b6cf0] to-[#1f42b8] py-3.5 font-display text-base font-bold text-white transition sm:mt-5 sm:py-4 ${
+                  canBuy
+                    ? "glow-pulse shadow-[0_10px_28px_rgb(47_95_224/0.4)] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0"
+                    : "cursor-not-allowed opacity-40"
+                }`}
               >
                 {busy ? (
                   t("Processing…")
                 ) : (
                   <span className="inline-flex items-center gap-2">
-                    <ShoppingCart className="h-4 w-4" />
+                    <ShoppingCart className="h-5 w-5" />
                     {t("Place Order")}
+                    {canBuy && selected?.price != null && (
+                      <span className="rounded-md bg-white/20 px-2 py-0.5 text-sm">
+                        ${selected.price.toFixed(2)}
+                      </span>
+                    )}
                   </span>
                 )}
               </button>
+              <p className="mt-2.5 flex items-center justify-center gap-3 text-[11px] text-muted-foreground">
+                <span className="inline-flex items-center gap-1">
+                  <Lock className="h-3 w-3" /> {km ? "បង់ប្រាក់មានសុវត្ថិភាព" : "Secure payment"}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Zap className="h-3 w-3" /> {km ? "បញ្ចូល ១-៥ នាទី" : "Delivered in 1-5 min"}
+                </span>
+              </p>
 
               {!check?.ok && (
                 <p className="mt-2 flex items-center justify-center gap-1 text-xs text-muted-foreground">
