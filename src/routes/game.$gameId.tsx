@@ -1036,6 +1036,8 @@ function TelegramSwitch({ current }: { current: string }) {
             to="/game/$gameId"
             params={{ gameId: tab.id }}
             replace
+            // Stay at the switch instead of jumping to the top of the page.
+            resetScroll={false}
             aria-current={on ? "page" : undefined}
             className={`flex items-center justify-center rounded-xl px-3 py-2.5 text-center text-sm font-bold transition sm:py-3 sm:text-base ${
               on
