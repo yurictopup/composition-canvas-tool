@@ -541,26 +541,26 @@ export function ChatWidget({
                     </p>
                   </div>
 
-                  <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-4">
+                  <ul className="mt-3 divide-y divide-[var(--chat-line)] overflow-hidden rounded-2xl border border-[var(--chat-line)] bg-[var(--chat-glass)] sm:mt-4">
                     {faqs.map((f) => {
                       const FaqIcon = f.icon ?? MessageCircle;
                       return (
-                        <button
-                          key={f.q}
-                          type="button"
-                          onClick={() => openFaq(f)}
-                          className={`group flex flex-col gap-1 rounded-2xl p-2 text-left transition hover:-translate-y-0.5 sm:gap-1.5 sm:p-2.5 hover:border-[var(--chat-line-strong)] hover:bg-[var(--chat-hover)] ${glass}`}
-                        >
-                          <span className="grid h-7 w-7 place-items-center rounded-lg bg-[linear-gradient(135deg,oklch(0.72_0.13_252/0.3),oklch(0.55_0.24_290/0.3))] text-[var(--chat-accent)] ring-1 ring-[var(--chat-line)] transition group-hover:bg-[linear-gradient(135deg,oklch(0.72_0.13_252),oklch(0.55_0.24_290))] group-hover:text-white">
-                            <FaqIcon className="h-4 w-4" />
-                          </span>
-                          <span className="line-clamp-2 text-[12px] font-medium leading-[1.6] text-[var(--chat-fg)]">
-                            {f.q}
-                          </span>
-                        </button>
+                        <li key={f.q}>
+                          <button
+                            type="button"
+                            onClick={() => openFaq(f)}
+                            className="group flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition hover:bg-[var(--chat-hover)]"
+                          >
+                            <FaqIcon className="h-4 w-4 shrink-0 text-[var(--chat-accent)]" />
+                            <span className="min-w-0 flex-1 text-[12.5px] font-medium leading-[1.6] text-[var(--chat-fg)]">
+                              {f.q}
+                            </span>
+                            <ChevronRight className="h-4 w-4 shrink-0 text-[var(--chat-muted)] transition-transform group-hover:translate-x-0.5" />
+                          </button>
+                        </li>
                       );
                     })}
-                  </div>
+                  </ul>
 
                   {threads.length > 0 && (
                     <div className="mt-5">
