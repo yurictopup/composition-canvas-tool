@@ -698,7 +698,7 @@ function GamePage({ gameId }: { gameId: string }) {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">{t("Payment")}</dt>
-                  <dd>{pay}</dd>
+                  <dd>ABA KHQR</dd>
                 </div>
               </dl>
               <div className="mt-4 flex items-end justify-between border-t pt-4">
