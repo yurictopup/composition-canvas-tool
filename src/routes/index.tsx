@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
-import { Clock, QrCode } from "lucide-react";
+import { Clock } from "lucide-react";
 import banner from "@/assets/banner-angkor.webp";
 import { useSiteImage } from "@/lib/site-images";
 import mascot from "@/assets/mascot-cut.webp";
@@ -276,28 +276,6 @@ function BannerOverlay() {
             }}
           />
         ))}
-      </span>
-
-      {/* "Pay with" card */}
-      <span className="pay-card absolute left-[20%] top-[8%] hidden -rotate-3 rounded-2xl bg-[linear-gradient(135deg,#fff6c2,#ffc21f_45%,#ff8a00)] p-[3px] shadow-[0_8px_0_#0b2a7a,0_16px_30px_rgb(0_0_0/0.35)] md:block">
-        <span className="relative flex flex-col items-center gap-1.5 overflow-hidden rounded-[13px] bg-[linear-gradient(180deg,#ffffff,#e9f0ff)] px-4 pb-2.5 pt-2">
-          <span className="pay-card-shine" aria-hidden="true" />
-          <span className="flex items-center gap-1.5 font-sans text-[clamp(12px,1.05vw,16px)] font-bold leading-[1.7] text-[#0b2a7a]">
-            <span className="size-1.5 rounded-full bg-[#22c55e] shadow-[0_0_0_3px_rgb(34_197_94/0.25)]" />
-            {"ទូទាត់តាមរយៈ"}
-          </span>
-          <span className="flex items-center gap-2 rounded-lg bg-[#E1232E] py-1 pl-1.5 pr-3 shadow-[0_3px_0_#9c1219,0_0_16px_rgb(225_35_46/0.45)]">
-            <span className="grid size-[clamp(20px,1.9vw,30px)] place-items-center rounded-md bg-white">
-              <QrCode className="size-[75%] text-[#E1232E]" strokeWidth={2.5} />
-            </span>
-            <span className="text-[clamp(14px,1.4vw,22px)] font-black tracking-wider text-white">
-              KHQR
-            </span>
-          </span>
-          <span className="font-sans text-[clamp(10px,0.8vw,12px)] font-semibold leading-[1.7] text-[#5b6b8c]">
-            ស្កេនបង់ប្រាក់ភ្លាមៗ
-          </span>
-        </span>
       </span>
 
       {/* headline */}
