@@ -11,6 +11,7 @@ import {
   RefreshCw,
   ShoppingCart,
   Tag,
+  Ticket,
   Truck,
   Users,
   Wallet,
@@ -20,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isOwnerAccount } from "@/lib/owner";
 import { AdminPrices } from "@/components/AdminPrices";
 import { AdminImages } from "@/components/admin/AdminImages";
+import { AdminPromos } from "@/components/admin/AdminPromos";
 import { AdminCustomers } from "@/components/admin/AdminCustomers";
 import { AdminMfa } from "@/components/admin/AdminMfa";
 import { AdminOrders } from "@/components/admin/AdminOrders";
@@ -93,6 +95,13 @@ const NAV: NavItem[] = [
     section: "Store",
   },
   { id: "prices", icon: <Tag size={22} />, label: "Prices", title: "Prices", section: "Store" },
+  {
+    id: "promos",
+    icon: <Ticket size={22} />,
+    label: "Promo codes",
+    title: "Promo codes",
+    section: "Store",
+  },
   {
     id: "images",
     icon: <ImageIcon size={22} />,
@@ -629,6 +638,7 @@ function AdminPage() {
 
                 {/* ══════════════ PRICES TAB ══════════════ */}
                 {tab === "prices" && <AdminPrices />}
+                {tab === "promos" && <AdminPromos />}
                 {tab === "images" && <AdminImages />}
                 {tab === "supplier" && <AdminSupplierOrders orders={orders} />}
               </div>

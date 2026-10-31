@@ -30,6 +30,7 @@ export const placeGuestOrder = createServerFn({ method: "POST" })
       playerId: z.string().min(1).max(64),
       playerZone: z.string().max(32).optional(),
       contact: z.string().max(64).optional(),
+      promoCode: z.string().max(32).optional(),
     }),
   )
   .handler(async ({ data }): Promise<{ orderId: string; price: number; token: string }> => {

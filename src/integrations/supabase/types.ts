@@ -13,6 +13,7 @@ export type Database = {
           created_at: string;
           delivered_at: string | null;
           delivery_codes: string[] | null;
+          discount_usd: number | null;
           game_id: string;
           game_name: string;
           id: string;
@@ -28,6 +29,7 @@ export type Database = {
           player_name: string | null;
           player_zone: string | null;
           price_usd: number;
+          promo_code: string | null;
           status: string;
           supplier_order_id: string | null;
           supplier_status: string | null;
@@ -39,6 +41,7 @@ export type Database = {
           created_at?: string;
           delivered_at?: string | null;
           delivery_codes?: string[] | null;
+          discount_usd?: number | null;
           game_id: string;
           game_name: string;
           id?: string;
@@ -54,6 +57,7 @@ export type Database = {
           player_name?: string | null;
           player_zone?: string | null;
           price_usd: number;
+          promo_code?: string | null;
           status?: string;
           supplier_order_id?: string | null;
           supplier_status?: string | null;
@@ -65,6 +69,7 @@ export type Database = {
           created_at?: string;
           delivered_at?: string | null;
           delivery_codes?: string[] | null;
+          discount_usd?: number | null;
           game_id?: string;
           game_name?: string;
           id?: string;
@@ -80,6 +85,7 @@ export type Database = {
           player_name?: string | null;
           player_zone?: string | null;
           price_usd?: number;
+          promo_code?: string | null;
           status?: string;
           supplier_order_id?: string | null;
           supplier_status?: string | null;
@@ -113,6 +119,7 @@ export type Database = {
       product_prices: {
         Row: {
           active: boolean;
+          cost_usd: number | null;
           game_id: string;
           game_name: string;
           package_amt: string;
@@ -120,6 +127,7 @@ export type Database = {
         };
         Insert: {
           active?: boolean;
+          cost_usd?: number | null;
           game_id: string;
           game_name: string;
           package_amt: string;
@@ -127,10 +135,41 @@ export type Database = {
         };
         Update: {
           active?: boolean;
+          cost_usd?: number | null;
           game_id?: string;
           game_name?: string;
           package_amt?: string;
           price_usd?: number;
+        };
+        Relationships: [];
+      };
+      promo_codes: {
+        Row: {
+          active: boolean;
+          code: string;
+          created_at: string;
+          expires_at: string | null;
+          max_uses: number | null;
+          percent_off: number;
+          used_count: number;
+        };
+        Insert: {
+          active?: boolean;
+          code: string;
+          created_at?: string;
+          expires_at?: string | null;
+          max_uses?: number | null;
+          percent_off: number;
+          used_count?: number;
+        };
+        Update: {
+          active?: boolean;
+          code?: string;
+          created_at?: string;
+          expires_at?: string | null;
+          max_uses?: number | null;
+          percent_off?: number;
+          used_count?: number;
         };
         Relationships: [];
       };

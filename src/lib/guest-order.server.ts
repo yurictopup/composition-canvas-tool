@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { baseGameId, findGame } from "@/lib/games";
 import { validatePlayerId } from "@/lib/player-id";
+import { quotePromo } from "@/lib/promo.server";
 import { salesOpenFor } from "@/lib/store-status";
 
 // Guest checkout: a visitor who is not signed in can still order. The order is
@@ -34,6 +35,7 @@ export type GuestOrderInput = {
   playerId: string;
   playerZone?: string | undefined;
   contact?: string | undefined;
+  promoCode?: string | undefined;
 };
 
 export class GuestOrderError extends Error {}
@@ -76,6 +78,16 @@ export async function createGuestOrder(db: SupabaseClient, input: GuestOrderInpu
     throw new GuestOrderError("The shop is very busy. Please try again in a few minutes.");
   }
 
+  // A promo code: the database works out the price (never below cost).
+  let price = Number(item.price_usd);
+  let promo: { code: string; discount: number } | null = null;
+  if (input.promoCode?.trim()) {
+    const quote = await quotePromo(db, game.id, input.packageAmt, input.promoCode);
+    if (!quote.ok) throw new GuestOrderError(quote.message);
+    price = quote.price;
+    promo = { code: quote.code, discount: quote.discount };
+  }
+
   const contact = input.contact?.trim();
   const { data: order, error } = await db
     .from("orders")
@@ -86,7 +98,9 @@ export async function createGuestOrder(db: SupabaseClient, input: GuestOrderInpu
       game_id: game.id,
       game_name: item.game_name,
       package_amt: input.packageAmt,
-      price_usd: item.price_usd,
+      price_usd: price,
+      promo_code: promo?.code ?? null,
+      discount_usd: promo?.discount ?? null,
       payment: "Bakong",
       player_id: playerId,
       player_zone: playerZone,

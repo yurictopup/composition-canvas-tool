@@ -53,6 +53,8 @@ export const LIMITS = {
   guestOrderIp: { capacity: 5, perSeconds: 600 },
   guestView: { capacity: 30, perSeconds: 60 },
   guestPayStartIp: { capacity: 10, perSeconds: 600 },
+  // Trying promo codes: enough to fix a typo, too few to guess codes.
+  promoCheckIp: { capacity: 10, perSeconds: 600 },
   // Order page polls every 5 s (12 a minute); a little room for two tabs.
   payCheckIp: { capacity: 30, perSeconds: 60 },
   payCheckUser: { capacity: 30, perSeconds: 60 },

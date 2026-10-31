@@ -19,6 +19,7 @@ import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import { lookupPlayer } from "@/lib/player-lookup.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { placeGuestOrder } from "@/lib/guest-order.functions";
+import { checkPromo } from "@/lib/promo.functions";
 import { guestOrderPath, saveGuestOrder } from "@/lib/guest-orders";
 import {
   ArrowUp,
@@ -85,6 +86,17 @@ function GamePage({ gameId }: { gameId: string }) {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [paidPrice, setPaidPrice] = useState<number | null>(null);
   const [orderErr, setOrderErr] = useState<string | null>(null);
+  // Promo code: what was typed, and the price the server gave for it.
+  const [promoInput, setPromoInput] = useState("");
+  const [promo, setPromo] = useState<{
+    code: string;
+    price: number;
+    discount: number;
+    percent: number;
+    pkg: string;
+  } | null>(null);
+  const [promoErr, setPromoErr] = useState<string | null>(null);
+  const [promoBusy, setPromoBusy] = useState(false);
   // Not signed in: the order is placed as a guest and opened again by its secret link.
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [guestToken, setGuestToken] = useState<string | null>(null);
@@ -185,6 +197,33 @@ function GamePage({ gameId }: { gameId: string }) {
         ? (availablePackages[pkg] ?? null)
         : null;
   const canBuy = !!check?.ok && !!selected && selected.price !== null && !busy;
+  const selectedAmt = selected && game ? `${selected.amt} ${game.unit}` : null;
+  // A code is priced for one package; choosing another package drops it.
+  const appliedPromo = promo && promo.pkg === selectedAmt ? promo : null;
+  const finalPrice = appliedPromo ? appliedPromo.price : (selected?.price ?? null);
+
+  async function applyPromo() {
+    if (!selectedAmt || !promoInput.trim()) return;
+    setPromoBusy(true);
+    setPromoErr(null);
+    try {
+      const quote = await checkPromo({
+        data: { gameId, packageAmt: selectedAmt, code: promoInput.trim() },
+      });
+      if (quote.ok) {
+        setPromo({ ...quote, pkg: selectedAmt });
+        setPromoInput(quote.code);
+      } else {
+        setPromo(null);
+        setPromoErr(quote.message);
+      }
+    } catch {
+      setPromo(null);
+      setPromoErr("Too many tries. Please wait a few minutes.");
+    } finally {
+      setPromoBusy(false);
+    }
+  }
 
   function selectPkg(i: number) {
     setPkg(i);
@@ -252,6 +291,7 @@ function GamePage({ gameId }: { gameId: string }) {
             packageAmt,
             playerId: uid.trim(),
             playerZone: zone.trim() || undefined,
+            promoCode: appliedPromo?.code,
           },
         });
         saveGuestOrder({
@@ -279,6 +319,7 @@ function GamePage({ gameId }: { gameId: string }) {
           payment: pay,
           player_id: uid.trim(),
           player_zone: zone.trim() || null,
+          promo_code: appliedPromo?.code ?? null,
           status: "pending",
         })
         .select("id, price_usd")
@@ -736,10 +777,92 @@ function GamePage({ gameId }: { gameId: string }) {
                   <dd className="text-right font-semibold">ABA KHQR</dd>
                 </div>
               </dl>
+              {/* Promo code */}
+              <div className="mt-3 rounded-xl border border-dashed border-[#c9d6ef] bg-white/60 p-3">
+                <label
+                  htmlFor="promo-code"
+                  className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-[#142650]"
+                >
+                  <Ticket className="h-4 w-4 text-[#2f5fe0]" />
+                  {km ? "លេខកូដបញ្ចុះតម្លៃ" : "Promo code"}
+                </label>
+                {appliedPromo ? (
+                  <div className="flex items-center justify-between gap-2 rounded-lg bg-emerald-50 px-3 py-2.5 text-sm">
+                    <span className="flex min-w-0 items-center gap-1.5 font-semibold text-emerald-700">
+                      <CircleCheck className="h-4 w-4 shrink-0" />
+                      <span className="truncate">
+                        {appliedPromo.code} · -{appliedPromo.percent}%
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPromo(null);
+                        setPromoInput("");
+                      }}
+                      className="shrink-0 text-xs font-semibold text-emerald-700 underline-offset-2 hover:underline"
+                    >
+                      {km ? "ដកចេញ" : "Remove"}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      id="promo-code"
+                      value={promoInput}
+                      onChange={(e) => {
+                        setPromoInput(e.target.value.toUpperCase().replace(/\s/g, ""));
+                        setPromoErr(null);
+                      }}
+                      onKeyDown={(e) => e.key === "Enter" && void applyPromo()}
+                      maxLength={20}
+                      placeholder={km ? "ដាក់លេខកូដ" : "Enter code"}
+                      autoCapitalize="characters"
+                      autoComplete="off"
+                      className="min-w-0 flex-1 rounded-lg border border-[#dfe8f6] bg-white px-3 py-2.5 font-mono text-sm uppercase tracking-wider outline-none transition focus:border-[#2f5fe0] focus:ring-4 focus:ring-[#2f5fe0]/10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void applyPromo()}
+                      disabled={!selectedAmt || !promoInput.trim() || promoBusy}
+                      className="shrink-0 rounded-lg bg-[#142650] px-4 text-sm font-bold text-white transition hover:bg-[#1f3570] disabled:opacity-40"
+                    >
+                      {promoBusy ? "…" : km ? "ប្រើ" : "Apply"}
+                    </button>
+                  </div>
+                )}
+                {promoErr && (
+                  <p className="mt-1.5 flex items-center gap-1 text-xs font-semibold text-destructive">
+                    <CircleAlert className="h-3.5 w-3.5 shrink-0" />
+                    {t(promoErr)}
+                  </p>
+                )}
+                {!selectedAmt && !appliedPromo && (
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                    {km ? "ជ្រើសកញ្ចប់ជាមុនសិន" : "Choose a package first."}
+                  </p>
+                )}
+              </div>
+
+              {appliedPromo && selected?.price != null && (
+                <div className="mt-3 flex items-center justify-between px-1 text-sm">
+                  <span className="text-muted-foreground">{km ? "បញ្ចុះតម្លៃ" : "Discount"}</span>
+                  <span className="font-semibold text-emerald-600">
+                    -${appliedPromo.discount.toFixed(2)}
+                  </span>
+                </div>
+              )}
               <div className="mt-3 flex items-center justify-between rounded-xl bg-gradient-to-r from-[#2f5fe0]/10 to-[#2f5fe0]/[0.03] px-3.5 py-3">
                 <span className="text-sm font-semibold text-[#142650]">{t("Total")}</span>
-                <span className="font-display text-2xl font-black text-[#2f5fe0] sm:text-3xl">
-                  {selected?.price != null ? `$${selected.price.toFixed(2)}` : "—"}
+                <span className="flex items-baseline gap-2">
+                  {appliedPromo && selected?.price != null && (
+                    <span className="text-sm text-muted-foreground line-through">
+                      ${selected.price.toFixed(2)}
+                    </span>
+                  )}
+                  <span className="font-display text-2xl font-black text-[#2f5fe0] sm:text-3xl">
+                    {finalPrice != null ? `$${finalPrice.toFixed(2)}` : "—"}
+                  </span>
                 </span>
               </div>
 
@@ -765,9 +888,9 @@ function GamePage({ gameId }: { gameId: string }) {
                   <span className="inline-flex items-center gap-2">
                     {canBuy ? <ShoppingCart className="h-5 w-5" /> : <Lock className="h-4 w-4" />}
                     {t("Place Order")}
-                    {canBuy && selected?.price != null && (
+                    {canBuy && finalPrice != null && (
                       <span className="rounded-md bg-white/20 px-2 py-0.5 text-sm">
-                        ${selected.price.toFixed(2)}
+                        ${finalPrice.toFixed(2)}
                       </span>
                     )}
                   </span>
