@@ -87,7 +87,6 @@ function GamePage({ gameId }: { gameId: string }) {
   const [orderErr, setOrderErr] = useState<string | null>(null);
   // Not signed in: the order is placed as a guest and opened again by its secret link.
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
-  const [contact, setContact] = useState("");
   const [guestToken, setGuestToken] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const prices = useLivePrices(gameId);
@@ -253,7 +252,6 @@ function GamePage({ gameId }: { gameId: string }) {
             packageAmt,
             playerId: uid.trim(),
             playerZone: zone.trim() || undefined,
-            contact: contact.trim() || undefined,
           },
         });
         saveGuestOrder({
@@ -744,34 +742,6 @@ function GamePage({ gameId }: { gameId: string }) {
                   {selected?.price != null ? `$${selected.price.toFixed(2)}` : "—"}
                 </span>
               </div>
-
-              {signedIn === false && (
-                <div className="mt-4 rounded-xl border border-[#e6edf8] bg-white/70 p-3.5">
-                  <label className="grid gap-2 text-sm font-semibold text-[#142650]">
-                    <span className="flex items-center gap-1.5">
-                      <Send className="h-4 w-4 text-[#2f5fe0]" />
-                      {t("Phone or Telegram (optional)")}
-                    </span>
-                    <input
-                      value={contact}
-                      onChange={(e) => setContact(e.target.value)}
-                      maxLength={64}
-                      placeholder="012 345 678 / @username"
-                      autoComplete="tel"
-                      className="min-w-0 rounded-lg border border-[#dfe8f6] bg-white px-3 py-2.5 font-normal outline-none transition focus:border-[#2f5fe0] focus:ring-4 focus:ring-[#2f5fe0]/10"
-                    />
-                  </label>
-                  <p className="mt-2 font-sans text-xs leading-[1.7] text-muted-foreground">
-                    {t(
-                      "No account needed. We contact you here only if there is a problem with your order.",
-                    )}{" "}
-                    <Link to="/auth" className="font-semibold text-primary hover:underline">
-                      {t("Sign in")}
-                    </Link>{" "}
-                    {t("to keep all your orders in one place.")}
-                  </p>
-                </div>
-              )}
 
               {orderErr && (
                 <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-sm font-semibold text-destructive">
