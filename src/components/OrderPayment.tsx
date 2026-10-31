@@ -74,8 +74,28 @@ export function OrderPayment({
     return () => clearInterval(timer);
   }, [waiting, stopped, delivering, orderId, guestToken]);
 
+  // On a phone, go straight to the bank app once per order, like other top-up shops.
+  // Coming back to the page (after paying or cancelling) does not open it again;
+  // the button stays for that.
+  const appLink = waiting && !stopped ? state?.appLink : undefined;
+  useEffect(() => {
+    if (!appLink || !isPhone()) return;
+    const key = `yuric-bank-opened-${orderId}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+    } catch {
+      // storage blocked: still open once for this page view
+    }
+    window.location.href = appLink;
+  }, [appLink, orderId]);
+
   if (error || (state && !state.available)) return <>{fallback}</>;
   return <PaymentView state={state} now={now} summary={summary} />;
+}
+
+function isPhone(): boolean {
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
 // The screen itself, kept apart from the polling so each state can be shown alone.
