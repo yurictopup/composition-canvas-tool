@@ -667,8 +667,8 @@ function GamePage({ gameId }: { gameId: string }) {
                     >
                       {pay === m && <span className="h-2 w-2 rounded-full bg-white" />}
                     </span>
-                    <KhqrMark />
-                    <span className="block text-base font-bold">{m} KHQR</span>
+                    <AbaMark />
+                    <span className="block text-base font-bold">ABA KHQR</span>
                     <span className="block text-[11px] leading-snug text-[#5b6b8c]">
                       {t("Scan with ABA, ACLEDA, Wing or any bank app")}
                     </span>
@@ -842,12 +842,12 @@ function GuestLinkBox({
   );
 }
 
-// Red KHQR badge, the mark Cambodian bank apps show for Bakong QR payments.
-function KhqrMark() {
+// ABA badge: payments come through the shop's ABA PayWay link (KHQR, any bank app can pay).
+function AbaMark() {
   return (
-    <span className="flex h-12 w-20 shrink-0 sm:h-16 sm:w-24 flex-col items-center justify-center rounded-[3px] bg-[#E1232E] text-white shadow-[0_3px_10px_rgb(225_35_46/0.35)]">
-      <span className="text-xl font-extrabold leading-none tracking-wide">KHQR</span>
-      <span className="mt-1.5 h-[3px] w-12 rounded bg-white/70" />
+    <span className="flex h-12 w-20 shrink-0 sm:h-16 sm:w-24 flex-col items-center justify-center rounded-[3px] bg-[#0B4F71] text-white shadow-[0_3px_10px_rgb(11_79_113/0.35)]">
+      <span className="text-xl font-extrabold leading-none tracking-wide">ABA</span>
+      <span className="mt-1.5 text-[9px] font-bold leading-none tracking-[0.2em] text-white/80">KHQR</span>
     </span>
   );
 }
