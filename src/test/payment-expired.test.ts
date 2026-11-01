@@ -15,6 +15,7 @@ vi.mock("@/lib/bakong", () => ({
 }));
 vi.mock("@/lib/delivery.server", () => ({
   deliverPaidOrder: (...a: unknown[]) => deliverPaidOrder(...a),
+  refreshPaidOrder: vi.fn(),
 }));
 
 const { checkEarlierQr, startOrderPayment } = await import("@/lib/payment.server");

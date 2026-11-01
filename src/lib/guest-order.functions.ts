@@ -71,8 +71,9 @@ export const checkGuestPayment = createServerFn({ method: "POST" })
     await requireGuestToken(data.orderId, data.token);
     const { adminDb } = await import("@/lib/delivery.server");
     const { checkOrderPayment } = await import("@/lib/payment.server");
-    const { bankCheckAllowed } = await import("@/lib/rate-limit.server");
+    const { bankCheckAllowed, supplierCheckAllowed } = await import("@/lib/rate-limit.server");
     return checkOrderPayment(adminDb(), data.orderId, "guest", {
       beforeBankCheck: () => bankCheckAllowed(data.orderId),
+      beforeSupplierCheck: () => supplierCheckAllowed(data.orderId),
     });
   });

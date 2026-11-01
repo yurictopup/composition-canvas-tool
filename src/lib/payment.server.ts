@@ -7,7 +7,7 @@ import {
   paymentMatches,
   type BakongConfig,
 } from "@/lib/bakong";
-import { deliverPaidOrder } from "@/lib/delivery.server";
+import { deliverPaidOrder, refreshPaidOrder } from "@/lib/delivery.server";
 import { salesOpenFor } from "@/lib/store-status";
 
 export type PaymentState = {
@@ -159,16 +159,33 @@ export async function checkOrderPayment(
   scope: OrderScope,
   {
     beforeBankCheck,
+    beforeSupplierCheck,
   }: {
     /** False skips the Bakong call this time (the order was asked about a moment ago). */
     beforeBankCheck?: () => Promise<boolean>;
+    /** False skips asking the supplier how a paid order's delivery is going. */
+    beforeSupplierCheck?: () => Promise<boolean>;
   } = {},
 ): Promise<PaymentState> {
   const cfg = bakongConfig();
   if (!cfg) return { available: false, paid: false };
   const order = await loadOrder(db, orderId, scope);
   if (!order) return { available: true, paid: false, message: "Order not found." };
-  if (order.paid_at) return paidState(order);
+  if (order.paid_at) {
+    // Paid and being delivered: ask the supplier now instead of waiting for the cron
+    // (every 2 minutes), so the page shows "delivered" as soon as the diamonds arrive.
+    if (order.status === "processing" && (!beforeSupplierCheck || (await beforeSupplierCheck()))) {
+      try {
+        await refreshPaidOrder(db, order.id);
+        const fresh = await loadOrder(db, orderId, scope);
+        if (fresh) return paidState(fresh);
+      } catch (error) {
+        // The cron asks again; the page keeps showing "processing".
+        console.error("[payment] delivery refresh failed", order.id, error instanceof Error ? error.message : error);
+      }
+    }
+    return paidState(order);
+  }
   if (!order.payment_md5)
     return { available: true, paid: false, message: "No KHQR for this order yet." };
   // Not paid as of a few seconds ago; the next poll (or the cron) asks again.

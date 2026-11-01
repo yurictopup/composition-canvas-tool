@@ -86,3 +86,8 @@ export async function enforceLimits(rules: Rule[], take: Take = takeFromDatabase
 export async function bankCheckAllowed(orderId: string, take: Take = takeFromDatabase) {
   return (await checkLimits([rule("bankCheckOrder", orderId)], take)).allowed;
 }
+
+/** At most one supplier question per paid order every few seconds. */
+export async function supplierCheckAllowed(orderId: string, take: Take = takeFromDatabase) {
+  return (await checkLimits([rule("supplierCheckOrder", orderId)], take)).allowed;
+}

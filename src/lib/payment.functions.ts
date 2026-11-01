@@ -42,13 +42,14 @@ export const checkPayment = createServerFn({ method: "POST" })
     await enforceLimits([rule("payCheckUser", context.userId), rule("payCheckIp", clientIp())]);
     const { adminDb } = await import("@/lib/delivery.server");
     const { checkOrderPayment } = await import("@/lib/payment.server");
-    const { bankCheckAllowed } = await import("@/lib/rate-limit.server");
+    const { bankCheckAllowed, supplierCheckAllowed } = await import("@/lib/rate-limit.server");
     return checkOrderPayment(
       adminDb(),
       data.orderId,
       await ownerOrSelf(context.supabase, context.claims, context.userId),
       {
         beforeBankCheck: () => bankCheckAllowed(data.orderId),
+        beforeSupplierCheck: () => supplierCheckAllowed(data.orderId),
       },
     );
   });
