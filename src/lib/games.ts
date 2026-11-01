@@ -50,11 +50,11 @@ export const games = [
   { id: "ff", name: "Free Fire", icon: freefire, unit: "Diamonds", blurb: "Free Fire diamonds at the best price" },
   { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess, unit: "Diamonds", blurb: "Instant Magic Chess delivery" },
   { id: "pubg", name: "PUBG Mobile", icon: pubg, unit: "UC", blurb: "Fast PUBG UC delivery" },
-  { id: "roblox", name: "Roblox", icon: roblox, unit: "Robux", blurb: "Robux gift code Â· redeem at roblox.com/redeem" },
+  { id: "roblox", name: "Roblox", icon: roblox, unit: "Robux", blurb: "Robux gift code · redeem at roblox.com/redeem" },
   // Bought by FazerCards for the buyer's Telegram username (see fazerTelegram).
   { id: "tgstars", name: "Telegram Stars", icon: telegramStars, unit: "Stars", blurb: "Stars sent to your Telegram username" },
   { id: "tgpremium", name: "Telegram Premium", icon: telegram, unit: "Months", blurb: "Premium for your Telegram username" },
-  { id: "hok", name: "Honor of Kings", icon: hok, unit: "Tokens", blurb: "Tokens HoK áž…áž¼áž›áž—áŸ’áž›áž¶áž˜" },
+  { id: "hok", name: "Honor of Kings", icon: hok, unit: "Tokens", blurb: "Tokens HoK ចូលភ្លាម" },
   { id: "wildrift", name: "League of Legends: Wild Rift", icon: wildrift, unit: "Wild Cores", blurb: "League of Legends: Wild Rift" },
   { id: "bloodstrike", name: "Blood Strike", icon: bloodstrike, unit: "Gold", blurb: "Blood Strike" },
   { id: "genshin", name: "Genshin Impact", icon: genshin, unit: "Genesis Crystals", blurb: "Genshin Impact" },

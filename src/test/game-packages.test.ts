@@ -80,6 +80,12 @@ describe("Per-game packages", () => {
     ]);
   });
 
+  it("game texts are not garbled by a wrong file encoding", async () => {
+    const { games } = await import("@/lib/games");
+    // UTF-8 read as Windows-1252 turns "·" into "Â·" and Khmer into "áž…".
+    for (const g of games) expect(`${g.name} ${g.blurb}`, g.id).not.toMatch(/Â|áž|áŸ|â€/);
+  });
+
   it("unknown games get no packages rather than inherited ones", () => {
     expect(getPackages("not-a-game")).toEqual([]);
   });
