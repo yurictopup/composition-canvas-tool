@@ -60,7 +60,7 @@ export function OrderPayment({
 
   useEffect(() => {
     if ((!waiting || stopped) && !delivering) return;
-    const timer = setInterval(async () => {
+    const check = async () => {
       setNow(Date.now());
       try {
         const next = guestToken
@@ -70,8 +70,22 @@ export function OrderPayment({
       } catch {
         // keep polling; a missed check is retried on the next tick
       }
-    }, POLL_MS);
-    return () => clearInterval(timer);
+    };
+    const timer = setInterval(check, POLL_MS);
+    // A phone pauses this page while the bank app is open, so its timer stops. Ask at
+    // once when the customer comes back instead of waiting for the next tick.
+    const onBack = () => {
+      if (document.visibilityState === "visible") void check();
+    };
+    document.addEventListener("visibilitychange", onBack);
+    window.addEventListener("focus", onBack);
+    window.addEventListener("pageshow", onBack);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onBack);
+      window.removeEventListener("focus", onBack);
+      window.removeEventListener("pageshow", onBack);
+    };
   }, [waiting, stopped, delivering, orderId, guestToken]);
 
   // On a phone, go straight to the bank app once per order, like other top-up shops.
