@@ -71,9 +71,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-// The password reset link signs the customer in on whatever page Supabase
+// The password reset link signs the customer in on whatever page the database
 // sends them to (often the home page, not /auth). Read it from the address
-// before Supabase clears it, so /auth can ask for the new password.
+// before the database clears it, so /auth can ask for the new password.
 const RECOVERY_FLAG = "yuric-password-recovery";
 const openedFromResetLink =
   typeof window !== "undefined" && /(?:^|[#&?])type=recovery(?:&|$)/.test(window.location.hash);
@@ -91,8 +91,8 @@ function useResetLinkRedirect() {
     };
     if (openedFromResetLink) toNewPassword();
     let unsubscribe = () => {};
-    void import("@/integrations/supabase/client").then(({ supabase }) => {
-      const { data } = supabase.auth.onAuthStateChange((event) => {
+    void import("@/mock/backend").then(({ backend }) => {
+      const { data } = backend.auth.onAuthStateChange((event) => {
         if (event === "PASSWORD_RECOVERY") toNewPassword();
       });
       unsubscribe = () => data.subscription.unsubscribe();

@@ -1,5 +1,5 @@
-// Yuric Bot in Khmer — adapted from src/components/ChatWidget.tsx (yurictopup/composition-canvas-tool@031a95c):
-// FAQ threads and Telegram hand-off as before; typed questions are answered by Workers AI
+// Yuric Bot in Khmer.
+// FAQ threads and Telegram hand-off as before; typed questions were answered by an AI in the live store
 // (chat.functions.ts), or by topic and game (chatBrain.ts) when the AI is not available.
 import { useEffect, useRef, useState, type ComponentType } from "react";
 import {
@@ -30,11 +30,11 @@ import {
   type BotAction,
 } from "@/lib/chatBrain";
 import { askBot, checkMyOrders } from "@/lib/chat.functions";
-import { MAX_TEXT, MAX_TURNS } from "@/lib/chatAi";
+import { MAX_TEXT, MAX_TURNS } from "@/lib/chatLimits";
 import { fetchPrices, type PriceMap } from "@/lib/prices";
 import { setStoreTheme, useStorePrefs } from "@/lib/storePrefs";
 
-/** Workers AI answers (slow, about 5-10 seconds); off until a faster model is chosen. */
+/** AI answers (slow, about 5-10 seconds); off until a faster model is chosen. */
 const USE_AI = false;
 
 type Icon = ComponentType<{ className?: string }>;
@@ -266,7 +266,7 @@ export function ChatWidget({
           post({ text: ai.text, actions, ai: ai.source === "ai" });
           return;
         }
-        // No AI (quota used up, or not on Cloudflare): the keyword answers.
+        // No AI (not in this copy): the keyword answers.
         console.warn("Yuric Bot AI unavailable:", ai.unavailable);
         keywords();
       });

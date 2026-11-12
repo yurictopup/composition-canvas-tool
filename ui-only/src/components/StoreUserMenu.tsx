@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import * as DM from "@radix-ui/react-dropdown-menu";
 import { Link } from "@tanstack/react-router";
-import type { User } from "@/integrations/supabase/client";
+import type { User } from "@/mock/backend";
 import {
   AlertTriangle,
   Bell,
@@ -21,7 +21,7 @@ import {
   Truck,
   UserRound,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { backend } from "@/mock/backend";
 import { isOwnerAccount } from "@/lib/owner";
 import { guestOrderPath, listGuestOrders, type SavedGuestOrder } from "@/lib/guest-orders";
 import { setStoreLang, setStoreTheme, useStorePrefs, type StoreLang, type StoreTheme } from "@/lib/storePrefs";
@@ -188,7 +188,7 @@ export function StoreUserMenu({ user, onSignOut }: { user: User; onSignOut: () =
 
   useEffect(() => {
     let live = true;
-    isOwnerAccount(supabase).then((yes) => live && setOwner(yes));
+    isOwnerAccount(backend).then((yes) => live && setOwner(yes));
     return () => {
       live = false;
     };
@@ -200,7 +200,7 @@ export function StoreUserMenu({ user, onSignOut }: { user: User; onSignOut: () =
     } catch {
       // private mode: everything shows as new
     }
-    supabase
+    backend
       .from("orders")
       .select("id, game_name, package_amt, price_usd, status, created_at")
       .order("created_at", { ascending: false })

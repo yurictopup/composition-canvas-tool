@@ -17,7 +17,7 @@ import {
   ShieldCheck,
   Zap,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { backend } from "@/mock/backend";
 import { SiteChrome } from "@/components/SiteChrome";
 import { Button } from "@/components/ui/button";
 import { games } from "@/lib/games";
@@ -45,7 +45,7 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-// Email codes have 6 digits (Supabase → Authentication → Email → "Email OTP
+// Email codes have 6 digits (the email settings: "Email OTP
 // Length" must stay 6, or customers can't type the whole code).
 const CODE_MIN = 6;
 const CODE_MAX = 6;
@@ -102,7 +102,7 @@ function AuthPage() {
       // Private mode: the PASSWORD_RECOVERY event below still works.
     }
     if (flagged) {
-      void supabase.auth.getSession().then(({ data }) => {
+      void backend.auth.getSession().then(({ data }) => {
         if (data.session) {
           setRecovering(true);
           setPassword("");
@@ -112,7 +112,7 @@ function AuthPage() {
   }, []);
 
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
+    const { data } = backend.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
         setRecovering(true);
         setPassword("");
@@ -152,7 +152,7 @@ function AuthPage() {
       if (bad) return;
     }
     setBusy(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(to, {
+    const { error } = await backend.auth.resetPasswordForEmail(to, {
       redirectTo: `${window.location.origin}/auth`,
     });
     setBusy(false);
@@ -188,7 +188,7 @@ function AuthPage() {
       return;
     }
     setBusy(true);
-    const { error } = await supabase.auth.verifyOtp({
+    const { error } = await backend.auth.verifyOtp({
       email: resetFor,
       token: code.trim(),
       type: "recovery",
@@ -213,7 +213,7 @@ function AuthPage() {
     setErrors({ password: bad });
     if (bad) return;
     setBusy(true);
-    const { error } = await supabase.auth.updateUser({ password });
+    const { error } = await backend.auth.updateUser({ password });
     setBusy(false);
     if (error) {
       setMsg({
@@ -246,7 +246,7 @@ function AuthPage() {
     setBusy(true);
     try {
       if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        const { error } = await backend.auth.signInWithPassword({ email: email.trim(), password });
         if (error) {
           if (error.message.includes("rate") || error.message.includes("limit")) {
             setMsg({ ok: false, text: "ព្យាយាមច្រើនពេក សូមរង់ចាំ 1 នាទីទៀត" });
@@ -257,7 +257,7 @@ function AuthPage() {
         }
         navigate({ to: "/" });
       } else {
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await backend.auth.signUp({
           email: email.trim(),
           password,
           options: { emailRedirectTo: window.location.origin },
@@ -290,7 +290,7 @@ function AuthPage() {
     }
     setBusy(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
+      const { error } = await backend.auth.verifyOtp({
         email: codeFor,
         token: code.trim(),
         type: "signup",
@@ -309,7 +309,7 @@ function AuthPage() {
     if (!codeFor) return;
     setMsg(null);
     setBusy(true);
-    const { error } = await supabase.auth.resend({
+    const { error } = await backend.auth.resend({
       type: "signup",
       email: codeFor,
       options: { emailRedirectTo: window.location.origin },

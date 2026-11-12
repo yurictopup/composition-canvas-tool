@@ -1,8 +1,8 @@
 # Yuric Topup: UI-only copy
 
-This folder is a copy of the Yuric Topup store's look only (pages, components,
-styles, fonts, pictures). It has **no backend**: no Supabase, no KHQR/Bakong,
-no FazerCards, no admin page, and no keys or secrets. Everything you see uses
+This folder is the Yuric Topup store's design only (pages, components, styles,
+fonts, pictures). It is not connected to any service: no database, no payment,
+no supplier, no admin page, no keys or secrets. Everything you see uses
 demo data that lives in your browser.
 
 ## Run it on your computer
@@ -10,7 +10,7 @@ demo data that lives in your browser.
 You need Node.js 20 or newer (https://nodejs.org, the LTS version).
 
 ```bash
-cd ui-only
+cd D:\yuric-topup-ui-only
 npm install
 npm run dev
 ```
@@ -34,12 +34,12 @@ Other commands:
 | Sign in / sign up | Shows "UI demo: accounts are turned off" |
 | Yuric Bot | Built-in keyword answers only (no AI) |
 
-The fake pieces are in `src/integrations/supabase/client.ts`, `src/mock/orders.ts`
+The fake pieces are in `src/mock/backend.ts`, `src/mock/orders.ts`
 and the `src/lib/*.functions.ts` files.
 
 ## Design rules (same as the live store)
 
 - No emoji anywhere in the UI; use real icons (lucide-react).
 - No Khmer full stop in website text.
-- Koulen for headings, Kantumruy Pro for small Khmer text.
+- Koulen for headings, Kantumruy Pro for small Khmer text (fonts are bundled, no internet needed).
 - The home banner text is Khmer only; never translate it.

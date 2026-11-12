@@ -18,7 +18,7 @@ import { OrderPayment } from "@/components/OrderPayment";
 import { Button } from "@/components/ui/button";
 import { getIdConfig, validatePlayerId } from "@/lib/player-id";
 import { lookupPlayer } from "@/lib/player-lookup.functions";
-import { supabase } from "@/integrations/supabase/client";
+import { backend } from "@/mock/backend";
 import { placeGuestOrder } from "@/lib/guest-order.functions";
 import { checkPromo } from "@/lib/promo.functions";
 import { gameImageUrls } from "@/lib/image-preload";
@@ -124,8 +124,8 @@ function GamePage({ gameId }: { gameId: string }) {
   const onSale = status ? gameOnSale(status, gameId) : null;
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
-    const { data } = supabase.auth.onAuthStateChange((_e, session) => setSignedIn(!!session));
+    backend.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data } = backend.auth.onAuthStateChange((_e, session) => setSignedIn(!!session));
     return () => data.subscription.unsubscribe();
   }, []);
 
@@ -299,7 +299,7 @@ function GamePage({ gameId }: { gameId: string }) {
     try {
       const {
         data: { user },
-      } = await supabase.auth.getUser();
+      } = await backend.auth.getUser();
       const packageAmt = `${selected.amt} ${game.unit}`;
       if (!user) {
         const guest = await placeGuestOrder({
@@ -324,7 +324,7 @@ function GamePage({ gameId }: { gameId: string }) {
         return;
       }
 
-      const { data, error } = await supabase
+      const { data, error } = await backend
         .from("orders")
         .insert({
           user_id: user.id,

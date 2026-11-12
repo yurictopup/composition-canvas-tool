@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { backend } from "@/mock/backend";
 import banner from "@/assets/banner-angkor.webp";
 import { findGame, gamePackages, games, hotItemsByGame } from "@/lib/games";
 
@@ -103,7 +103,7 @@ const notify = () => listeners.forEach((l) => l());
 export function loadSiteImages(force = false): Promise<void> {
   if (request && !force) return request;
   request = (async () => {
-    const { data, error } = await supabase.from("site_images").select("slot, url");
+    const { data, error } = await backend.from("site_images").select("slot, url");
     if (error || !data) return;
     overrides = Object.fromEntries(data.map((r) => [r.slot, r.url]));
     notify();

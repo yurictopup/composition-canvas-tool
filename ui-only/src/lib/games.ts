@@ -41,17 +41,17 @@ import hi3 from "@/assets/hi3.webp";
 import telegram from "@/assets/telegram.svg";
 import telegramStars from "@/assets/telegram-stars.webp";
 
-// Games FazerCards can top up for Cambodian accounts, plus Roblox, which the team delivers
+// Games the supplier can top up for Cambodian accounts, plus Roblox, which the team delivers
 // by hand through the buyer's Game Pass. CODM (India-only there) and the Supercell games
 // were removed on 2026-10-27; their ID rules stay in player-id.ts.
-// EAFC Mobile, League of Legends and Honkai Impact 3rd use FazerCards' Cambodia-region packs.
+// EAFC Mobile, League of Legends and Honkai Impact 3rd use the supplier's Cambodia-region packs.
 export const games = [
   { id: "mlbb", name: "Mobile Legends", icon: mlbb, unit: "Diamonds", blurb: "Instant MLBB diamond delivery" },
   { id: "ff", name: "Free Fire", icon: freefire, unit: "Diamonds", blurb: "Free Fire diamonds at the best price" },
   { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess, unit: "Diamonds", blurb: "Instant Magic Chess delivery" },
   { id: "pubg", name: "PUBG Mobile", icon: pubg, unit: "UC", blurb: "Fast PUBG UC delivery" },
   { id: "roblox", name: "Roblox", icon: roblox, unit: "Robux", blurb: "Robux gift code · redeem at roblox.com/redeem" },
-  // Bought by FazerCards for the buyer's Telegram username (see fazerTelegram).
+  // Bought by the supplier for the buyer's Telegram username.
   { id: "tgstars", name: "Telegram Stars", icon: telegramStars, unit: "Stars", blurb: "Stars sent to your Telegram username" },
   { id: "tgpremium", name: "Telegram Premium", icon: telegram, unit: "Months", blurb: "Premium for your Telegram username" },
   { id: "hok", name: "Honor of Kings", icon: hok, unit: "Tokens", blurb: "Tokens HoK ចូលភ្លាម" },
@@ -79,7 +79,7 @@ export const telegramTabs = [
 /** Game tiles on the home and profile pages (Telegram Stars sits inside the Telegram tile). */
 export const listedGames = games.filter((g) => g.id !== "tgstars");
 
-// Other servers of a game. Each is its own game id (own packages, prices and FazerCards
+// Other servers of a game. Each is its own game id (own packages, prices and the supplier
 // category) but is reached from the main game's page through the server tabs.
 export const serverGames: (Game & { base: string; server: string })[] = [
   { id: "mlbb_ph", name: "Mobile Legends PH", icon: mlbb, unit: "Diamonds", blurb: "MLBB Philippines server", base: "mlbb", server: "Philippines" },
@@ -117,9 +117,9 @@ export type GamePackage = { amt: string; price: number | null; hot?: boolean; im
 // img puts the item in "Recommended for You"; icon only replaces the currency icon in "More items".
 export type HotItem = { label: string; price: number; img?: string; icon?: string; note?: string; badge?: string };
 
-// Packages match what FazerCards sells for each game (read from the reseller panel on
+// Packages match what the supplier sells for each game (read from the reseller panel on
 // 2026-10-27, Cambodia-usable regions only).
-// The live selling price comes from the Supabase product_prices table (edited on /admin,
+// The live selling price comes from the the database product_prices table (edited on /admin,
 // see src/lib/prices.ts); the prices here are only shown until that table loads.
 export const gamePackages: Record<string, GamePackage[]> = {
   mlbb: [
@@ -382,7 +382,7 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "3300", price: 55.99 },
     { amt: "6600", price: 111.99 },
   ],
-  // CODM and the Supercell games are no longer sold (no Cambodia stock at FazerCards); kept so old orders still resolve.
+  // CODM and the Supercell games are no longer sold (no Cambodia stock at the supplier); kept so old orders still resolve.
   codm: [
     { amt: "80", price: 0.99 },
     { amt: "400 + 20", price: 4.99 },
@@ -415,7 +415,7 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "6500", price: 49.99 },
     { amt: "14000", price: 99.99 },
   ],
-  // Robux gift card codes (FazerCards Roblox Robux US), redeemed by the buyer.
+  // Robux gift card codes (the supplier Roblox Robux US), redeemed by the buyer.
   roblox: [
     { amt: "50", price: 1.79 },
     { amt: "275", price: 2.99 },
@@ -425,7 +425,7 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "5250", price: 49.49 },
     { amt: "11000", price: 99.49 },
   ],
-  // Telegram Stars / Premium for a username; FazerCards cost on 2026-10-30 was
+  // Telegram Stars / Premium for a username; the supplier cost on 2026-10-30 was
   // $0.0152 a star and $12.18 / $16.24 / $29.43 for 3 / 6 / 12 months.
   tgstars: [
     { amt: "50", price: 0.89 },
@@ -450,7 +450,7 @@ export function getPackages(gameId: string): GamePackage[] {
   return gamePackages[gameId] ?? [];
 }
 
-// Passes, cards and bundles FazerCards sells next to the currency packs. Items with a picture
+// Passes, cards and bundles the supplier sells next to the currency packs. Items with a picture
 // show as "Recommended for You" tiles; the rest list under "More items" with the currency icon.
 export const hotItemsByGame: Record<string, HotItem[]> = {
   mlbb: [

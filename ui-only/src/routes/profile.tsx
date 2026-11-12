@@ -6,7 +6,7 @@ import banner from "@/assets/banner-angkor.webp";
 import { useSiteImage } from "@/lib/site-images";
 import { listedGames, store } from "@/lib/games";
 import { SiteChrome } from "@/components/SiteChrome";
-import { supabase } from "@/integrations/supabase/client";
+import { backend } from "@/mock/backend";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -49,14 +49,14 @@ function Profile() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
+    backend.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         navigate({ to: "/auth" });
         return;
       }
       setUserEmail(data.user.email ?? null);
 
-      const { data: orderData } = await supabase
+      const { data: orderData } = await backend
         .from("orders")
         .select("*")
         .order("created_at", { ascending: false })

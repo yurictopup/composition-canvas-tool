@@ -1,4 +1,4 @@
-// UI-only copy: a fake Supabase client. It never connects to any server and
+// UI-only copy: a fake the database client. It never connects to any server and
 // holds no keys. Reads return demo data (or nothing), so every page draws with
 // the built-in packages and prices from src/lib/games.ts. Sign in / sign up
 // only show a message, because there are no real accounts here.
@@ -67,7 +67,7 @@ const auth = {
   updateUser: async (_input: unknown) => ({ data: { user: null }, error: { message: DEMO_MESSAGE } }),
 };
 
-export const supabase = {
+export const backend = {
   auth,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   from: (table: string): any => queryBuilder(table),

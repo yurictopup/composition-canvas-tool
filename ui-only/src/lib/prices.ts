@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { backend } from "@/mock/backend";
 
-// Selling prices live in the Supabase `product_prices` table. The database
+// Selling prices live in the the database `product_prices` table. The database
 // charges these prices on every order, and the owner edits them on /admin,
 // so the shop shows the same numbers. Rows are keyed by "<amt> <unit>",
 // the same text an order stores in package_amt.
@@ -20,7 +20,7 @@ export function packageKey(amt: string, unit: string): string {
 }
 
 export async function fetchPrices(gameId?: string): Promise<PriceMap | null> {
-  let query = supabase
+  let query = backend
     .from("product_prices")
     .select("game_id, package_amt, game_name, price_usd, active");
   if (gameId) query = query.eq("game_id", gameId);
@@ -31,18 +31,6 @@ export async function fetchPrices(gameId?: string): Promise<PriceMap | null> {
     map.set(`${row.game_id}|${row.package_amt}`, { ...row, price_usd: Number(row.price_usd) });
   }
   return map;
-}
-
-/**
- * The FazerCards product the owner picked for each package ("<game_id>|<package_amt>").
- * Owner-only table: anyone else gets nothing, and null means it couldn't be read.
- */
-export async function fetchOffers(): Promise<Map<string, string> | null> {
-  const { data, error } = await supabase
-    .from("package_offers")
-    .select("game_id, package_amt, fazer_offer");
-  if (error || !data) return null;
-  return new Map(data.map((o) => [`${o.game_id}|${o.package_amt}`, o.fazer_offer]));
 }
 
 // Prices already read this visit, so going back to a game shows them at once

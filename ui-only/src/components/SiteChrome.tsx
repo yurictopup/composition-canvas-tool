@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import type { User } from "@/integrations/supabase/client";
-import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@/mock/backend";
+import { backend } from "@/mock/backend";
 import { store } from "@/lib/games";
 import { StoreGuestMenu, StoreSettingsMenu, StoreUserMenu } from "@/components/StoreUserMenu";
 import { useStorePrefs } from "@/lib/storePrefs";
@@ -23,15 +23,15 @@ export function SiteChrome({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // The saved session is enough to show the menu; it needs no call to the auth server.
-    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    backend.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
+    const { data: sub } = backend.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
 
   async function signOut() {
-    await supabase.auth.signOut();
+    await backend.auth.signOut();
     navigate({ to: "/", replace: true });
   }
 

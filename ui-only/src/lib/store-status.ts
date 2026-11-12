@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-type SupabaseClient = typeof supabase;
-import { supabase } from "@/integrations/supabase/client";
+type Backend = typeof backend;
+import { backend } from "@/mock/backend";
 
 // The owner's sales switch (public.store_settings, flipped on /admin > Prices).
 // While sales are off, the shop shows "coming soon" instead of packages and new
@@ -11,7 +11,7 @@ export type StoreStatus = { salesOpen: boolean; hiddenGames: string[] };
 
 const OPEN: StoreStatus = { salesOpen: true, hiddenGames: [] };
 
-export async function fetchStoreStatus(db: SupabaseClient = supabase): Promise<StoreStatus> {
+export async function fetchStoreStatus(db: Backend = backend): Promise<StoreStatus> {
   const { data, error } = await db
     .from("store_settings")
     .select("sales_open, hidden_games")
@@ -27,7 +27,7 @@ export function gameOnSale(status: StoreStatus, gameId: string): boolean {
 }
 
 /** Server check before a new order or KHQR: false when the owner paused sales for this game. */
-export async function salesOpenFor(db: SupabaseClient, gameId: string): Promise<boolean> {
+export async function salesOpenFor(db: Backend, gameId: string): Promise<boolean> {
   return gameOnSale(await fetchStoreStatus(db), gameId);
 }
 
