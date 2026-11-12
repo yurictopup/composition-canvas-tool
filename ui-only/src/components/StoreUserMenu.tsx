@@ -244,7 +244,7 @@ export function StoreUserMenu({ user, onSignOut }: { user: User; onSignOut: () =
                   return (
                     <DM.Item key={o.id} asChild>
                       <Link
-                        to="/profile"
+                        to={owner ? "/admin" : "/profile"}
                         className="flex gap-3 border-b border-[color:var(--store-line,rgb(100_169_243/0.2))] px-5 py-3.5 outline-none last:border-0 "
                       >
                         <span
@@ -270,7 +270,7 @@ export function StoreUserMenu({ user, onSignOut }: { user: User; onSignOut: () =
             <div className="border-t border-[color:var(--store-line,rgb(100_169_243/0.2))] p-3">
               <DM.Item asChild>
                 <Link
-                  to="/profile"
+                  to={owner ? "/admin" : "/profile"}
                   className="btn-3d block rounded-md py-2 text-center text-sm font-semibold outline-none"
                 >
                   {t("View all orders")}
@@ -300,6 +300,14 @@ export function StoreUserMenu({ user, onSignOut }: { user: User; onSignOut: () =
               </span>
             </div>
             <DM.Separator className="my-1 h-px bg-brand-400/20" />
+            {owner && (
+              <DM.Item asChild className={itemCls}>
+                <Link to="/admin">
+                  <LayoutDashboard size={18} />
+                  {t("Admin dashboard")}
+                </Link>
+              </DM.Item>
+            )}
             <DM.Item asChild className={itemCls}>
               <Link to="/profile">
                 <Receipt size={18} />

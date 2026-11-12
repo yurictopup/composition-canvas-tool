@@ -85,3 +85,16 @@ export function livePackages<P extends { amt: string; price: number | null }>(
     (a, b) => packageSize(a.amt) - packageSize(b.amt),
   );
 }
+
+export async function fetchOffers(): Promise<Map<string, string> | null> {
+  const { data, error } = await backend
+    .from("package_offers")
+    .select("game_id, package_amt, supplier_offer");
+  if (error || !data) return null;
+  return new Map(
+    (data as { game_id: string; package_amt: string; supplier_offer: string }[]).map((o) => [
+      `${o.game_id}|${o.package_amt}`,
+      o.supplier_offer,
+    ]),
+  );
+}
