@@ -1,5 +1,3 @@
-// UI-only copy: fake versions of the order calls. The live store runs these
-// on the server; here they only keep a demo order in this browser tab.
 import type { GuestOrderView } from "@/lib/guest-order.server";
 import type { PaymentState } from "@/lib/payment.server";
 import { createDemoOrder, demoPayment, loadDemoOrder } from "@/mock/orders";

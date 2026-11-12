@@ -1,12 +1,9 @@
-// UI-only copy: demo orders kept in this browser tab only (sessionStorage).
-// Nothing is sent anywhere and no real payment is ever made.
 import { findGame, getHotItems, getPackages } from "@/lib/games";
 import type { GuestOrderView } from "@/lib/guest-order.server";
 import type { PaymentState } from "@/lib/payment.server";
 
 const KEY = "yuric-ui-demo-orders";
 
-// Not a real KHQR: scanning it in a bank app does nothing.
 export const DEMO_QR = "YURIC-TOPUP-UI-DEMO-NOT-A-REAL-PAYMENT";
 
 function readAll(): Record<string, GuestOrderView> {
@@ -21,7 +18,6 @@ function writeAll(all: Record<string, GuestOrderView>) {
   try {
     sessionStorage.setItem(KEY, JSON.stringify(all));
   } catch {
-    // Private mode: the order page then shows "not found", which is fine for a demo.
   }
 }
 

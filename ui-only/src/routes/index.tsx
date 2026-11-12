@@ -11,7 +11,6 @@ import { useStorePrefs } from "@/lib/storePrefs";
 import { useStoreStatus } from "@/lib/store-status";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Inside a game's own tab the main tile names its server, next to the other servers' tiles.
 const mainServerTile: Record<string, string> = { mlbb: "Mobile Legends KH", ff: "Free Fire MY/SG" };
 
 const gameTabs = [
@@ -19,7 +18,6 @@ const gameTabs = [
   ...["mlbb", "ff", "roblox", "pubg"].map((id) => ({
     id,
     label: games.find((game) => game.id === id)?.name ?? id,
-    // Each server of the game (e.g. Free Fire SG, PH) gets its own tile.
     items: [
       ...games.filter((game) => game.id === id),
       ...serverGames.filter((game) => game.base === id),
@@ -79,8 +77,6 @@ function Index() {
           <span className="pointer-events-none absolute bottom-0 right-[5%] z-[2] block h-[92%] w-auto">
             <span className="mascot-backdrop" aria-hidden="true" />
             <HairWindFilter />
-            {/* Hair layer: the whole image with a wind ripple; the face and body
-                are covered by the still copy below, so only the hair moves. */}
             <img
               src={mascot}
               alt="តួអង្គ Yuric ពេជ្រភ្លឺភ្លឹប"
@@ -150,14 +146,12 @@ function Index() {
                     params={{ gameId: g.id }}
                     className="block text-center"
                     style={{ "--shine-delay": `${i * 0.5}s` } as CSSProperties}
-                    // Fetch this game's pictures before the click so its page opens complete.
                     onPointerEnter={() => warmImages(gameImageUrls(g.id))}
                     onTouchStart={() => warmImages(gameImageUrls(g.id))}
                   >
                     <span className="tile-clean block rounded-[26%]">
                       <img
                         src={pic(g.icon)}
-                        // The first rows load at once; only the far ones wait for scrolling.
                         loading={i < 14 ? "eager" : "lazy"}
                         decoding="async"
                         alt={g.name}
@@ -184,7 +178,6 @@ const floatIcons = ["mlbb", "genshin", "pubg", "ff"]
   .map((id) => games.find((g) => g.id === id))
   .filter((g): g is (typeof games)[number] => Boolean(g));
 
-// Icon spots along the white swoosh, in % of the swoosh box.
 const iconSpots = [
   { top: 4, left: 16, rotate: -8 },
   { top: 26, left: 28, rotate: 6 },
@@ -222,15 +215,12 @@ function Diamond({ className, style }: { className?: string; style?: CSSProperti
   );
 }
 
-// Welcome headline, payment badge, game icons, waves and gems drawn over the
-// Angkor banner (HTML/SVG, so it stays sharp and follows the store language).
 function BannerOverlay() {
   const pic = useSiteImage();
   return (
     <span className="pointer-events-none absolute inset-0 z-[1] block">
       <span className="absolute inset-0 block bg-[radial-gradient(ellipse_42%_75%_at_50%_48%,rgb(6_20_70/0.6),transparent_72%)]" />
 
-      {/* gold wave along the bottom */}
       <svg
         viewBox="0 0 1000 250"
         preserveAspectRatio="none"
@@ -256,7 +246,6 @@ function BannerOverlay() {
         />
       </svg>
 
-      {/* white swoosh with 3D game tiles */}
       <span className="absolute inset-y-0 left-0 block w-[19%]">
         <svg
           viewBox="0 0 200 250"
@@ -283,7 +272,6 @@ function BannerOverlay() {
         ))}
       </span>
 
-      {/* headline */}
       <span className="absolute left-[47%] top-[46%] flex w-[56%] -translate-x-1/2 -translate-y-1/2 flex-col items-center text-center sm:left-[50%] sm:w-[48%]">
         <span className="grid font-khmer text-[clamp(28px,6.2vw,96px)] leading-[1.1]">
           <span className="banner-title-back col-start-1 row-start-1" aria-hidden="true">
@@ -322,7 +310,6 @@ function BannerOverlay() {
   );
 }
 
-// Scrolling noise pushed through a displacement map reads as wind in the hair.
 function HairWindFilter() {
   return (
     <svg width="0" height="0" className="absolute" aria-hidden="true">

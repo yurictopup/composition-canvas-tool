@@ -1,8 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 
-// Storefront language and theme. Kept in a tiny module-level store (not React
-// context) because pages call their strings before they render <SiteChrome>.
-
 export type StoreLang = "km" | "en";
 export type StoreTheme = "light" | "dark" | "system";
 
@@ -23,7 +20,6 @@ function load() {
     if (l === "km" || l === "en") lang = l;
     if (t === "light" || t === "dark" || t === "system") theme = t;
   } catch {
-    // private mode: defaults apply
   }
 }
 
@@ -31,7 +27,6 @@ function save(key: string, value: string) {
   try {
     localStorage.setItem(key, value);
   } catch {
-    // private mode: the choice just isn't remembered
   }
 }
 
@@ -42,7 +37,6 @@ function emit() {
 function subscribe(cb: () => void) {
   load();
   listeners.add(cb);
-  // Stored prefs are read after hydration, so tell the first subscriber.
   queueMicrotask(cb);
   return () => listeners.delete(cb);
 }

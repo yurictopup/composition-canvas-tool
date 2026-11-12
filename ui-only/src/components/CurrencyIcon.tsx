@@ -1,12 +1,9 @@
-// In-game currency artwork for package cards, so each game shows its own
-// currency (Robux, UC, Gems...) instead of one shared diamond.
 import diamond from "@/assets/diamond.webp";
 import mlbbDiamonds from "@/assets/mlbb-diamonds.webp";
 import magicchessDiamonds from "@/assets/magicchess-diamonds.webp";
 import pubgUc from "@/assets/pubg-uc.webp";
 import { baseGameId } from "@/lib/games";
 
-// Games shown with a picture instead of drawn artwork (server variants use their main game's).
 const pictures: Record<string, string> = {
   mlbb: mlbbDiamonds,
   pubg: pubgUc,
@@ -95,7 +92,6 @@ function Monochrome() {
 const STAR =
   "M24 6L29.17 17.88L42.07 19.13L32.37 27.72L35.17 40.37L24 33.8L12.83 40.37L15.63 27.72L5.93 19.13L18.83 17.88Z";
 
-// Telegram's rounded star: gold for Stars, purple for Premium.
 function TelegramStar({ id, from, to }: { id: string; from: string; to: string }) {
   return (
     <>
@@ -156,7 +152,6 @@ function art(gameId: string) {
   }
 }
 
-/** The picture a game's package tiles show instead of a drawn icon, if any (for preloading). */
 export function currencyPicture(gameId: string): string | undefined {
   const picture = pictures[baseGameId(gameId)];
   return picture ?? (art(gameId) ? undefined : diamond);
@@ -165,7 +160,6 @@ export function currencyPicture(gameId: string): string | undefined {
 export function CurrencyIcon({ gameId, className }: Props) {
   const picture = pictures[baseGameId(gameId)];
   const drawn = picture ? null : art(gameId);
-  // Diamond games without their own picture (Free Fire, Magic Chess...) use the HD diamond.
   if (!drawn) {
     return (
       <img

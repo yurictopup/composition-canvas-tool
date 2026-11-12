@@ -1,7 +1,3 @@
-// Yuric Bot's answers: matches a customer's question (Khmer or English) to a topic and a game,
-// and answers from the shop's real catalogue (src/lib/games.ts) and ID rules (src/lib/player-id.ts).
-// Prices come from the live price table (src/lib/prices.ts) when the widget has loaded it;
-// without it the bot lists the packages and points to the game page.
 import { games, getHotItems, getPackages, store } from "@/lib/games";
 import { getIdConfig } from "@/lib/player-id";
 import type { PriceMap } from "@/lib/prices";
@@ -11,7 +7,7 @@ export type BotReply = { text: string; actions?: BotAction[]; suggestions?: stri
 
 type Game = (typeof games)[number];
 
-const TELEGRAM = store.telegram; // "@Yuricccc"
+const TELEGRAM = store.telegram; 
 const TELEGRAM_URL = "https://t.me/" + TELEGRAM.replace(/^@/, "");
 
 export const DEFAULT_SUGGESTIONS = [
@@ -22,7 +18,6 @@ export const DEFAULT_SUGGESTIONS = [
   "ហ្គេមអ្វីខ្លះ?",
 ];
 
-// Words that point at each game. Latin aliases match as whole words; Khmer ones as substrings.
 const GAME_ALIASES: Record<string, string[]> = {
   mlbb: ["mlbb", "mobile legends", "mobile legend", "ml", "ម៉ូបាយលេជិន", "ម៉ូបាយ", "អឹមអិល"],
   ff: ["free fire", "freefire", "ff", "ហ្វ្រីហ្វាយ"],
@@ -45,7 +40,6 @@ const GAME_ALIASES: Record<string, string[]> = {
   valorant: ["valorant", "vp"],
 };
 
-// Topic keywords. Each topic's score is the number of its keywords found in the message.
 const TOPICS: Record<string, string[]> = {
   greet: ["សួស្តី", "ជំរាបសួរ", "hello", "hi", "hey", "សួស្ដី", "bong"],
   thanks: ["អរគុណ", "thank", "thanks", "thx", "អូខេ"],
@@ -195,7 +189,6 @@ function has(text: string, word: string) {
   return new RegExp(`(^|[^a-z0-9])${escaped}($|[^a-z0-9])`).test(text);
 }
 
-/** The game a (lowercased) message names, preferring the longest alias. */
 export function detectGame(text: string): Game | undefined {
   let best: { g: Game; len: number } | undefined;
   for (const g of games) {
@@ -211,7 +204,6 @@ function topScores(text: string) {
     t,
     words.filter((w) => has(text, w)).length,
   ]);
-  // Ties go to the more specific topic; greetings and thanks only lead when nothing else matched.
   const weak = (t: string) => (t === "greet" || t === "thanks" ? 1 : 0);
   return scores
     .filter(([, n]) => n > 0)
@@ -233,10 +225,6 @@ function packagesLine(g: Game) {
   return `កញ្ចប់ដែលមាន៖ ${pk.map((p) => p.amt).join(", ")} ${g.unit}${hot ? ` (ពេញនិយម៖ ${hot.amt})` : ""}`;
 }
 
-/**
- * Today's prices from the live table: a few currency packs (cheapest first) and the
- * passes. Packages the owner switched off are left out. Null without live prices.
- */
 export function priceLines(g: Game, prices: PriceMap | null | undefined, max = 8): string | null {
   if (!prices) return null;
   const live = (amt: string) => {
@@ -267,7 +255,6 @@ const gameAction = (g: Game, href: (id: string) => string): BotAction => ({
 });
 const telegramAction: BotAction = { label: `ជជែកតាម Telegram · ${TELEGRAM}`, href: TELEGRAM_URL };
 
-// "How do I pay?" or "can I pay with ABA?" asks for the steps, not for the customer's orders.
 const HOW_WORDS = [
   "how",
   "can i",
@@ -281,7 +268,6 @@ const HOW_WORDS = [
   "អ្វី",
 ];
 
-/** True when a message is about a payment or an order that hasn't arrived. */
 export function isOrderQuestion(raw: string): boolean {
   const text = raw.toLowerCase().replace(/\s+/g, " ").trim();
   const topics = topScores(text);
@@ -299,7 +285,6 @@ export function answer(
   const topics = topScores(text);
   const has_ = (t: string) => topics.includes(t);
 
-  // Promo codes: how to use one; the bot never makes up a code.
   if (has_("promo") && !has_("late") && !has_("refund")) {
     return {
       text: `បាទ យើងមានលេខកូដបញ្ចុះតម្លៃ (Promo Code) ម្តងម្កាល ៖\n១. ជ្រើសហ្គេម និងកញ្ចប់\n២. នៅ "សង្ខេបការបញ្ជាទិញ" វាយលេខកូដក្នុងប្រអប់ លេខកូដបញ្ចុះតម្លៃ ហើយចុច ប្រើ\n៣. តម្លៃថ្មីបង្ហាញភ្លាមៗ រួចចុច បញ្ជាទិញ\nលេខកូដថ្មីៗ ប្រកាសនៅ Telegram ${TELEGRAM} លេខកូដមួយមានកំណត់ចំនួនដង និងថ្ងៃផុតកំណត់ ហើយមិនប្រើបានលើ Roblox និង Telegram ទេ`,
@@ -308,7 +293,6 @@ export function answer(
     };
   }
 
-  // Roblox works differently from every other game.
   if (game?.id === "roblox") {
     const list = priceLines(game, prices);
     return {
@@ -318,7 +302,6 @@ export function answer(
     };
   }
 
-  // Telegram Stars and Premium go to a Telegram username, not a game ID.
   if (game?.id === "tgstars" || game?.id === "tgpremium") {
     const list = priceLines(game, prices);
     const what = game.id === "tgstars" ? "Telegram Stars" : "Telegram Premium (3, 6 ឬ 12 ខែ)";

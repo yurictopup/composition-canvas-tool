@@ -3,19 +3,12 @@ import { backend } from "@/mock/backend";
 import banner from "@/assets/banner-angkor.webp";
 import { findGame, gamePackages, games, hotItemsByGame } from "@/lib/games";
 
-// Pictures the owner can replace from /admin. Each slot has a built-in picture;
-// an uploaded one (public.site_images + the site-images bucket) is shown instead.
-// Currency packages and passes without artwork have no built-in picture (fallback ""):
-// the shop shows the game's currency icon until the owner uploads one.
-
 export type ImageSlot = {
   key: string;
   group: "banner" | "game" | "item" | "package";
-  /** Game the picture belongs to (items and packages). */
   gameId?: string;
   name: string;
   fallback: string;
-  /** Size the upload is cropped to, in pixels. */
   width: number;
   height: number;
 };
@@ -29,7 +22,6 @@ function itemSlots(): ImageSlot[] {
     for (const item of items) {
       const key = `item:${gameId}:${item.label}`;
       if (seen.has(item.img ?? key)) continue;
-      // Wide cards (FF memberships) keep their shape; square passes stay square.
       const wide = item.badge
         ? [960, 368]
         : item.img && /ff-/.test(item.img)
@@ -69,7 +61,6 @@ export const imageSlots: ImageSlot[] = [
   ...itemSlots(),
 ];
 
-/** Slot of one currency package, e.g. pkg:mlbb:86. Shown in place of the currency icon. */
 export function packageSlotKey(gameId: string, amt: string): string {
   return `pkg:${gameId}:${amt}`;
 }
@@ -87,7 +78,6 @@ export function packageSlot(gameId: string, amt: string): ImageSlot {
   };
 }
 
-/** Games that sell currency packages, for the package picture picker. */
 export const packageGameIds = Object.keys(gamePackages).filter((id) => findGame(id));
 
 const slotByFallback = new Map(
@@ -99,7 +89,6 @@ let request: Promise<void> | null = null;
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((l) => l());
 
-/** Reads the uploaded pictures once per page load (or again with force). */
 export function loadSiteImages(force = false): Promise<void> {
   if (request && !force) return request;
   request = (async () => {
@@ -123,10 +112,6 @@ export function siteImageOverrides() {
   return overrides;
 }
 
-/**
- * Returns a function that swaps a built-in picture for the owner's upload, if any:
- * `pic(game.icon)`. Before uploads load (and during SSR) the built-in one shows.
- */
 export function useSiteImage(): (builtIn: string) => string {
   const map = useOverrides();
   return (builtIn) => {
@@ -135,10 +120,6 @@ export function useSiteImage(): (builtIn: string) => string {
   };
 }
 
-/**
- * Returns a function that gives the owner's upload for a slot key, or undefined when
- * there is none: `slotPic(packageSlotKey(game.id, p.amt))`.
- */
 export function useSlotImage(): (key: string) => string | undefined {
   const map = useOverrides();
   return (key) => map[key];
@@ -158,14 +139,8 @@ function useOverrides(): Record<string, string> {
   return map;
 }
 
-/** Where the picture sits in the slot, in output pixels (the crop editor sets it). */
 export type CropPlacement = { x: number; y: number; scale: number };
 
-/**
- * Draws a picture into a width x height slot at the given placement and encodes it as
- * WebP. Without a placement the picture is centred and fills the slot. Parts of the slot
- * the picture doesn't cover stay transparent.
- */
 export async function cropToSize(
   file: Blob,
   width: number,

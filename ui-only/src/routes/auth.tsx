@@ -45,8 +45,6 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-// Email codes have 6 digits (the email settings: "Email OTP
-// Length" must stay 6, or customers can't type the whole code).
 const CODE_MIN = 6;
 const CODE_MAX = 6;
 const CODE_PATTERN = /^\d{6}$/;
@@ -72,12 +70,9 @@ function AuthPage() {
   const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  // After sign up, the email carries a code (and a link); either one confirms the account.
   const [codeFor, setCodeFor] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [cooldown, setCooldown] = useState(0);
-  // Forgot password: ask for the email, then the email's code (or its link),
-  // then a new password. `recovering` = signed in by the code/link, new password next.
   const [forgot, setForgot] = useState(false);
   const [resetFor, setResetFor] = useState<string | null>(null);
   const [recovering, setRecovering] = useState(false);
@@ -91,15 +86,12 @@ function AuthPage() {
     return () => clearTimeout(id);
   }, [cooldown]);
 
-  // The reset link in the email brings the customer back signed in for recovery;
-  // the root sends them here with this flag set (see src/routes/__root.tsx).
   useEffect(() => {
     let flagged = false;
     try {
       flagged = sessionStorage.getItem("yuric-password-recovery") === "1";
       sessionStorage.removeItem("yuric-password-recovery");
     } catch {
-      // Private mode: the PASSWORD_RECOVERY event below still works.
     }
     if (flagged) {
       void backend.auth.getSession().then(({ data }) => {
@@ -124,7 +116,6 @@ function AuthPage() {
 
   const pwStr = mode === "signup" || recovering ? passwordStrength(password) : null;
 
-  // Shown in red under each field (instead of the browser's own bubble).
   const [errors, setErrors] = useState<{
     email?: string | undefined;
     password?: string | undefined;
@@ -163,7 +154,6 @@ function AuthPage() {
       });
       return;
     }
-    // Same answer whether or not the email has an account, so nobody can probe for accounts.
     setResetFor(to);
     setCode("");
     setCooldown(60);
@@ -329,7 +319,6 @@ function AuthPage() {
       ? "border-[#d6e2f5] bg-[#f6f9ff] text-[#142650] placeholder:text-[#9aa8c4] focus:border-brand-500 focus:ring-brand-500/15"
       : "border-white/12 bg-white/[0.06] text-on-dark placeholder:text-on-dark-muted/60 focus:border-brand-400 focus:ring-brand-400/20"
   }`;
-  // A field with a problem gets a red border; its message shows in red below it.
   const withError = (cls: string, err?: string) =>
     err ? `${cls} border-red-500! focus:border-red-500! focus:ring-red-500/20!` : cls;
   const errorText = `text-xs font-normal leading-[1.6] ${light ? "text-red-600" : "text-red-400"}`;
@@ -358,7 +347,6 @@ function AuthPage() {
               : "border-white/10 bg-[oklch(0.22_0.08_264/0.92)] shadow-[0_30px_80px_-20px_rgb(0_0_0/0.6)]"
           }`}
         >
-          {/* Brand side: the home banner under a deep navy wash, with what the customer gets */}
           <aside className="relative isolate flex flex-col justify-between overflow-hidden px-6 py-7 text-white sm:px-10 sm:py-10 lg:min-h-[640px]">
             <img
               src={pic(banner)}
@@ -428,7 +416,6 @@ function AuthPage() {
             </div>
           </aside>
 
-          {/* Form side */}
           <section
             className={`px-5 py-7 sm:px-12 sm:py-12 ${light ? "text-[#142650]" : "text-on-dark"}`}
           >
@@ -899,7 +886,6 @@ function AuthPage() {
   );
 }
 
-/** Six boxes for the email code; typing, backspace and pasting all move between boxes. */
 function CodeBoxes({
   value,
   light,

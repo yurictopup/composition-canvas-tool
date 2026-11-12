@@ -2,11 +2,6 @@ import { useEffect, useState } from "react";
 type Backend = typeof backend;
 import { backend } from "@/mock/backend";
 
-// The owner's sales switch (public.store_settings, flipped on /admin > Prices).
-// While sales are off, the shop shows "coming soon" instead of packages and new
-// orders are refused; paid orders are still delivered. If the table can't be
-// read (not created yet), the shop stays open as before.
-
 export type StoreStatus = { salesOpen: boolean; hiddenGames: string[] };
 
 const OPEN: StoreStatus = { salesOpen: true, hiddenGames: [] };
@@ -21,12 +16,10 @@ export async function fetchStoreStatus(db: Backend = backend): Promise<StoreStat
   return { salesOpen: !!data.sales_open, hiddenGames: data.hidden_games ?? [] };
 }
 
-/** True when the shop sells this game right now. */
 export function gameOnSale(status: StoreStatus, gameId: string): boolean {
   return status.salesOpen && !status.hiddenGames.includes(gameId);
 }
 
-/** Server check before a new order or KHQR: false when the owner paused sales for this game. */
 export async function salesOpenFor(db: Backend, gameId: string): Promise<boolean> {
   return gameOnSale(await fetchStoreStatus(db), gameId);
 }
@@ -34,13 +27,11 @@ export async function salesOpenFor(db: Backend, gameId: string): Promise<boolean
 let cached: StoreStatus | null = null;
 const listeners = new Set<(s: StoreStatus) => void>();
 
-/** Lets /admin show its change in the shop at once (same tab). */
 export function setStoreStatus(status: StoreStatus) {
   cached = status;
   listeners.forEach((l) => l(status));
 }
 
-/** The sales switch; null while loading (packages stay hidden until it is known). */
 export function useStoreStatus(): StoreStatus | null {
   const [status, setStatus] = useState<StoreStatus | null>(cached);
   useEffect(() => {

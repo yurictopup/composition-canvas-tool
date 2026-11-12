@@ -1,6 +1,3 @@
-// Yuric Bot in Khmer.
-// FAQ threads and Telegram hand-off as before; typed questions were answered by an AI in the live store
-// (chat.functions.ts), or by topic and game (chatBrain.ts) when the AI is not available.
 import { useEffect, useRef, useState, type ComponentType } from "react";
 import {
   ArrowUp,
@@ -34,7 +31,6 @@ import { MAX_TEXT, MAX_TURNS } from "@/lib/chatLimits";
 import { fetchPrices, type PriceMap } from "@/lib/prices";
 import { setStoreTheme, useStorePrefs } from "@/lib/storePrefs";
 
-/** AI answers (slow, about 5-10 seconds); off until a faster model is chosen. */
 const USE_AI = false;
 
 type Icon = ComponentType<{ className?: string }>;
@@ -43,7 +39,6 @@ type ChatMessage = {
   text: string;
   actions?: BotAction[];
   suggestions?: string[];
-  /** Written by the AI rather than the keyword answers. */
   ai?: boolean;
 };
 type Thread = { id: number; title: string; messages: ChatMessage[] };
@@ -78,7 +73,7 @@ export const defaultFaqs: ChatFaq[] = [
   },
   {
     q: "ខ្ញុំបញ្ចូល ID ខុស តើត្រូវធ្វើដូចម្តេច?",
-    a: "យើងមិនអាចសងប្រាក់វិញបានទេ ប្រសិនបើអ្នកបញ្ចូល Player ID ខុស ព្រោះពេជ្រត្រូវបានបញ្ចូលទៅ ID នោះផ្ទាល់ សូមពិនិត្យ ID ឱ្យបានត្រឹមត្រូវ ហើយចុច Check ID មុនពេលបង់ប្រាក់ បើការបញ្ជាទិញមិនទាន់ដំណើរការ សូមទាក់ទងយើងតាម Telegram @Yuricccc ភ្លាមៗ ជាមួយវិក្កយបត្រ និង ID ដែលត្រឹមត្រូវ",
+    a: "យើងមិនអាចសងប្រាក់វិញបានទេ ប្រសិនបើអ្នកបញ្ចូល Player ID ខុស ព្រោះពេជ្រត្រូវបានបញ្ចូលទៅ ID នោះផ្ទាល់ សូមពិនិត្យ ID ឱ្យបានត្រឹមត្រូវ ហើយចុច Check ID មុនពេលបង់ប្រាក់ បើការបញ្ជាទិញមិនទាន់ដំណើរការ សូមទាក់ទងយើងតាម Telegram @your_telegram ភ្លាមៗ ជាមួយវិក្កយបត្រ និង ID ដែលត្រឹមត្រូវ",
     icon: CircleAlert,
     telegram: true,
   },
@@ -93,7 +88,6 @@ export const defaultFaqs: ChatFaq[] = [
 export type ChatWidgetProps = {
   faqs?: ChatFaq[];
   telegram?: string;
-  /** Link to a game's top-up page, used by the bot's "បញ្ចូល …" buttons. Default `/game/<id>`. */
   gameHref?: (id: string) => string;
   defaultOpen?: boolean;
 };
@@ -104,7 +98,7 @@ const shortTitle = (text: string) => (text.length > 40 ? text.slice(0, 40) + "�
 
 export function ChatWidget({
   faqs = defaultFaqs,
-  telegram = "Yuricccc",
+  telegram = "your_telegram",
   gameHref = (id) => `/game/${id}`,
   defaultOpen = false,
 }: ChatWidgetProps) {
@@ -116,7 +110,6 @@ export function ChatWidget({
   const [typing, setTyping] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Today's prices, so the bot can quote them; loaded the first time the chat opens.
   const [prices, setPrices] = useState<PriceMap | null>(null);
   useEffect(() => {
     if (!open || prices) return;
@@ -128,7 +121,6 @@ export function ChatWidget({
       cancelled = true;
     };
   }, [open, prices]);
-  // Bot messages already shown in full; only new answers type out.
   const seen = useRef(new Set<string>());
 
   const active = threads.find((t) => t.id === activeId) ?? null;
@@ -169,7 +161,6 @@ export function ChatWidget({
     setActiveId(thread.id);
   }
 
-  // The composer only shows inside a conversation; this opens an empty one.
   function startChat() {
     const thread: Thread = {
       id: nextThreadId++,
@@ -205,7 +196,6 @@ export function ChatWidget({
           t.id === id
             ? {
                 ...t,
-                // A chat started from "ask AI" is named after its first question.
                 title: t.title === NEW_CHAT ? shortTitle(text) : t.title,
                 messages: [...t.messages, { role: "user", text }],
               }
@@ -231,8 +221,6 @@ export function ChatWidget({
       const wait = 350 + Math.min(500, reply.text.length * 2) - (Date.now() - started);
       timer.current = setTimeout(() => post(reply), Math.max(0, wait));
     };
-    // KENZO found the AI too slow, so answers come from the keyword brain right away.
-    // Payment problems still get a live check of the customer's orders.
     if (!USE_AI) {
       if (!isOrderQuestion(text)) return keywords();
       checkMyOrders()
@@ -252,11 +240,9 @@ export function ChatWidget({
       .catch((error: unknown) => ({ unavailable: String(error) }))
       .then((ai) => {
         if ("text" in ai) {
-          // The AI writes the answer; the buttons come from what the customer asked about.
           const game = detectGame(text.toLowerCase());
           const actions: BotAction[] = [];
           if (game) actions.push({ label: `បញ្ចូល ${game.name}`, href: gameHref(game.id) });
-          // Problems always get the admin button, even if the AI forgot to mention Telegram.
           const kw = answer(text, gameHref);
           if (
             /telegram|តេឡេក្រាម/i.test(ai.text) ||
@@ -266,13 +252,11 @@ export function ChatWidget({
           post({ text: ai.text, actions, ai: ai.source === "ai" });
           return;
         }
-        // No AI (not in this copy): the keyword answers.
         console.warn("Yuric Bot AI unavailable:", ai.unavailable);
         keywords();
       });
   }
 
-  // Dark "AI app" look on every site theme: deep navy glass, aurora glow, blue-violet accents.
   const glass = "border border-[var(--chat-line)] bg-[var(--chat-glass)] backdrop-blur-md";
   const scroll = "[scrollbar-width:thin] [scrollbar-color:var(--chat-line-strong)_transparent]";
   const hint = "ចម្លើយអាចមានកំហុស · តម្លៃពិតប្រាកដនៅទំព័រហ្គេម";
@@ -318,9 +302,7 @@ export function ChatWidget({
   );
 
   return (
-    // Colours come from CSS variables (.yt-chat in styles.css) so the chat follows the light/dark switch.
     <div className="yt-chat contents" data-light={light ? "true" : undefined}>
-      {/* launcher — bot head floats freely, with an "ask Yuric Bot" pill on wide screens */}
       {!open && (
         <button
           type="button"
@@ -353,12 +335,10 @@ export function ChatWidget({
       {open && (
         <div className="fixed bottom-[4.25rem] right-3 z-40 h-[min(430px,60svh)] w-[min(340px,calc(100vw-1.5rem))] rounded-[24px] sm:rounded-[30px] bg-[linear-gradient(150deg,oklch(0.75_0.13_240/0.9),oklch(0.5_0.24_290/0.6)_45%,oklch(0.3_0.1_268/0.4)_70%,oklch(0.75_0.12_210/0.8))] p-px shadow-[0_30px_90px_oklch(0.12_0.08_268/0.7),0_0_60px_oklch(0.55_0.22_280/0.3)] animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-200 sm:right-5 sm:top-auto sm:h-[min(520px,calc(100vh-8rem))] sm:w-[350px]">
           <div className="relative flex h-full flex-col overflow-hidden rounded-[23px] sm:rounded-[29px] bg-[var(--chat-bg)] font-sans text-[var(--chat-fg)]">
-            {/* aurora glow behind everything */}
             <span className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-[oklch(0.55_0.2_255/0.45)] blur-3xl yt-aurora" />
             <span className="pointer-events-none absolute -right-20 top-24 h-56 w-56 rounded-full bg-[oklch(0.5_0.24_295/0.35)] blur-3xl yt-aurora [animation-delay:-4s]" />
             <span className="pointer-events-none absolute -bottom-24 left-10 h-56 w-56 rounded-full bg-[oklch(0.6_0.14_210/0.25)] blur-3xl yt-aurora [animation-delay:-8s]" />
 
-            {/* header */}
             <div className="relative flex items-center gap-3 border-b border-[var(--chat-line)] px-4 py-2.5">
               {active && (
                 <button
@@ -416,7 +396,6 @@ export function ChatWidget({
 
             {active ? (
               <>
-                {/* conversation */}
                 <div
                   ref={listRef}
                   aria-live="polite"
@@ -509,7 +488,6 @@ export function ChatWidget({
               </>
             ) : (
               <>
-                {/* home */}
                 <div className={`relative flex-1 overflow-y-auto px-3 pb-3 pt-3 sm:px-3.5 sm:pt-4 ${scroll}`}>
                   <div className="flex flex-col items-center text-center">
                     <span className="relative grid h-12 w-12 place-items-center sm:h-14 sm:w-14">
@@ -589,7 +567,6 @@ export function ChatWidget({
                     <Send className="h-4 w-4 shrink-0 text-[var(--chat-accent)]" />
                   </a>
                 </div>
-                {/* The big "start chat" button is gone: typing here starts the chat. */}
                 {footer}
               </>
             )}
@@ -600,8 +577,6 @@ export function ChatWidget({
   );
 }
 
-// Reveals a new answer a few letters at a time, like an AI writing it.
-// Steps by grapheme so Khmer vowel signs and subscripts never show half-built.
 function TypeText({ text, onDone }: { text: string; onDone: () => void }) {
   const [parts] = useState(() => {
     const Seg = (Intl as { Segmenter?: typeof Intl.Segmenter }).Segmenter;

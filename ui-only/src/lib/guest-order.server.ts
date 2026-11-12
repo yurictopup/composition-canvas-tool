@@ -1,4 +1,3 @@
-// UI-only copy: just the type the order page uses.
 export type GuestOrderView = {
   id: string;
   gameId: string;

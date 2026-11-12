@@ -7,12 +7,11 @@ demo data that lives in your browser.
 
 ## Run it on your computer
 
-You need Node.js 20 or newer (https://nodejs.org, the LTS version).
+You need Node.js 20 or newer (the LTS version). Open a terminal in this folder, then:
 
 ```bash
-cd D:\yuric-topup-ui-only
-npm install
-npm run dev
+npm.cmd install
+npm.cmd run dev
 ```
 
 Then open http://localhost:5173 (it opens by itself).
@@ -37,9 +36,14 @@ Other commands:
 The fake pieces are in `src/mock/backend.ts`, `src/mock/orders.ts`
 and the `src/lib/*.functions.ts` files.
 
-## Design rules (same as the live store)
+## Design rules
 
 - No emoji anywhere in the UI; use real icons (lucide-react).
 - No Khmer full stop in website text.
 - Koulen for headings, Kantumruy Pro for small Khmer text (fonts are bundled, no internet needed).
 - The home banner text is Khmer only; never translate it.
+
+## Your details
+
+The Telegram contact is a placeholder (`@your_telegram`). Change it in
+`src/lib/games.ts` (`store.telegram`) and in `src/components/ChatWidget.tsx`.

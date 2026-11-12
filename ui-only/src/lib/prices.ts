@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { backend } from "@/mock/backend";
 
-// Selling prices live in the the database `product_prices` table. The database
-// charges these prices on every order, and the owner edits them on /admin,
-// so the shop shows the same numbers. Rows are keyed by "<amt> <unit>",
-// the same text an order stores in package_amt.
 export type PriceRow = {
   game_id: string;
   package_amt: string;
@@ -33,11 +29,8 @@ export async function fetchPrices(gameId?: string): Promise<PriceMap | null> {
   return map;
 }
 
-// Prices already read this visit, so going back to a game shows them at once
-// (they are still re-read in the background, so an owner's change shows too).
 const priceCache = new Map<string, PriceMap>();
 
-/** Prices for one game; null while loading or when the table can't be read. */
 export function useLivePrices(gameId: string): PriceMap | null {
   const [prices, setPrices] = useState<PriceMap | null>(() => priceCache.get(gameId) ?? null);
   useEffect(() => {
@@ -54,11 +47,6 @@ export function useLivePrices(gameId: string): PriceMap | null {
   return prices;
 }
 
-/**
- * The price to show for a package. Until live prices load, the fallback from
- * games.ts is shown; once loaded, a package missing from the table or switched
- * off is not for sale (null), because the database would refuse the order.
- */
 export function livePrice(
   prices: PriceMap | null,
   gameId: string,
@@ -70,16 +58,11 @@ export function livePrice(
   return row && row.active ? row.price_usd : null;
 }
 
-/** Leading number of a package ("1500 + 300" -> 1800) so lists sort small to large. */
 export function packageSize(amt: string): number {
   const m = amt.match(/^(\d+)(?:\s*\+\s*(\d+))?/);
   return m ? Number(m[1]) + Number(m[2] ?? 0) : Number.MAX_SAFE_INTEGER;
 }
 
-/**
- * The packages a game page sells: the built-in list plus packages the owner added on
- * /admin, smallest first. Once live prices load, switched-off packages drop out.
- */
 export function livePackages<P extends { amt: string; price: number | null }>(
   prices: PriceMap | null,
   gameId: string,

@@ -41,17 +41,12 @@ import hi3 from "@/assets/hi3.webp";
 import telegram from "@/assets/telegram.svg";
 import telegramStars from "@/assets/telegram-stars.webp";
 
-// Games the supplier can top up for Cambodian accounts, plus Roblox, which the team delivers
-// by hand through the buyer's Game Pass. CODM (India-only there) and the Supercell games
-// were removed on 2026-10-27; their ID rules stay in player-id.ts.
-// EAFC Mobile, League of Legends and Honkai Impact 3rd use the supplier's Cambodia-region packs.
 export const games = [
   { id: "mlbb", name: "Mobile Legends", icon: mlbb, unit: "Diamonds", blurb: "Instant MLBB diamond delivery" },
   { id: "ff", name: "Free Fire", icon: freefire, unit: "Diamonds", blurb: "Free Fire diamonds at the best price" },
   { id: "magicchess", name: "Magic Chess GoGo", icon: magicchess, unit: "Diamonds", blurb: "Instant Magic Chess delivery" },
   { id: "pubg", name: "PUBG Mobile", icon: pubg, unit: "UC", blurb: "Fast PUBG UC delivery" },
   { id: "roblox", name: "Roblox", icon: roblox, unit: "Robux", blurb: "Robux gift code · redeem at roblox.com/redeem" },
-  // Bought by the supplier for the buyer's Telegram username.
   { id: "tgstars", name: "Telegram Stars", icon: telegramStars, unit: "Stars", blurb: "Stars sent to your Telegram username" },
   { id: "tgpremium", name: "Telegram Premium", icon: telegram, unit: "Months", blurb: "Premium for your Telegram username" },
   { id: "hok", name: "Honor of Kings", icon: hok, unit: "Tokens", blurb: "Tokens HoK ចូលភ្លាម" },
@@ -70,17 +65,13 @@ export const games = [
 
 export type Game = (typeof games)[number];
 
-/** Telegram has one tile (Premium); its page switches between Premium and Stars. */
 export const telegramTabs = [
   { id: "tgpremium", label: "Telegram Premium" },
   { id: "tgstars", label: "Telegram Stars" },
 ];
 
-/** Game tiles on the home and profile pages (Telegram Stars sits inside the Telegram tile). */
 export const listedGames = games.filter((g) => g.id !== "tgstars");
 
-// Other servers of a game. Each is its own game id (own packages, prices and the supplier
-// category) but is reached from the main game's page through the server tabs.
 export const serverGames: (Game & { base: string; server: string })[] = [
   { id: "mlbb_ph", name: "Mobile Legends PH", icon: mlbb, unit: "Diamonds", blurb: "MLBB Philippines server", base: "mlbb", server: "Philippines" },
   { id: "mlbb_my", name: "Mobile Legends MY", icon: mlbb, unit: "Diamonds", blurb: "MLBB Malaysia server", base: "mlbb", server: "Malaysia" },
@@ -90,7 +81,6 @@ export const serverGames: (Game & { base: string; server: string })[] = [
   { id: "ff_id", name: "Free Fire ID", icon: freefire, unit: "Diamonds", blurb: "Free Fire Indonesia server", base: "ff", server: "Indonesia" },
 ];
 
-/** Server tabs shown on a game page; the first is the main game. */
 const mainServer: Record<string, string> = { mlbb: "Cambodia / Global", ff: "Malaysia / Singapore" };
 export const gameServers: Record<string, { id: string; label: string }[]> = Object.fromEntries(
   Object.entries(mainServer).map(([base, label]) => [
@@ -103,24 +93,17 @@ export function findGame(id: string | undefined): Game | undefined {
   return games.find((g) => g.id === id) ?? serverGames.find((g) => g.id === id);
 }
 
-/** In-game pictures of single currency packages, by game and package amount. Uploads from /admin win. */
 export const packagePictures: Record<string, Record<string, string>> = {
   bloodstrike: { "51": bs105, "105": bs105, "320": bs320, "540": bs540, "1100": bs1100, "2260": bs2260, "5800": bs5800 },
 };
 
-/** The main game of a server variant (same Player ID rules and name check). */
 export function baseGameId(id: string): string {
   return serverGames.find((g) => g.id === id)?.base ?? id;
 }
 
 export type GamePackage = { amt: string; price: number | null; hot?: boolean; img?: string };
-// img puts the item in "Recommended for You"; icon only replaces the currency icon in "More items".
 export type HotItem = { label: string; price: number; img?: string; icon?: string; note?: string; badge?: string };
 
-// Packages match what the supplier sells for each game (read from the reseller panel on
-// 2026-10-27, Cambodia-usable regions only).
-// The live selling price comes from the the database product_prices table (edited on /admin,
-// see src/lib/prices.ts); the prices here are only shown until that table loads.
 export const gamePackages: Record<string, GamePackage[]> = {
   mlbb: [
     { amt: "11", price: 0.27 },
@@ -382,7 +365,6 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "3300", price: 55.99 },
     { amt: "6600", price: 111.99 },
   ],
-  // CODM and the Supercell games are no longer sold (no Cambodia stock at the supplier); kept so old orders still resolve.
   codm: [
     { amt: "80", price: 0.99 },
     { amt: "400 + 20", price: 4.99 },
@@ -415,7 +397,6 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "6500", price: 49.99 },
     { amt: "14000", price: 99.99 },
   ],
-  // Robux gift card codes (the supplier Roblox Robux US), redeemed by the buyer.
   roblox: [
     { amt: "50", price: 1.79 },
     { amt: "275", price: 2.99 },
@@ -425,8 +406,6 @@ export const gamePackages: Record<string, GamePackage[]> = {
     { amt: "5250", price: 49.49 },
     { amt: "11000", price: 99.49 },
   ],
-  // Telegram Stars / Premium for a username; the supplier cost on 2026-10-30 was
-  // $0.0152 a star and $12.18 / $16.24 / $29.43 for 3 / 6 / 12 months.
   tgstars: [
     { amt: "50", price: 0.89 },
     { amt: "100", price: 1.75, hot: true },
@@ -441,7 +420,6 @@ export const gamePackages: Record<string, GamePackage[]> = {
   ],
 };
 
-// Roblox keeps 30% of a Game Pass sale, so the pass must cost more than the Robux delivered.
 export function robloxGamePassPrice(robux: number): number {
   return Math.ceil(robux / 0.7);
 }
@@ -450,8 +428,6 @@ export function getPackages(gameId: string): GamePackage[] {
   return gamePackages[gameId] ?? [];
 }
 
-// Passes, cards and bundles the supplier sells next to the currency packs. Items with a picture
-// show as "Recommended for You" tiles; the rest list under "More items" with the currency icon.
 export const hotItemsByGame: Record<string, HotItem[]> = {
   mlbb: [
     { label: "Weekly Pass", price: 1.55, img: mlbbWeeklyPass },
@@ -628,6 +604,6 @@ export const payments = ["Bakong"];
 
 export const store = {
   name: "Yuric Topup",
-  telegram: "@Yuricccc",
+  telegram: "@your_telegram",
   hours: "24 Hours",
 };

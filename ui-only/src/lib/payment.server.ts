@@ -1,4 +1,3 @@
-// UI-only copy: just the type the payment card uses.
 export type PaymentState = {
   available: boolean;
   qr?: string;

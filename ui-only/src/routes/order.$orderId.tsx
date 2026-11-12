@@ -8,9 +8,7 @@ import { getGuestOrder } from "@/lib/guest-order.functions";
 import type { GuestOrderView } from "@/lib/guest-order.server";
 import { useStorePrefs } from "@/lib/storePrefs";
 
-// A guest order, opened by the secret link shown after ordering without an account.
 export const Route = createFileRoute("/order/$orderId")({
-  // A plain check instead of zod keeps zod out of the bundle every page loads.
   validateSearch: (search: Record<string, unknown>): { t?: string } =>
     typeof search["t"] === "string" ? { t: search["t"] } : {},
   head: () => ({

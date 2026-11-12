@@ -71,9 +71,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-// The password reset link signs the customer in on whatever page the database
-// sends them to (often the home page, not /auth). Read it from the address
-// before the database clears it, so /auth can ask for the new password.
 const RECOVERY_FLAG = "yuric-password-recovery";
 const openedFromResetLink =
   typeof window !== "undefined" && /(?:^|[#&?])type=recovery(?:&|$)/.test(window.location.hash);
@@ -85,7 +82,6 @@ function useResetLinkRedirect() {
       try {
         sessionStorage.setItem(RECOVERY_FLAG, "1");
       } catch {
-        // Private mode: /auth still sees the PASSWORD_RECOVERY event itself.
       }
       if (window.location.pathname !== "/auth") void router.navigate({ to: "/auth" });
     };
@@ -107,7 +103,6 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
   );

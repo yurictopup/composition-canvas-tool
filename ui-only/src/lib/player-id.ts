@@ -3,10 +3,8 @@ export type IdConfig = { primary: IdField; secondary?: IdField; requiresLookup?:
 
 const hoyoServers = ["Asia", "America", "Europe", "TW, HK, MO"] as const;
 
-// Telegram usernames: 5-32 characters, letters, digits and _, starting with a letter.
 const TELEGRAM_USERNAME = /^[A-Za-z][A-Za-z0-9_]{4,31}$/;
 
-/** The username the supplier expects: without the @ some people type. */
 export function telegramUsername(id: string): string {
   return id.trim().replace(/^@/, "");
 }
@@ -23,7 +21,6 @@ export const idConfigs: Record<string, IdConfig> = {
   hok: { primary: { label: "Player ID", placeholder: "Player ID", numeric: true }, requiresLookup: true },
   magicchess: { primary: { label: "User ID", placeholder: "User ID", numeric: true }, secondary: { label: "Zone ID", placeholder: "Zone ID", numeric: true }, requiresLookup: true },
   roblox: { primary: { label: "Username", placeholder: "Roblox Username" }, requiresLookup: true },
-  // Checked against the public t.me/<username> page (lookupTelegram).
   tgstars: { primary: { label: "Telegram username", placeholder: "@username" }, requiresLookup: true },
   tgpremium: { primary: { label: "Telegram username", placeholder: "@username" }, requiresLookup: true },
   codm: { primary: { label: "Player ID (UID)", placeholder: "Player ID (UID)", numeric: true }, requiresLookup: true },

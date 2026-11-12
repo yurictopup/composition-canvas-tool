@@ -1,4 +1,3 @@
-// UI-only copy: the demo code "DEMO10" gives 10% off; any other code is refused.
 import type { PromoQuote } from "@/lib/promo.server";
 import { demoPrice } from "@/mock/orders";
 

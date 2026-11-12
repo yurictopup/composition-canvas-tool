@@ -41,7 +41,6 @@ function KhqrBadge() {
   );
 }
 
-// Pill link in the footer chip style, as KENZO picked.
 function TelegramButton() {
   return (
     <a
@@ -65,8 +64,6 @@ function Copyright() {
   );
 }
 
-/* Four columns: brand, menu, popular games, help card. Khmer labels use Koulen (font-khmer),
-   kept at 15px+ with tall line height so vowel marks don't clip. */
 export function StoreFooter() {
   const { t } = useStorePrefs();
   const pic = useSiteImage();

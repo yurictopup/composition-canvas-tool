@@ -2,7 +2,6 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { BOT_MARKUP } from "./botMarkup";
 
-/* BotLogo — the Yuric Bot head logo, inline SVG; motion lives in bundle.css (.yt-bot). */
 export type BotLogoProps = {
   size?: number;
   animated?: boolean;

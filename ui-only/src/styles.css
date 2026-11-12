@@ -44,8 +44,7 @@
 :root {
   --radius: 1rem;
 
-  /* blue → white ramp: #0a1a3f · #1e40af · #60a5fa · #ffffff */
-  --brand-950: oklch(0.25 0.1 264);
+    --brand-950: oklch(0.25 0.1 264);
   --brand-700: oklch(0.42 0.19 266);
   --brand-500: oklch(0.55 0.19 264);
   --brand-400: oklch(0.72 0.13 252);
@@ -78,9 +77,7 @@
 @layer base {
   * { border-color: var(--color-border); }
   html { background: var(--color-background); }
-  /* Phones: the storefront runs one notch smaller (rem sizes scale down 12.5%).
-     Form fields stay 16px so iOS Safari does not zoom in on focus. */
-  @media (max-width: 639px) {
+    @media (max-width: 639px) {
     html:has(.store-chrome) { font-size: 14px; }
     .store-chrome :is(input, select, textarea) { font-size: 16px; }
   }
@@ -160,7 +157,6 @@
   50% { box-shadow: 0 6px 0 oklch(0.3 0.12 266), 0 12px 24px oklch(0.42 0.19 266 / 0.45), 0 0 22px 4px oklch(0.72 0.13 252 / 0.5); }
 }
 
-/* clean game tile: the picture stays untouched, only a soft light sweep on top */
 @utility tile-clean {
   position: relative;
   overflow: hidden;
@@ -238,7 +234,6 @@
   animation: marquee 24s linear infinite;
   will-change: transform;
 }
-/* home ticker: deep blue band with a slow light sweep, soft faded edges */
 @utility ticker-bar {
   background:
     linear-gradient(100deg, transparent 30%, oklch(1 0 0 / 0.12) 50%, transparent 70%) 0 0 / 250% 100%,
@@ -256,7 +251,6 @@
   animation: glow-pulse 3.2s ease-in-out infinite;
 }
 
-/* plain soft backdrop behind the mascot so it blends into the banner */
 @utility mascot-backdrop {
   position: absolute;
   inset: -8% -12% -10% -12%;
@@ -270,7 +264,6 @@
   pointer-events: none;
 }
 
-/* glossy light sweep across the mascot, clipped to its silhouette */
 @keyframes mascot-sheen {
   0% { background-position: 130% 0; }
   55%, 100% { background-position: -150% 0; }
@@ -291,7 +284,6 @@
   mix-blend-mode: screen;
   pointer-events: none;
 }
-/* BotLogo (Yuric Bot head): motion */
 .yt-bot[data-animated="true"] .yt-bot-float{animation:yt-bot-float 3.2s ease-in-out infinite;transform-origin:60px 60px}
 .yt-bot[data-animated="true"] .yt-bot-tilt{animation:yt-bot-tilt 6.4s ease-in-out infinite;transform-origin:60px 96px}
 .yt-bot[data-animated="true"] .yt-bot-ball{animation:yt-bot-pulse 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
@@ -314,7 +306,6 @@
 .yt-bot[data-stars="false"] .yt-bot-s1,.yt-bot[data-stars="false"] .yt-bot-s2,.yt-bot[data-stars="false"] .yt-bot-s3{display:none}
 
 
-/* Admin dashboard: clean light admin look in the store's colors (navy menu, light blue canvas, royal blue primary) */
 .vx {
   --vx-primary: #2f5fe0;
   --vx-primary-soft: rgb(47 95 224 / 0.14);
@@ -336,8 +327,6 @@
   background: var(--vx-bg);
   color: var(--vx-body);
 }
-/* Koulen for Khmer letters only: its Latin digits read badly ("1" looks like "I"),
-   so numbers and English in headings fall through to Public Sans. */
 @font-face {
   font-family: "Koulen Khmer";
   font-style: normal;
@@ -416,7 +405,6 @@
   --vx-shadow: 0 3px 12px rgb(0 0 0 / 0.35);
   color-scheme: dark;
 }
-/* the shared admin widgets use plain Tailwind greys; map them onto the dark tokens */
 .vx.vx-dark .bg-white { background-color: var(--vx-card); }
 .vx.vx-dark .bg-gray-50,
 .vx.vx-dark .hover\:bg-gray-50\/60:hover,
@@ -437,7 +425,6 @@
   box-shadow: 0 6px 24px rgb(7 28 80 / 0.18);
 }
 
-/* Storefront light theme (the default store look is the dark navy one) */
 .store-light {
   --on-dark: #142650;
   --on-dark-muted: #4b5b7c;
@@ -480,8 +467,6 @@ html:has(.store-light) { background: #eef4fd; }
 .store-pop-active { background: rgb(100 169 243 / 0.2); color: var(--brand-400); }
 .store-pop[data-light="true"] .store-pop-active { background: rgb(47 95 224 / 0.12); color: #2f5fe0; }
 
-/* Home banner overlay */
-/* Padding keeps Khmer marks above and below the line (៍, ូ, ្វ) inside the gradient box. */
 .banner-title,
 .banner-title-back {
   padding-block: 0.35em;
@@ -512,7 +497,6 @@ html:has(.store-light) { background: #eef4fd; }
   .banner-float { animation: none; }
 }
 
-/* Mascot hair wind: filtered full image under a still copy masked to face + body */
 .mascot-hair { filter: url(#hair-wind) drop-shadow(0 0 18px rgba(96, 165, 250, 0.55)); }
 .mascot-still {
   -webkit-mask-image: radial-gradient(ellipse 27% 22% at 46% 46%, #000 72%, transparent 100%),
@@ -547,7 +531,6 @@ html:has(.store-light) { background: #eef4fd; }
   .pay-card, .pay-card-shine { animation: none; }
 }
 
-/* Storefront footer: its own solid surface, since the page gradient ends near white */
 .store-footer {
   --store-footer-line: rgb(100 169 243 / 0.18);
   background: linear-gradient(180deg, #0b1f4d 0%, #071538 100%);
@@ -587,7 +570,6 @@ html:has(.store-light) { background: #eef4fd; }
 }
 .store-light .store-footer-chip { background: #f5f9ff; border-color: #dfe8f6; }
 
-/* Yuric Bot chat: slow drifting aurora glow */
 @keyframes yt-aurora {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(24px, 18px) scale(1.15); }
@@ -595,7 +577,6 @@ html:has(.store-light) { background: #eef4fd; }
 .yt-aurora { animation: yt-aurora 12s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .yt-aurora { animation: none; } }
 
-/* Yuric Bot chat colours: dark glass by default, a bright version with the light theme */
 .yt-chat {
   --chat-bg: oklch(0.14 0.045 268);
   --chat-input: oklch(0.17 0.05 268);
@@ -626,7 +607,6 @@ html:has(.store-light) { background: #eef4fd; }
 }
 .yt-chat[data-light="true"] .yt-aurora { opacity: 0.35; }
 
-/* Crop editor: checkerboard shows the parts of a slot the picture doesn't cover. */
 .crop-checker {
   background-color: #fff;
   background-image:

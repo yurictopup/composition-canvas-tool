@@ -1,5 +1,3 @@
-// UI-only copy: fake payment calls for signed-in orders (never used, since
-// there are no accounts here, but the payment card imports them).
 import type { PaymentState } from "@/lib/payment.server";
 import { demoPayment } from "@/mock/orders";
 

@@ -1,4 +1,3 @@
-// UI-only copy: any well-formed ID shows the demo name "Demo Player".
 import type { LookupResult } from "@/lib/player-lookup";
 import { validatePlayerId } from "@/lib/player-id";
 

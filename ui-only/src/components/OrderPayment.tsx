@@ -7,8 +7,6 @@ import type { PaymentState } from "@/lib/payment.server";
 import { useStorePrefs } from "@/lib/storePrefs";
 
 const POLL_MS = 5000;
-// Bakong can confirm a payment made in the last seconds a little after the QR
-// expires, so the page keeps asking for a while longer.
 const GRACE_MS = 3 * 60_000;
 
 export type OrderSummary = {
@@ -19,9 +17,6 @@ export type OrderSummary = {
   merchant?: string;
 };
 
-// Shows the order's own KHQR and waits for Bakong to confirm it. Once paid the
-// QR is replaced by a check mark. Without Bakong set up on the server, the
-// manual instructions (fallback) are shown. Guest orders pass their link token.
 export function OrderPayment({
   orderId,
   guestToken,
@@ -53,8 +48,6 @@ export function OrderPayment({
   const waiting = !!state?.available && !!state.qr && !state.paid;
   const stopped =
     waiting && !!state.expiresAt && new Date(state.expiresAt).getTime() + GRACE_MS < now;
-  // Paid but not delivered yet: keep asking (no bank call any more) so the page shows
-  // "delivered" and, for Roblox, the code as soon as it is ready.
   const delivering =
     !!state?.paid && !["completed", "failed", "refunded"].includes(state.status ?? "");
 
@@ -68,12 +61,9 @@ export function OrderPayment({
           : await checkPayment({ data: { orderId } });
         if (next.paid) setState(next);
       } catch {
-        // keep polling; a missed check is retried on the next tick
       }
     };
     const timer = setInterval(check, POLL_MS);
-    // A phone pauses this page while the bank app is open, so its timer stops. Ask at
-    // once when the customer comes back instead of waiting for the next tick.
     const onBack = () => {
       if (document.visibilityState === "visible") void check();
     };
@@ -88,9 +78,6 @@ export function OrderPayment({
     };
   }, [waiting, stopped, delivering, orderId, guestToken]);
 
-  // On a phone, go straight to the bank app once per order, like other top-up shops.
-  // Coming back to the page (after paying or cancelling) does not open it again;
-  // the button stays for that.
   const appLink = waiting && !stopped ? state?.appLink : undefined;
   useEffect(() => {
     if (!appLink || !isPhone()) return;
@@ -99,7 +86,6 @@ export function OrderPayment({
       if (sessionStorage.getItem(key)) return;
       sessionStorage.setItem(key, "1");
     } catch {
-      // storage blocked: still open once for this page view
     }
     window.location.href = appLink;
   }, [appLink, orderId]);
@@ -112,7 +98,6 @@ function isPhone(): boolean {
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
-// The screen itself, kept apart from the polling so each state can be shown alone.
 export function PaymentView({
   state,
   now,
@@ -162,7 +147,6 @@ export function PaymentView({
         </p>
       </div>
 
-      {/* On a phone: open the bank app with this payment ready, no screenshot needed. */}
       {state.appLink && !expired && (
         <div className="mx-auto mb-4 w-full max-w-[300px]">
           <a
@@ -180,7 +164,6 @@ export function PaymentView({
         </div>
       )}
 
-      {/* KHQR card, laid out like the official Bakong KHQR sticker */}
       <div className="mx-auto w-full max-w-[300px] overflow-hidden rounded-2xl bg-white text-[#1a1a1a] shadow-[0_10px_30px_rgb(15_23_42/0.18)] ring-1 ring-black/5">
         <div className="relative flex h-12 items-center justify-center bg-[#E1232E]">
           <span className="text-lg font-extrabold tracking-[0.12em] text-white">KHQR</span>
@@ -284,7 +267,6 @@ function PaidView({ state, summary }: { state: PaymentState; summary: OrderSumma
   );
 }
 
-// The Roblox gift code with a copy button and how to redeem it.
 function RedeemCodes({ codes }: { codes: string[] }) {
   const { lang } = useStorePrefs();
   const km = lang === "km";

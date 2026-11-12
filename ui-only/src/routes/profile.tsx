@@ -82,7 +82,6 @@ function Profile() {
       </section>
 
       <main className="mx-auto w-full max-w-[1500px] px-4 pb-10 sm:px-6">
-        {/* Profile header */}
         <div className="card-3d relative -mt-12 flex flex-col gap-4 rounded-3xl p-5 sm:flex-row sm:items-end">
           <span className="grid h-24 w-24 shrink-0 place-items-center rounded-full border-4 border-card bg-secondary font-display text-3xl font-black text-secondary-foreground shadow-lg">
             YT
@@ -95,7 +94,6 @@ function Profile() {
           </div>
         </div>
 
-        {/* My Orders */}
         <section className="card-3d mt-5 rounded-3xl p-5 sm:p-7">
           <h2 className="mb-4 flex items-center gap-2 font-display text-xl font-bold">
             <Package className="h-5 w-5 text-primary" aria-hidden="true" /> My Orders
@@ -168,7 +166,6 @@ function Profile() {
           )}
         </section>
 
-        {/* All Games */}
         <section className="card-3d mt-5 rounded-3xl p-5 sm:p-7">
           <h2 className="flex items-center gap-2 font-display text-xl font-bold">
             <Gamepad2 className="h-5 w-5 text-primary" aria-hidden="true" /> All Games

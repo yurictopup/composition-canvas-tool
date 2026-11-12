@@ -60,7 +60,6 @@ export const Route = createFileRoute("/game/$gameId")({
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" },
       ],
-      // Pictures the page will show, fetched while its code loads (no pieces popping in).
       links: gameImageUrls(params.gameId)
         .slice(0, 14)
         .map((href) => ({ rel: "preload", as: "image", href })),
@@ -83,14 +82,12 @@ function GamePage({ gameId }: { gameId: string }) {
   const [uid, setUid] = useState("");
   const [zone, setZone] = useState("");
   const isTelegram = telegramTabs.some((tab) => tab.id === gameId);
-  // Keep the typed username when switching between Telegram Premium and Stars.
   useEffect(() => {
     if (!isTelegram) return;
     try {
       const saved = sessionStorage.getItem(TG_USERNAME_KEY);
       if (saved) setUid(saved);
     } catch {
-      // storage blocked: the field just starts empty
     }
   }, [isTelegram]);
   const [check, setCheck] = useState<{ ok: boolean; msg: string; name?: string } | null>(null);
@@ -103,7 +100,6 @@ function GamePage({ gameId }: { gameId: string }) {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [paidPrice, setPaidPrice] = useState<number | null>(null);
   const [orderErr, setOrderErr] = useState<string | null>(null);
-  // Promo code: what was typed, and the price the server gave for it.
   const [promoInput, setPromoInput] = useState("");
   const [promo, setPromo] = useState<{
     code: string;
@@ -114,12 +110,10 @@ function GamePage({ gameId }: { gameId: string }) {
   } | null>(null);
   const [promoErr, setPromoErr] = useState<string | null>(null);
   const [promoBusy, setPromoBusy] = useState(false);
-  // Not signed in: the order is placed as a guest and opened again by its secret link.
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [guestToken, setGuestToken] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const prices = useLivePrices(gameId);
-  // Owner paused sales on /admin: no packages or prices, only "coming soon".
   const status = useStoreStatus();
   const onSale = status ? gameOnSale(status, gameId) : null;
 
@@ -139,7 +133,6 @@ function GamePage({ gameId }: { gameId: string }) {
     );
   }
 
-  // Server variants (e.g. MLBB Philippines) share the main game's ID rules and name check.
   const idGameId = baseGameId(gameId);
   const idConfig = getIdConfig(idGameId);
   const availablePackages = livePackages(
@@ -149,17 +142,14 @@ function GamePage({ gameId }: { gameId: string }) {
     getPackages(gameId),
     getHotItems(gameId).map((h) => h.label),
   ) as { amt: string; price: number | null; hot?: boolean }[];
-  // Once live prices load, items the owner switched off in the table are hidden, not shown as "—".
   const hotItems = getHotItems(gameId)
     .map((item) => ({
       ...item,
       price: livePrice(prices, gameId, packageKey(item.label, game.unit), item.price),
     }))
     .filter((item) => !prices || item.price !== null);
-  // Badged items (the bundle) run full width on top; the rest sit in centred rows below.
   const featuredHot = hotItems.filter((item) => item.img && item.badge);
   const pictureHot = hotItems.filter((item) => item.img && !item.badge);
-  // Passes and packs without artwork list as plain cards under "More items".
   const moreItems = hotItems.filter((item) => !item.img);
   function renderHot(item: (typeof hotItems)[number], wide = false) {
     const i = hotItems.indexOf(item);
@@ -215,7 +205,6 @@ function GamePage({ gameId }: { gameId: string }) {
         : null;
   const canBuy = !!check?.ok && !!selected && selected.price !== null && !busy;
   const selectedAmt = selected && game ? `${selected.amt} ${game.unit}` : null;
-  // A code is priced for one package; choosing another package drops it.
   const appliedPromo = promo && promo.pkg === selectedAmt ? promo : null;
   const finalPrice = appliedPromo ? appliedPromo.price : (selected?.price ?? null);
 
@@ -277,15 +266,12 @@ function GamePage({ gameId }: { gameId: string }) {
       });
       if (result.status === "found") next = { ok: true, msg: "User verified:", name: result.name };
       else if (result.status === "not_found") next = { ok: false, msg: "User ID not found" };
-      // No supplier name check for this game yet: a well-formed ID may still
-      // order, and the owner delivers it by hand from /admin.
       else if (result.status === "unsupported")
         next = { ok: true, msg: "ID format is correct, please double-check it before paying" };
       else next = { ok: false, msg: "Name check is busy right now. Please try again." };
     } catch {
       next = { ok: false, msg: "Name check is busy right now. Please try again." };
     }
-    // Ignore answers for an ID the player has since changed.
     if (seq !== checkSeq.current) return;
     setCheck(next);
     setChecking(false);
@@ -344,7 +330,6 @@ function GamePage({ gameId }: { gameId: string }) {
 
       if (error) throw error;
       setOrderId(data.id);
-      // The database sets the final price; show what was actually charged.
       setPaidPrice(Number(data.price_usd));
     } catch (e) {
       const message = (e as { message?: string } | null)?.message;
@@ -354,13 +339,11 @@ function GamePage({ gameId }: { gameId: string }) {
     }
   }
 
-  // ── Order Success Screen ──────────────────────────────────────────────
   if (orderId) {
     return (
       <SiteChrome>
         <main className="mx-auto w-full max-w-[600px] px-4 py-10 sm:px-6">
           <div className="card-3d rounded-3xl p-6 sm:p-8">
-            {/* Payment: the order's own KHQR, or manual instructions when Bakong isn't set up */}
             <OrderPayment
               orderId={orderId}
               guestToken={guestToken}
@@ -442,10 +425,8 @@ function GamePage({ gameId }: { gameId: string }) {
     );
   }
 
-  // ── Main Order Form ───────────────────────────────────────────────────
   return (
     <SiteChrome>
-      {/* Extra bottom room so the floating Yuric Bot never covers the Order button. */}
       <main className="mx-auto w-full max-w-[1200px] px-3 pb-24 pt-4 sm:px-6 sm:pb-28 sm:pt-8">
         <Link
           to="/"
@@ -477,7 +458,6 @@ function GamePage({ gameId }: { gameId: string }) {
           <SalesPaused loading={onSale === null} />
         ) : (
           <>
-            {/* Step 1 — Player ID */}
             <section className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
               <h2 className="mb-3 flex items-center gap-2.5 font-khmer text-base sm:mb-4 sm:gap-3 sm:text-lg">
                 <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground sm:h-8 sm:w-8">
@@ -503,7 +483,6 @@ function GamePage({ gameId }: { gameId: string }) {
                         try {
                           sessionStorage.setItem(TG_USERNAME_KEY, e.target.value);
                         } catch {
-                          // storage blocked: switching tabs just clears the field
                         }
                       }
                     }}
@@ -571,7 +550,6 @@ function GamePage({ gameId }: { gameId: string }) {
               )}
             </section>
 
-            {/* Step 2 — Package */}
             <section className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
               <h2 className="mb-3 flex items-center gap-2.5 font-khmer text-base sm:mb-4 sm:gap-3 sm:text-lg">
                 <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground sm:h-8 sm:w-8">
@@ -586,7 +564,6 @@ function GamePage({ gameId }: { gameId: string }) {
                   <p className="mb-3 flex items-center gap-2 text-sm font-bold text-amber-600">
                     <Sparkles className="h-4 w-4" /> {t("Recommended for You")}
                   </p>
-                  {/* Bundles (badge) and passes share one row: four side by side when there are four. */}
                   <div className="mb-3 flex flex-wrap justify-center gap-3">
                     {[...featuredHot, ...pictureHot].map((item, _, row) => (
                       <div
@@ -702,7 +679,6 @@ function GamePage({ gameId }: { gameId: string }) {
               )}
             </section>
 
-            {/* Step 3 — Payment */}
             <section className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
               <h2 className="mb-3 flex items-center gap-2.5 font-khmer text-base sm:mb-4 sm:gap-3 sm:text-lg">
                 <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground sm:h-8 sm:w-8">
@@ -764,7 +740,6 @@ function GamePage({ gameId }: { gameId: string }) {
               </p>
             </section>
 
-            {/* Summary */}
             <aside className="card-3d mt-3 rounded-2xl p-3.5 sm:mt-5 sm:rounded-3xl sm:p-5">
               <div className="flex items-center justify-between gap-2">
                 <h3 className="font-khmer text-base sm:text-lg">{t("Order summary")}</h3>
@@ -796,7 +771,6 @@ function GamePage({ gameId }: { gameId: string }) {
                   <dd className="text-right font-semibold">ABA KHQR</dd>
                 </div>
               </dl>
-              {/* Promo code */}
               <div className="mt-3 rounded-xl border border-dashed border-[#c9d6ef] bg-white/60 p-3">
                 <label
                   htmlFor="promo-code"
@@ -937,7 +911,6 @@ function GamePage({ gameId }: { gameId: string }) {
   );
 }
 
-// Shown instead of the order form while the owner has sales switched off.
 function SalesPaused({ loading }: { loading: boolean }) {
   const { t } = useStorePrefs();
   if (loading) {
@@ -968,7 +941,6 @@ function SalesPaused({ loading }: { loading: boolean }) {
   );
 }
 
-// Guests have no order history, so the order's own link is how they come back to it.
 function GuestLinkBox({
   path,
   copied,
@@ -1011,7 +983,6 @@ function GuestLinkBox({
   );
 }
 
-// ABA badge: payments come through the shop's ABA PayWay link (KHQR, any bank app can pay).
 function AbaMark() {
   return (
     <span className="flex h-12 w-20 shrink-0 sm:h-16 sm:w-24 flex-col items-center justify-center rounded-[3px] bg-[#0B4F71] text-white shadow-[0_3px_10px_rgb(11_79_113/0.35)]">
@@ -1023,7 +994,6 @@ function AbaMark() {
 
 const TG_USERNAME_KEY = "yuric-tg-username";
 
-// One Telegram page with a Premium / Stars switch (each is its own game id underneath).
 function TelegramSwitch({ current }: { current: string }) {
   return (
     <div className="mb-4 grid grid-cols-2 gap-1 rounded-2xl border border-[#dfe8f6] bg-[#eef3fb] p-1">
@@ -1035,7 +1005,6 @@ function TelegramSwitch({ current }: { current: string }) {
             to="/game/$gameId"
             params={{ gameId: tab.id }}
             replace
-            // Stay at the switch instead of jumping to the top of the page.
             resetScroll={false}
             aria-current={on ? "page" : undefined}
             className={`flex items-center justify-center rounded-xl px-3 py-2.5 text-center text-sm font-bold transition sm:py-3 sm:text-base ${
@@ -1052,7 +1021,6 @@ function TelegramSwitch({ current }: { current: string }) {
   );
 }
 
-// Telegram Stars / Premium go straight to the username typed above; nothing to redeem.
 function TelegramSteps({ premium }: { premium: boolean }) {
   const { lang } = useStorePrefs();
   const km = lang === "km";
@@ -1107,7 +1075,6 @@ function TelegramSteps({ premium }: { premium: boolean }) {
   );
 }
 
-// Robux are sold as gift card codes: the code shows after payment and the buyer redeems it.
 function RobloxCodeSteps() {
   const { lang } = useStorePrefs();
   const km = lang === "km";

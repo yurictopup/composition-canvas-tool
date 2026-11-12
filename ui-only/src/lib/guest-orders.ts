@@ -1,5 +1,3 @@
-// Orders placed without signing in, remembered on this device so the buyer can
-// open them again from the account menu. The token is what lets them see it.
 
 export type SavedGuestOrder = {
   id: string;
@@ -30,6 +28,5 @@ export function saveGuestOrder(order: SavedGuestOrder) {
     const rest = listGuestOrders().filter((o) => o.id !== order.id);
     localStorage.setItem(KEY, JSON.stringify([order, ...rest].slice(0, MAX)));
   } catch {
-    // private mode: the link on screen still works
   }
 }

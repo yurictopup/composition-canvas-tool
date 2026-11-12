@@ -26,10 +26,6 @@ import { isOwnerAccount } from "@/lib/owner";
 import { guestOrderPath, listGuestOrders, type SavedGuestOrder } from "@/lib/guest-orders";
 import { setStoreLang, setStoreTheme, useStorePrefs, type StoreLang, type StoreTheme } from "@/lib/storePrefs";
 
-// Store header controls: language and theme for everyone, plus order
-// notifications and the account menu once signed in (same pattern as the
-// admin top bar).
-
 type OrderNote = {
   id: string;
   game_name: string;
@@ -117,7 +113,6 @@ const avatarCls =
 
 export function StoreGuestMenu() {
   const { light, t } = useStorePrefs();
-  // Orders placed here without signing in; read when the menu opens.
   const [saved, setSaved] = useState<SavedGuestOrder[]>([]);
   return (
     <DM.Root modal={false} onOpenChange={(open) => open && setSaved(listGuestOrders())}>
@@ -198,7 +193,6 @@ export function StoreUserMenu({ user, onSignOut }: { user: User; onSignOut: () =
     try {
       setSeen(Number(localStorage.getItem(SEEN_KEY) ?? 0) || 0);
     } catch {
-      // private mode: everything shows as new
     }
     backend
       .from("orders")
@@ -214,7 +208,6 @@ export function StoreUserMenu({ user, onSignOut }: { user: User; onSignOut: () =
     try {
       localStorage.setItem(SEEN_KEY, String(now));
     } catch {
-      // private mode: the badge just resets on reload
     }
   }
 
@@ -223,7 +216,6 @@ export function StoreUserMenu({ user, onSignOut }: { user: User; onSignOut: () =
 
   return (
     <div className="flex items-center gap-1">
-      {/* Order notifications */}
       <DM.Root modal={false}>
         <DM.Trigger className={iconBtn} title={t("Notifications")}>
           <Bell size={20} />
@@ -289,7 +281,6 @@ export function StoreUserMenu({ user, onSignOut }: { user: User; onSignOut: () =
         </DM.Portal>
       </DM.Root>
 
-      {/* Account */}
       <DM.Root modal={false}>
         <DM.Trigger className="relative ml-1 rounded-full outline-none" title={user.email ?? ""}>
           <span className="flex h-8 w-8 items-center justify-center rounded-full sm:h-9 sm:w-9 bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold uppercase text-white ring-2 ring-brand-400/40">

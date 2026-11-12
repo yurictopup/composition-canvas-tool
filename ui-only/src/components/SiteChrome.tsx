@@ -22,7 +22,6 @@ export function SiteChrome({ children }: { children: ReactNode }) {
   const { light, t } = useStorePrefs();
 
   useEffect(() => {
-    // The saved session is enough to show the menu; it needs no call to the auth server.
     backend.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
     const { data: sub } = backend.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
@@ -60,7 +59,6 @@ export function SiteChrome({ children }: { children: ReactNode }) {
           <div className="marquee-track ticker-track">
             {[0, 1].map((k) => (
               <span key={k} aria-hidden={k === 1} className="flex shrink-0 items-center gap-2 pr-2 sm:gap-3 sm:pr-3">
-                {/* Each half repeats the list so it is wider than the bar on any screen; no gap appears. */}
                 {[...tickerItems, ...tickerItems].map(({ Icon, label, tone }, i) => (
                   <span key={i} className="flex items-center gap-2 sm:gap-3">
                     <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 py-0 pl-0.5 pr-2.5 font-khmer text-[12px] font-normal leading-[1.9] sm:gap-2 sm:py-1 sm:pl-1 sm:pr-4 sm:text-[15px] tracking-wide backdrop-blur-sm">

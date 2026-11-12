@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { qrcodegen } from "@/lib/vendor/qrcodegen";
 
-// Draws a KHQR string as an SVG QR code (no image service involved).
 export function KhqrCode({ value, size = 240 }: { value: string; size?: number }) {
   const path = useMemo(() => {
     const qr = qrcodegen.QrCode.encodeText(value, qrcodegen.QrCode.Ecc.MEDIUM);

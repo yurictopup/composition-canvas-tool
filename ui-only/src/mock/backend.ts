@@ -1,13 +1,8 @@
-// UI-only copy: a fake the database client. It never connects to any server and
-// holds no keys. Reads return demo data (or nothing), so every page draws with
-// the built-in packages and prices from src/lib/games.ts. Sign in / sign up
-// only show a message, because there are no real accounts here.
 
 const DEMO_MESSAGE = "UI demo: accounts are turned off in this copy.";
 
 type Result = { data: unknown; error: { message: string } | null; count?: number | null };
 
-// What each table returns. Anything not listed returns an empty list.
 function tableResult(table: string, single: boolean): Result {
   switch (table) {
     case "store_settings":
@@ -15,7 +10,6 @@ function tableResult(table: string, single: boolean): Result {
     case "product_prices":
     case "site_images":
     case "package_offers":
-      // An error here makes the pages use the built-in prices and pictures.
       return { data: null, error: { message: "UI demo: no database" } };
     default:
       return { data: single ? null : [], error: null, count: 0 };
@@ -75,6 +69,5 @@ export const backend = {
   rpc: async (_fn: string, _args?: unknown): Promise<{ data: any; error: { message: string } | null }> => ({ data: null, error: { message: "UI demo: no database" } }),
 };
 
-// The few user fields the pages read.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type User = { id: string; email?: string; user_metadata: Record<string, any>; [key: string]: any };
