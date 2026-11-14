@@ -131,7 +131,7 @@ export function PaymentView({
   const msLeft = state.expiresAt ? new Date(state.expiresAt).getTime() - now : null;
   const expired = msLeft !== null && msLeft <= 0;
   const minutesLeft = msLeft !== null ? Math.max(0, Math.ceil(msLeft / 60000)) : null;
-  const merchant = summary.merchant ?? "Yuric Topup";
+  const merchant = summary.merchant ?? "Yuric Store";
 
   return (
     <div>

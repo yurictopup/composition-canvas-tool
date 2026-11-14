@@ -28,15 +28,15 @@ import banner from "@/assets/banner-angkor.webp";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — Yuric Topup" },
+      { title: "Sign in — Yuric Store" },
       {
         name: "description",
-        content: "Sign in or create a Yuric Topup account with your email to top up game diamonds.",
+        content: "Sign in or create a Yuric Store account with your email to top up game diamonds.",
       },
-      { property: "og:title", content: "Sign in — Yuric Topup" },
+      { property: "og:title", content: "Sign in — Yuric Store" },
       {
         property: "og:description",
-        content: "Sign in or create a Yuric Topup account with your email.",
+        content: "Sign in or create a Yuric Store account with your email.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -368,7 +368,7 @@ function AuthPage() {
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/12 ring-1 ring-white/25 backdrop-blur">
                   <Gem className="h-[18px] w-[18px] text-brand-400" aria-hidden="true" />
                 </span>
-                YURIC<span className="text-brand-400">TOPUP</span>
+                YURIC<span className="text-brand-400">STORE</span>
               </div>
               <h2 className="font-khmer text-[22px] font-normal leading-[1.6] sm:mt-10 sm:text-[34px]">
                 {tx("បញ្ចូលពេជ្រហ្គេម", "Game top-ups,")}

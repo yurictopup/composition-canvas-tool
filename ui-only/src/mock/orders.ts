@@ -4,7 +4,7 @@ import type { PaymentState } from "@/lib/payment.server";
 
 const KEY = "yuric-ui-demo-orders";
 
-export const DEMO_QR = "YURIC-TOPUP-UI-DEMO-NOT-A-REAL-PAYMENT";
+export const DEMO_QR = "YURIC-STORE-UI-DEMO-NOT-A-REAL-PAYMENT";
 
 function readAll(): Record<string, GuestOrderView> {
   try {

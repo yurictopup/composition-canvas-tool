@@ -40,7 +40,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
         <div className="mx-auto flex w-full max-w-[1500px] items-center justify-between px-3 py-2 sm:px-6 sm:py-3">
           <Link to="/" className="flex items-center gap-2 font-display text-base font-black text-glow sm:text-xl">
             <Gem className="h-4 w-4 sm:h-5 sm:w-5 text-brand-400" aria-hidden="true" />
-            YURIC<span className="text-brand-400"> TOPUP</span>
+            YURIC<span className="text-brand-400"> STORE</span>
           </Link>
           <nav className="flex items-center gap-1 text-sm">
             <StoreSettingsMenu />

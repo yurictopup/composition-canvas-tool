@@ -1,6 +1,6 @@
-# Yuric Topup: UI-only copy
+# Yuric Store: UI-only copy
 
-This folder is the Yuric Topup store's design only (pages, components, styles,
+This folder is the Yuric Store store's design only (pages, components, styles,
 fonts, pictures). It is not connected to any service: no database, no payment,
 no supplier, no keys or secrets. Everything you see uses
 demo data that lives in your browser.

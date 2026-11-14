@@ -11,9 +11,9 @@ import { backend } from "@/mock/backend";
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "My Orders — Yuric Topup" },
-      { name: "description", content: "View your Yuric Topup orders." },
-      { property: "og:title", content: "My Orders — Yuric Topup" },
+      { title: "My Orders — Yuric Store" },
+      { name: "description", content: "View your Yuric Store orders." },
+      { property: "og:title", content: "My Orders — Yuric Store" },
       { property: "og:type", content: "profile" },
     ],
   }),

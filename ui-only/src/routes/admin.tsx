@@ -34,7 +34,7 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import type { AdminOrder } from "@/components/admin/types";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — Yuric Topup" }] }),
+  head: () => ({ meta: [{ title: "Admin — Yuric Store" }] }),
   component: AdminPage,
 });
 
@@ -310,7 +310,7 @@ function AdminPage() {
                 className="mr-1.5 inline-block -translate-y-0.5 text-brand-400 lg:group-data-[mini=true]/side:mr-0"
               />
               <span className="lg:group-data-[mini=true]/side:hidden">
-                YURIC<span className="text-brand-400"> TOPUP</span>
+                YURIC<span className="text-brand-400"> STORE</span>
               </span>
             </span>
             <button
@@ -620,7 +620,7 @@ function AdminPage() {
           </main>
 
           <footer className="mx-auto w-full max-w-[1440px] px-6 pb-6 text-[13px] text-[var(--vx-muted)]">
-            © {new Date().getFullYear()} Yuric Topup · {t("Owner Control Center")}
+            © {new Date().getFullYear()} Yuric Store · {t("Owner Control Center")}
           </footer>
         </div>
       </div>

@@ -12,7 +12,7 @@ export const Route = createFileRoute("/order/$orderId")({
   validateSearch: (search: Record<string, unknown>): { t?: string } =>
     typeof search["t"] === "string" ? { t: search["t"] } : {},
   head: () => ({
-    meta: [{ title: "Order — Yuric Topup" }, { name: "robots", content: "noindex, nofollow" }],
+    meta: [{ title: "Order — Yuric Store" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: GuestOrderPage,
 });

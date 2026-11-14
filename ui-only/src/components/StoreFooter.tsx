@@ -24,7 +24,7 @@ function Brand() {
         <Gem className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2.2} />
       </span>
       <span className="font-display text-base font-black tracking-wide text-on-dark sm:text-xl">
-        YURIC<span className="text-brand-400"> TOPUP</span>
+        YURIC<span className="text-brand-400"> STORE</span>
       </span>
     </Link>
   );

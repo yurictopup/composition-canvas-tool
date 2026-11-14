@@ -53,9 +53,9 @@ export const Route = createFileRoute("/game/$gameId")({
     const unit = game?.unit ?? "Diamonds";
     return {
       meta: [
-        { title: `${name} — Yuric Topup` },
+        { title: `${name} — Yuric Store` },
         { name: "description", content: `Top up ${unit} ${name} — fast and secure via Bakong.` },
-        { property: "og:title", content: `${name} — Yuric Topup` },
+        { property: "og:title", content: `${name} — Yuric Store` },
         { property: "og:description", content: `Top up ${name} in 1-5 minutes via Bakong.` },
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" },
@@ -369,7 +369,7 @@ function GamePage({ gameId }: { gameId: string }) {
                     </p>
                     <p>2. Scan QR ឬ Transfer ទៅ:</p>
                     <div className="rounded-xl bg-card border px-4 py-3 mt-2">
-                      <p className="font-bold text-foreground text-base">Yuric Topup</p>
+                      <p className="font-bold text-foreground text-base">Yuric Store</p>
                       <p className="text-xs mt-1">
                         Telegram:{" "}
                         <a

@@ -603,7 +603,7 @@ export function getHotItems(gameId: string): HotItem[] {
 export const payments = ["Bakong"];
 
 export const store = {
-  name: "Yuric Topup",
+  name: "Yuric Store",
   telegram: "@your_telegram",
   hours: "24 Hours",
 };

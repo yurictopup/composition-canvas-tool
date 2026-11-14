@@ -33,13 +33,13 @@ const gameTabs = [
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Yuric Topup — បញ្ចូលពេជ្រហ្គេម 3D" },
+      { title: "Yuric Store — បញ្ចូលពេជ្រហ្គេម 3D" },
       {
         name: "description",
         content:
           "បញ្ចូលពេជ្រ Mobile Legends, Free Fire, Roblox, PUBG UC — លឿន សុវត្ថិភាព តាម Bakong",
       },
-      { property: "og:title", content: "Yuric Topup — បញ្ចូលពេជ្រហ្គេម 3D" },
+      { property: "og:title", content: "Yuric Store — បញ្ចូលពេជ្រហ្គេម 3D" },
       {
         property: "og:description",
         content: "ជ្រើសហ្គេម បញ្ចូល ID រួចបង់ប្រាក់តាម Bakong — ពេជ្រចូលក្នុង 1-5 នាទី",
@@ -286,7 +286,7 @@ function BannerOverlay() {
           <span className="banner-title col-start-1 row-start-1">មកកាន់</span>
         </span>
         <span className="mt-[0.15em] rounded-md border-2 border-[#fff2b0] bg-gradient-to-b from-[#ffd75e] to-[#ff9d00] px-[0.9em] py-[0.12em] font-display text-[clamp(11px,2.3vw,34px)] font-black tracking-[0.14em] text-[#0b2a7a] shadow-[0_4px_0_#b86e00,0_10px_20px_rgb(0_0_0/0.4)]">
-          YURIC TOPUP
+          YURIC STORE
         </span>
         <span className="banner-sub mt-[0.55em] font-khmer text-[clamp(10px,1.7vw,26px)]">
           បញ្ចូលពេជ្របានភ្លាមៗ - ដោយសុវត្ថិភាព

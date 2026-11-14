@@ -500,7 +500,7 @@ export function ChatWidget({
                       សួស្តី! ខ្ញុំជា Yuric Bot
                     </p>
                     <p className="mt-0.5 max-w-[270px] text-[12px] leading-5 text-[var(--chat-muted)]">
-                      ជំនួយការរបស់ Yuric Topup សួរខ្ញុំអំពីហ្គេម កញ្ចប់ តម្លៃ ការបង់ប្រាក់ ឬ
+                      ជំនួយការរបស់ Yuric Store សួរខ្ញុំអំពីហ្គេម កញ្ចប់ តម្លៃ ការបង់ប្រាក់ ឬ
                       បញ្ហាការបញ្ជាទិញ បានគ្រប់ពេល
                     </p>
                   </div>
