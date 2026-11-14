@@ -433,7 +433,7 @@ function AuthPage() {
                   <KeyRound className="h-8 w-8" aria-hidden="true" />
                 </span>
                 <div className="text-center">
-                  <h1 className="text-2xl font-bold leading-[1.6]">
+                  <h1 className="font-khmer text-2xl font-normal leading-[1.6]">
                     {tx("កំណត់ពាក្យសម្ងាត់ថ្មី", "Set a new password")}
                   </h1>
                   <p className={`mt-1 text-sm leading-[1.8] ${muted}`}>
@@ -497,7 +497,7 @@ function AuthPage() {
                   <MailCheck className="h-8 w-8" aria-hidden="true" />
                 </span>
                 <div className="text-center">
-                  <h1 className="text-2xl font-bold leading-[1.6]">
+                  <h1 className="font-khmer text-2xl font-normal leading-[1.6]">
                     {tx("ពិនិត្យ email របស់អ្នក", "Check your email")}
                   </h1>
                   <p className={`mt-1 text-sm leading-[1.8] ${muted}`}>
@@ -553,7 +553,7 @@ function AuthPage() {
             ) : forgot ? (
               <form onSubmit={sendReset} noValidate className="mx-auto grid max-w-[400px] gap-5">
                 <div>
-                  <h1 className="text-[22px] font-bold leading-[1.5] sm:text-[26px]">
+                  <h1 className="font-khmer text-[22px] font-normal leading-[1.5] sm:text-[26px]">
                     {tx("ភ្លេចពាក្យសម្ងាត់?", "Forgot your password?")}
                   </h1>
                   <p className={`mt-1 text-sm leading-[1.8] ${muted}`}>
@@ -614,7 +614,7 @@ function AuthPage() {
                   <MailCheck className="h-8 w-8" aria-hidden="true" />
                 </span>
                 <div className="text-center">
-                  <h1 className="text-2xl font-bold leading-[1.6]">
+                  <h1 className="font-khmer text-2xl font-normal leading-[1.6]">
                     {tx("ពិនិត្យ email របស់អ្នក", "Check your email")}
                   </h1>
                   <p className={`mt-1 text-sm leading-[1.8] ${muted}`}>
@@ -701,7 +701,7 @@ function AuthPage() {
                 </div>
 
                 <div className="mt-7">
-                  <h1 className="text-[22px] font-bold leading-[1.5] sm:text-[26px]">
+                  <h1 className="font-khmer text-[22px] font-normal leading-[1.5] sm:text-[26px]">
                     {mode === "login"
                       ? tx("សូមស្វាគមន៍ការត្រឡប់មកវិញ", "Welcome back")
                       : tx("បង្កើតគណនីថ្មី", "Create your account")}
